@@ -8,10 +8,10 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.aiphotostudio.bgremover.r"
+        applicationId = "com.aiphotostudio.bgremover"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
+        versionCode = 6
         versionName = "4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
