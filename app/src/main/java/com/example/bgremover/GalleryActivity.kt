@@ -1,14 +1,15 @@
 package com.example.bgremover
 
+import android.content.ContentUris
+import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
+import android.provider.MediaStore
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.io.File
 
 class GalleryActivity : AppCompatActivity() {
 
@@ -33,24 +34,49 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun loadImages() {
-        val downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val files = downloadFolder.listFiles { file ->
-            file.isFile && (file.extension.lowercase() == "jpg" || file.extension.lowercase() == "png" || file.extension.lowercase() == "jpeg")
-        } ?: emptyArray()
+        val imageList = mutableListOf<Uri>()
+        
+        val projection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME
+        )
+        
+        // We look for images in the Downloads and Pictures folders
+        val selection = "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?"
+        val selectionArgs = arrayOf("%Download%")
+        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
-        // Sort by last modified (newest first)
-        val sortedFiles = files.sortedByDescending { it.lastModified() }
+        contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
+        )?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                val contentUri = ContentUris.withAppendedId(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    id
+                )
+                imageList.add(contentUri)
+            }
+        }
 
-        if (sortedFiles.isEmpty()) {
+        if (imageList.isEmpty()) {
             tvEmpty.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
         } else {
             tvEmpty.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-            adapter = GalleryAdapter(sortedFiles.toMutableList()) { file ->
+            adapter = GalleryAdapter(imageList) { uri ->
                 // Delete logic
-                if (file.delete()) {
-                    loadImages()
+                try {
+                    contentResolver.delete(uri, null, null)
+                    loadImages() // Refresh
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
             recyclerView.adapter = adapter
