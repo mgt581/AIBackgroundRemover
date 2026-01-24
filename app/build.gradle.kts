@@ -10,7 +10,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.aiphotostudio.bgremover"
+        applicationId = "com.example.bgremover"
         minSdk = 24
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 36
@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        resValues = false
     }
     packaging {
         resources {
