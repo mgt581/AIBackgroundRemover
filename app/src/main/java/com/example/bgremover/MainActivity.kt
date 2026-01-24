@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
-            @Deprecated("Deprecated in Java", ReplaceWith("shouldOverrideUrlLoading(view, request)"))
+            @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 return false
             }
@@ -140,8 +140,9 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             try {
                 val imageFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image_${System.currentTimeMillis()}.jpg")
-                cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.provider", imageFile)
-                takePicture.launch(cameraImageUri)
+                val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.provider", imageFile)
+                cameraImageUri = uri
+                takePicture.launch(uri)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Failed to launch camera", e)
                 filePathCallback?.onReceiveValue(null)
