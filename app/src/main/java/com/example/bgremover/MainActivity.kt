@@ -32,21 +32,18 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
-    // Photo Picker Launcher (Gallery)
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         Log.d("MainActivity", "Photo Picker result: $uri")
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
         filePathCallback = null
     }
 
-    // Camera Launcher
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         Log.d("MainActivity", "Camera result: $success")
         filePathCallback?.onReceiveValue(if (success && cameraImageUri != null) arrayOf(cameraImageUri!!) else null)
         filePathCallback = null
     }
 
-    // Launcher for runtime permissions
     private val requestPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -73,7 +70,10 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
 
-            webView.loadUrl("https://aiphotostudio.co")
+            // Load the URL
+            if (savedInstanceState == null) {
+                webView.loadUrl("https://aiphotostudio.co")
+            }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
             Toast.makeText(this, "Critical Error: ${e.message}", Toast.LENGTH_LONG).show()
@@ -87,20 +87,34 @@ class MainActivity : AppCompatActivity() {
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
             @Suppress("DEPRECATION")
             databaseEnabled = true
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
 
         webView.webViewClient = object : WebViewClient() {
-            @Deprecated("Deprecated in Java")
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                return false
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val url = request?.url?.toString() ?: return false
+                // Keep navigation within the WebView for the studio site
+                if (url.contains("aiphotostudio.co")) {
+                    return false
+                }
+                // Open external links in browser
+                Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                    startActivity(this)
+                }
+                return true
             }
             
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-                Log.e("MainActivity", "WebView Error: ${error?.description}")
+                if (request?.isForMainFrame == true) {
+                    Log.e("MainActivity", "WebView Error: ${error?.description}")
+                    Toast.makeText(this@MainActivity, "Check your internet connection", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -145,6 +159,7 @@ class MainActivity : AppCompatActivity() {
                 takePicture.launch(uri)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Failed to launch camera", e)
+                Toast.makeText(this, "Camera error", Toast.LENGTH_SHORT).show()
                 filePathCallback?.onReceiveValue(null)
                 filePathCallback = null
             }
@@ -183,7 +198,7 @@ class MainActivity : AppCompatActivity() {
                     dm.enqueue(request)
                     Toast.makeText(this, "Download started. It will appear in 'My Gallery' soon.", Toast.LENGTH_LONG).show()
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("MainActivity", "Download failed", e)
                     Toast.makeText(this, "Failed to download image", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -194,51 +209,57 @@ class MainActivity : AppCompatActivity() {
         try {
             val base64String = dataUri.substringAfter(",")
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
             
             val fileName = "bg_remover_${System.currentTimeMillis()}.png"
-            
             val directory = File(filesDir, "saved_images")
             if (!directory.exists()) directory.mkdirs()
 
             val file = File(directory, fileName)
-            val outputStream = FileOutputStream(file)
-
-            outputStream.use {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-                Toast.makeText(this, "Image saved to app gallery", Toast.LENGTH_SHORT).show()
+            FileOutputStream(file).use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            }
+            runOnUiThread {
+                Toast.makeText(this, "Image saved to gallery", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
+            Log.e("MainActivity", "Data URI processing failed", e)
+            runOnUiThread {
+                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private fun checkAndRequestPermissions() {
         val permissionsToRequest = mutableListOf<String>()
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.CAMERA)
         }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
-
         if (permissionsToRequest.isNotEmpty()) {
             requestPermissionsLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (webView.canGoBack()) {
             webView.goBack()
         } else {
-            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        webView.saveState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        webView.restoreState(savedInstanceState)
     }
 }
