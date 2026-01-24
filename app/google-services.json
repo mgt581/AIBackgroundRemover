@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "495715411996-3not71nemqj26o4pem3jkj7lpqfhfl34.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudio.bgremover",
+            "certificate_hash": "80481d884a0eb6fb11f2424ae4cb82a659698d9b"
+          }
+        },
+        {
           "client_id": "495715411996-iijvtbo02cn7tgvk6tp7284kjmdhefu0.apps.googleusercontent.com",
           "client_type": 3
         }
