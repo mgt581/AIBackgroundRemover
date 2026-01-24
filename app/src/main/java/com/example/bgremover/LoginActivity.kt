@@ -2,6 +2,7 @@ package com.example.bgremover
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -25,19 +26,24 @@ class LoginActivity : AppCompatActivity() {
 
     private val signInLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            Log.d("LoginActivity", "Sign in result code: ${result.resultCode}")
             if (result.resultCode == RESULT_OK) {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
                     val account = task.getResult(ApiException::class.java)!!
+                    Log.d("LoginActivity", "Google sign in success, authenticating with Firebase")
                     firebaseAuthWithGoogle(account.idToken!!)
                 } catch (e: ApiException) {
+                    Log.e("LoginActivity", "Google sign in failed", e)
                     progressBar.visibility = View.GONE
                     btnSignIn.visibility = View.VISIBLE
-                    Toast.makeText(this, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Google sign in failed: status code ${e.statusCode}", Toast.LENGTH_LONG).show()
                 }
             } else {
+                Log.w("LoginActivity", "Sign in result not OK: ${result.resultCode}")
                 progressBar.visibility = View.GONE
                 btnSignIn.visibility = View.VISIBLE
+                Toast.makeText(this, "Sign in cancelled or failed", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -57,8 +63,11 @@ class LoginActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         btnSignIn = findViewById(R.id.btn_google_sign_in)
 
+        val webClientId = getString(R.string.default_web_client_id)
+        Log.d("LoginActivity", "Using web client ID: $webClientId")
+
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
 
@@ -70,6 +79,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun signIn() {
+        Log.d("LoginActivity", "Initiating sign in")
         progressBar.visibility = View.VISIBLE
         btnSignIn.visibility = View.GONE
         val signInIntent = googleSignInClient.signInIntent
@@ -81,8 +91,10 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    Log.d("LoginActivity", "Firebase authentication successful")
                     startMainActivity()
                 } else {
+                    Log.e("LoginActivity", "Firebase authentication failed", task.exception)
                     progressBar.visibility = View.GONE
                     btnSignIn.visibility = View.VISIBLE
                     Toast.makeText(this, "Authentication Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
