@@ -23,7 +23,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.example.bgremover.GalleryActivity
 import java.io.File
 import java.io.FileOutputStream
 

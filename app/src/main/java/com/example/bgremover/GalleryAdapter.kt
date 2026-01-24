@@ -8,6 +8,8 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.aiphotostudio.bgremover.R
+
 class GalleryAdapter(
     private val images: MutableList<Uri>,
     private val onDeleteClick: (Uri) -> Unit,
