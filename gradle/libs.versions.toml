@@ -1,6 +1,6 @@
 [versions]
 agp = "9.0.0"
-coreKtx = "1.17.1"
+coreKtx = "1.17.0"
 glide = "5.0.5"
 kotlin = "2.3.0"
 activityCompose = "1.12.2"

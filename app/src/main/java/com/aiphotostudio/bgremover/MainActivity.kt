@@ -22,7 +22,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import java.io.File
 import java.io.FileOutputStream
 
@@ -105,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                     return false
                 }
                 // Open external links in browser
-                Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+                Intent(Intent.ACTION_VIEW, toUri()).apply {
                     startActivity(this)
                 }
                 return true
@@ -187,7 +186,7 @@ class MainActivity : AppCompatActivity() {
                 handleDataUri(url)
             } else {
                 try {
-                    val request = DownloadManager.Request(url.toUri()).apply {
+                    val request = DownloadManager.Request(toUri()).apply {
                         setMimeType(mimetype)
                         addRequestHeader("User-Agent", userAgent)
                         setDescription("Downloading image...")
@@ -265,4 +264,8 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
+}
+
+private fun toUri(): Uri {
+    TODO("Provide the return value")
 }
