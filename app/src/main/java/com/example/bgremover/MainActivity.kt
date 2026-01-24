@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             try {
                 val imageFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image_${System.currentTimeMillis()}.jpg")
-                val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.provider", imageFile)
+                val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.r.provider", imageFile)
                 cameraImageUri = uri
                 takePicture.launch(uri)
             } catch (e: Exception) {
