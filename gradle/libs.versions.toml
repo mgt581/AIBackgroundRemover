@@ -18,7 +18,7 @@ gridlayoutV7 = "28.0.0"
 collection = "1.5.0"
 
 [libraries]
-activity-compose = { module = "androidx.a:activity-compose", version.ref = "activityComposeVersion" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-ktx-v1131 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }

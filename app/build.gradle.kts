@@ -52,7 +52,7 @@ dependencies {
     implementation(libs.play.services.auth)
 
     implementation(libs.androidx.core.ktx.v1131)
-    implementation("androidx.a:activity-compose:1.12.2")
+    implementation(libs.androidx.activity.compose)
     implementation("androidx.compose.ui:ui:1.10.1")
     implementation("androidx.compose.ui:ui-graphics:1.10.1")
     implementation("androidx.compose.ui:ui-tooling-preview:1.10.1")
