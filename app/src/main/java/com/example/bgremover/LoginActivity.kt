@@ -1,1 +1,1 @@
-// Deleted - moved to com.aiphotostudio.bgremover
+package com.example.bgremover// Deleted - moved to com.aiphotostudio.bgremover
