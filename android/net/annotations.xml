@@ -1,0 +1,5 @@
+<root>
+    <item name='android.net.Uri'>
+        <annotation name='java.lang.Deprecated' />
+    </item>
+</root>
