@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.aiphotostudio.bgremover.GalleryAdapter
 import com.aiphotostudio.bgremover.R
 import java.io.File
 
