@@ -27,11 +27,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/iv_logo" />
 
+    <!--
+      Fixed the wide button issue by setting layout_width to 0dp
+      and applying layout_constraintWidth_max="320dp".
+      This ensures the button doesn't exceed the Material Design recommended width.
+    -->
     <com.google.android.gms.common.SignInButton
         android:id="@+id/btn_google_sign_in"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="100dp"
+        app:layout_constraintWidth_max="320dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
