@@ -26,6 +26,7 @@ import androidx.core.net.toUri
 import java.io.File
 import java.io.FileOutputStream
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
@@ -104,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                     return false
                 }
                 // Open external links in browser
-                Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                Intent(Intent.ACTION_VIEW, url.toUri()).apply {
                     startActivity(this)
                 }
                 return true
@@ -245,14 +246,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         webView.saveState(outState)
@@ -261,5 +254,13 @@ class MainActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         webView.restoreState(savedInstanceState)
+    }
+}
+
+override fun onBackPressed(mainActivity: MainActivity) {
+    if (mainActivity.webView.canGoBack()) {
+        mainActivity.webView.goBack()
+    } else {
+        super.onBackPressed()
     }
 }
