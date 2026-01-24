@@ -255,12 +255,14 @@ class MainActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         webView.restoreState(savedInstanceState)
     }
-}
 
-override fun onBackPressed(mainActivity: MainActivity) {
-    if (mainActivity.webView.canGoBack()) {
-        mainActivity.webView.goBack()
-    } else {
-        super.onBackPressed()
+    @SuppressLint("GestureBackNavigation")
+    @Deprecated(message = "Deprecated in Java")
+    override fun onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
+        }
     }
 }
