@@ -1,4 +1,4 @@
-package com.aiphotostudio.bgremover
+package com.example.bgremover
 
 import android.net.Uri
 import android.os.Bundle
@@ -8,7 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.bgremover.R
+import com.aiphotostudio.bgremover.GalleryAdapter
+import com.aiphotostudio.bgremover.R
 import java.io.File
 
 class GalleryActivity : AppCompatActivity() {
@@ -52,7 +53,8 @@ class GalleryActivity : AppCompatActivity() {
         } else {
             tvEmpty.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-            adapter = GalleryAdapter(imageList, 
+            adapter = GalleryAdapter(
+                imageList,
                 onDeleteClick = { uri -> deleteImage(uri) },
                 onDownloadClick = { /* Not needed for local internal files */ }
             )
