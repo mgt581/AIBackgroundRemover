@@ -2,6 +2,7 @@ package com.example.bgremover
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import android.util.Log
 import android.webkit.*
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -24,7 +26,6 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,24 +33,17 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
-    // Handling both Gallery and Camera results
-    private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        Log.d("MainActivity", "FileChooser result: ${result.resultCode}")
-        val results = if (result.resultCode == RESULT_OK) {
-            val dataUri = result.data?.data
-            if (dataUri != null) {
-                Log.d("MainActivity", "Gallery URI: $dataUri")
-                arrayOf(dataUri)
-            } else if (cameraImageUri != null) {
-                Log.d("MainActivity", "Camera URI: $cameraImageUri")
-                arrayOf(cameraImageUri!!)
-            } else {
-                null
-            }
-        } else {
-            null
-        }
-        filePathCallback?.onReceiveValue(results)
+    // Photo Picker Launcher (Gallery)
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        Log.d("MainActivity", "Photo Picker result: $uri")
+        filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
+        filePathCallback = null
+    }
+
+    // Camera Launcher
+    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        Log.d("MainActivity", "Camera result: $success")
+        filePathCallback?.onReceiveValue(if (success && cameraImageUri != null) arrayOf(cameraImageUri!!) else null)
         filePathCallback = null
     }
 
@@ -58,22 +52,9 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
-        
-        val readImagesGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false ||
-                    permissions[Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED] ?: false
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
-        } else {
-            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
-        }
-
-        Log.d("MainActivity", "Permissions granted: Camera=$cameraGranted, Media=$readImagesGranted")
-        
         if (!cameraGranted) {
             Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show()
         }
-        // We don't necessarily want to toast here if they selected partial access
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -133,49 +114,55 @@ class MainActivity : AppCompatActivity() {
                 Log.d("MainActivity", "onShowFileChooser called")
                 this@MainActivity.filePathCallback?.onReceiveValue(null)
                 this@MainActivity.filePathCallback = filePathCallback
-                try {
-                    openChooser(fileChooserParams)
-                } catch (e: Exception) {
-                    Log.e("MainActivity", "Error opening chooser", e)
-                    this@MainActivity.filePathCallback?.onReceiveValue(null)
-                    this@MainActivity.filePathCallback = null
-                    return false
-                }
+                showSourceDialog()
                 return true
             }
         }
     }
 
-    private fun openChooser(params: WebChromeClient.FileChooserParams?) {
-        val intents = mutableListOf<Intent>()
-
-        // 1. Camera Intent
-        try {
-            val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            val imageFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image_${System.currentTimeMillis()}.jpg")
-            cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.provider", imageFile)
-            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
-            intents.add(captureIntent)
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Failed to setup camera intent", e)
-        }
-
-        // 2. Gallery Intent
-        val selectionIntent = params?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "image/*"
-        }
-
-        // 3. Create Combined Chooser
-        val chooserIntent = Intent(Intent.ACTION_CHOOSER).apply {
-            putExtra(Intent.EXTRA_INTENT, selectionIntent)
-            putExtra(Intent.EXTRA_TITLE, "Select Source")
-            if (intents.isNotEmpty()) {
-                putExtra(Intent.EXTRA_INITIAL_INTENTS, intents.toTypedArray())
+    private fun showSourceDialog() {
+        val options = arrayOf("Take Photo", "Choose from Gallery")
+        AlertDialog.Builder(this)
+            .setTitle("Select Image Source")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> launchCamera()
+                    1 -> launchGallery()
+                }
             }
-        }
+            .setOnCancelListener {
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = null
+            }
+            .show()
+    }
 
-        fileChooserLauncher.launch(chooserIntent)
+    private fun launchCamera() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                val imageFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image_${System.currentTimeMillis()}.jpg")
+                cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.provider", imageFile)
+                takePicture.launch(cameraImageUri)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Failed to launch camera", e)
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = null
+            }
+        } else {
+            Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
+        }
+    }
+
+    private fun launchGallery() {
+        try {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Failed to launch Photo Picker", e)
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
+        }
     }
 
     private fun setupDownloadListener() {
@@ -232,27 +219,6 @@ class MainActivity : AppCompatActivity() {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.CAMERA)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Android 14+ (Selected Photo Access)
-            val hasFullAccess = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED
-            val hasPartialAccess = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) == PackageManager.PERMISSION_GRANTED
-            
-            if (!hasFullAccess && !hasPartialAccess) {
-                permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
-                permissionsToRequest.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
-            }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
-            }
-        } else {
-            // Android 12 and below
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
