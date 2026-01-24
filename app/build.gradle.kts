@@ -12,7 +12,8 @@ android {
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 24
-        targetSdk = 37
+        //noinspection ExpiredTargetSdkVersion
+        targetSdk = 36
         versionCode = 7
         versionName = "4.1"
 
