@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.bgremover"
+    namespace = "com.aiphotostudio.bgremover"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.bgremover"
+        applicationId = "com.aiphotostudio.bgremover"
         minSdk = 24
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 36
-        versionCode = 7
+        versionCode = 8
         versionName = "4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

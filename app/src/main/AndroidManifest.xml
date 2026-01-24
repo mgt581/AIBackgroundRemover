@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.bgremover">
+<manifest xmlns:android="http://schemas.android.com/app/res/android"
+    package="com.aiphotostudio.bgremover">
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
