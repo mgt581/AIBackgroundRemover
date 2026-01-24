@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import java.io.File
 import java.io.FileOutputStream
 
@@ -75,7 +76,6 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        // Essential for Sign-In and session persistence
         val cookieManager = CookieManager.getInstance()
         cookieManager.setAcceptCookie(true)
         cookieManager.setAcceptThirdPartyCookies(webView, true)
@@ -88,35 +88,46 @@ class MainActivity : AppCompatActivity() {
             loadWithOverviewMode = true
             useWideViewPort = true
             databaseEnabled = true
-            setSupportMultipleWindows(false) // Changed to false for better sign-in stability
+            setSupportMultipleWindows(true) // Crucial for pop-up logins
             javaScriptCanOpenWindowsAutomatically = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            // Modern User Agent to prevent "Browser not secure" errors from Google
+            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
 
-                // Keep the app site AND common login providers inside the WebView
+                // Keep login and main site inside the app
                 return if (url.contains("aiphotostudio.co") ||
-                    url.contains("google.com/accounts") ||
-                    url.contains("accounts.google") ||
+                    url.contains("accounts.google.com") ||
                     url.contains("facebook.com")) {
                     false
                 } else {
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        startActivity(intent)
-                        true
-                    } catch (e: Exception) {
-                        false
-                    }
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                    true
                 }
             }
         }
 
         webView.webChromeClient = object : WebChromeClient() {
+            // This handles the "Sign In" popups properly
+            override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?): Boolean {
+                val newWebView = WebView(this@MainActivity)
+                val transport = resultMsg?.obj as WebView.WebViewTransport
+                transport.webView = newWebView
+                resultMsg.sendToTarget()
+                newWebView.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                        webView.loadUrl(request?.url.toString())
+                        return true
+                    }
+                }
+                return true
+            }
+
             override fun onShowFileChooser(
                 webView: WebView?,
                 filePathCallback: ValueCallback<Array<Uri>>?,
@@ -127,6 +138,27 @@ class MainActivity : AppCompatActivity() {
                 showSourceDialog()
                 return true
             }
+        }
+    }
+
+    private fun handleDataUri(dataUri: String) {
+        try {
+            val base64String = dataUri.substringAfter(",")
+            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
+
+            val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
+            if (!directory.exists()) directory.mkdirs()
+
+            val file = File(directory, "bg_${System.currentTimeMillis()}.png")
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+
+            Toast.makeText(this, "Image saved to Gallery!", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Save failed", e)
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -159,6 +191,15 @@ class MainActivity : AppCompatActivity() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
+    private fun checkAndRequestPermissions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            requestPermissionsLauncher.launch(permissions)
+        } else {
+            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
+        }
+    }
+
     private fun setupDownloadListener() {
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
             if (url.startsWith("data:")) {
@@ -168,9 +209,9 @@ class MainActivity : AppCompatActivity() {
                     val request = DownloadManager.Request(Uri.parse(url)).apply {
                         setMimeType(mimetype)
                         addRequestHeader("User-Agent", userAgent)
-                        setTitle(URLUtil.guessFileName(url, contentDisposition, mimetype))
+                        setTitle("Downloaded Image")
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimetype))
+                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "bg_remover_result.png")
                     }
                     (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
                     Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
@@ -181,48 +222,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDataUri(dataUri: String) {
-        try {
-            val base64String = dataUri.substringAfter(",")
-            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
-
-            val directory = File(filesDir, "saved_images")
-            if (!directory.exists()) directory.mkdirs()
-
-            val file = File(directory, "bg_${System.currentTimeMillis()}.png")
-            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            runOnUiThread { Toast.makeText(this, "Saved to App Gallery", Toast.LENGTH_SHORT).show() }
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Save failed", e)
-        }
-    }
-
-    private fun checkAndRequestPermissions() {
-        val perms = mutableListOf<String>()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) perms.add(Manifest.permission.CAMERA)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) perms.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-        if (perms.isNotEmpty()) requestPermissionsLauncher.launch(perms.toTypedArray())
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        webView.saveState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        webView.restoreState(savedInstanceState)
-    }
-
-    @SuppressLint("GestureBackNavigation")
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
+    // FIX FOR TODO
+    private fun String.toUri(): Uri {
+        return Uri.parse(this)
     }
 }
