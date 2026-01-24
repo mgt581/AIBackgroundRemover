@@ -1,4 +1,4 @@
-package com.example.bgremover
+﻿package com.example.bgremover
 
 import android.Manifest
 import android.annotation.SuppressLint
