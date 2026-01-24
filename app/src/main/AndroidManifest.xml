@@ -36,7 +36,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.aiphotostudio.bgremover.provider"
+            android:authorities="com.aiphotostudio.bgremover.r.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
