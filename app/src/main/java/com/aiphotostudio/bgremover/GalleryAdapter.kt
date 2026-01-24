@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.aiphotostudio.bgremover
 
 import android.net.Uri
@@ -13,8 +11,7 @@ import com.bumptech.glide.Glide
 
 class GalleryAdapter(
     private val images: MutableList<Uri>,
-    private val onDeleteClick: (Uri) -> Unit,
-    private val onDownloadClick: (Uri) -> Unit
+    private val onDeleteClick: (Uri) -> Unit
 ) : RecyclerView.Adapter<GalleryAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

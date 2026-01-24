@@ -53,8 +53,7 @@ class GalleryActivity : AppCompatActivity() {
             recyclerView.visibility = View.VISIBLE
             adapter = GalleryAdapter(
                 imageList,
-                onDeleteClick = { uri -> deleteImage(uri) },
-                onDownloadClick = { /* Not needed for local internal files */ }
+                onDeleteClick = { uri -> deleteImage(uri) }
             )
             recyclerView.adapter = adapter
         }
