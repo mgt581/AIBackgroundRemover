@@ -58,9 +58,22 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
+        
+        val readImagesGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false ||
+                    permissions[Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED] ?: false
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions[Manifest.permission.READ_MEDIA_IMAGES] ?: false
+        } else {
+            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
+        }
+
+        Log.d("MainActivity", "Permissions granted: Camera=$cameraGranted, Media=$readImagesGranted")
+        
         if (!cameraGranted) {
             Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show()
         }
+        // We don't necessarily want to toast here if they selected partial access
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,13 +147,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openChooser(params: WebChromeClient.FileChooserParams?) {
-        // 1. Create Camera Intent
-        val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val imageFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image_${System.currentTimeMillis()}.jpg")
-        cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.provider", imageFile)
-        captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
+        val intents = mutableListOf<Intent>()
 
-        // 2. Create Gallery/File Intent
+        // 1. Camera Intent
+        try {
+            val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            val imageFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image_${System.currentTimeMillis()}.jpg")
+            cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.provider", imageFile)
+            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
+            intents.add(captureIntent)
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Failed to setup camera intent", e)
+        }
+
+        // 2. Gallery Intent
         val selectionIntent = params?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "image/*"
@@ -150,7 +170,9 @@ class MainActivity : AppCompatActivity() {
         val chooserIntent = Intent(Intent.ACTION_CHOOSER).apply {
             putExtra(Intent.EXTRA_INTENT, selectionIntent)
             putExtra(Intent.EXTRA_TITLE, "Select Source")
-            putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(captureIntent))
+            if (intents.isNotEmpty()) {
+                putExtra(Intent.EXTRA_INITIAL_INTENTS, intents.toTypedArray())
+            }
         }
 
         fileChooserLauncher.launch(chooserIntent)
@@ -212,16 +234,30 @@ class MainActivity : AppCompatActivity() {
             permissionsToRequest.add(Manifest.permission.CAMERA)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // Android 14+ (Selected Photo Access)
+            val hasFullAccess = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED
+            val hasPartialAccess = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) == PackageManager.PERMISSION_GRANTED
+            
+            if (!hasFullAccess && !hasPartialAccess) {
+                permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
+                permissionsToRequest.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
             }
+        } else {
+            // Android 12 and below
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
 
