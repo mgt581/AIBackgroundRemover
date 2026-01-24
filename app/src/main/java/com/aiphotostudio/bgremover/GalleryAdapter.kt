@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.aiphotostudio.bgremover
 
 import android.net.Uri
