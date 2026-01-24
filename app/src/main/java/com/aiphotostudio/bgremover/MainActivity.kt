@@ -217,6 +217,7 @@ class MainActivity : AppCompatActivity() {
         webView.restoreState(savedInstanceState)
     }
 
+    @SuppressLint("GestureBackNavigation")
     override fun onBackPressed() {
         if (webView.canGoBack()) {
             webView.goBack()
