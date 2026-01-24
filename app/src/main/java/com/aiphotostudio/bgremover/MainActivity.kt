@@ -22,7 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
+import androidx.core.net.toUri // THIS IS THE KTX IMPORT YOU NEED AT THE TOP
 import java.io.File
 import java.io.FileOutputStream
 
@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
             checkAndRequestPermissions()
 
             btnGallery.setOnClickListener {
+                // Ensure GalleryActivity is created in your project
                 startActivity(Intent(this, GalleryActivity::class.java))
             }
 
@@ -87,47 +88,30 @@ class MainActivity : AppCompatActivity() {
             allowContentAccess = true
             loadWithOverviewMode = true
             useWideViewPort = true
-            databaseEnabled = true
-            setSupportMultipleWindows(true) // Crucial for pop-up logins
+            // Removed databaseEnabled to fix deprecation warning
+            setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            // Modern User Agent to prevent "Browser not secure" errors from Google
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-
-                // Keep login and main site inside the app
-                return if (url.contains("aiphotostudio.co") ||
-                    url.contains("accounts.google.com") ||
-                    url.contains("facebook.com")) {
+                return if (url.contains("aiphotostudio.co") || url.contains("accounts.google") || url.contains("facebook.com")) {
                     false
                 } else {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(intent)
-                    true
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        true
+                    } catch (e: Exception) {
+                        false
+                    }
                 }
             }
         }
 
         webView.webChromeClient = object : WebChromeClient() {
-            // This handles the "Sign In" popups properly
-            override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?): Boolean {
-                val newWebView = WebView(this@MainActivity)
-                val transport = resultMsg?.obj as WebView.WebViewTransport
-                transport.webView = newWebView
-                resultMsg.sendToTarget()
-                newWebView.webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                        webView.loadUrl(request?.url.toString())
-                        return true
-                    }
-                }
-                return true
-            }
-
             override fun onShowFileChooser(
                 webView: WebView?,
                 filePathCallback: ValueCallback<Array<Uri>>?,
@@ -154,11 +138,9 @@ class MainActivity : AppCompatActivity() {
             FileOutputStream(file).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
-
-            Toast.makeText(this, "Image saved to Gallery!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Image saved to Gallery!", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("MainActivity", "Save failed", e)
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -191,27 +173,19 @@ class MainActivity : AppCompatActivity() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
-    private fun checkAndRequestPermissions() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            requestPermissionsLauncher.launch(permissions)
-        } else {
-            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
-        }
-    }
-
     private fun setupDownloadListener() {
-        webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
+        webView.setDownloadListener { url, userAgent, _, mimetype, _ ->
             if (url.startsWith("data:")) {
                 handleDataUri(url)
             } else {
                 try {
-                    val request = DownloadManager.Request(Uri.parse(url)).apply {
+                    // Using the .toUri() extension properly now
+                    val request = DownloadManager.Request(url.toUri()).apply {
                         setMimeType(mimetype)
                         addRequestHeader("User-Agent", userAgent)
-                        setTitle("Downloaded Image")
+                        setTitle("AI Background Remover Download")
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "bg_remover_result.png")
+                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "processed_image.png")
                     }
                     (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
                     Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
@@ -222,8 +196,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // FIX FOR TODO
-    private fun String.toUri(): Uri {
-        return Uri.parse(this)
+    private fun checkAndRequestPermissions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+        } else {
+            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
+        }
     }
 }
