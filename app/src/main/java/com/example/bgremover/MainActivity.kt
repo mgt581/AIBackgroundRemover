@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
 import android.webkit.*
 import android.widget.Button
 import android.widget.Toast
@@ -33,11 +34,14 @@ class MainActivity : AppCompatActivity() {
 
     // Handling both Gallery and Camera results
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d("MainActivity", "FileChooser result: ${result.resultCode}")
         val results = if (result.resultCode == RESULT_OK) {
             val dataUri = result.data?.data
             if (dataUri != null) {
+                Log.d("MainActivity", "Gallery URI: $dataUri")
                 arrayOf(dataUri)
             } else if (cameraImageUri != null) {
+                Log.d("MainActivity", "Camera URI: $cameraImageUri")
                 arrayOf(cameraImageUri!!)
             } else {
                 null
@@ -61,21 +65,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        try {
+            setContentView(R.layout.activity_main)
 
-        webView = findViewById(R.id.webView)
-        val btnGallery = findViewById<Button>(R.id.btn_gallery)
+            webView = findViewById(R.id.webView)
+            val btnGallery = findViewById<Button>(R.id.btn_gallery)
 
-        setupWebView()
-        setupDownloadListener()
-        checkAndRequestPermissions()
+            setupWebView()
+            setupDownloadListener()
+            checkAndRequestPermissions()
 
-        btnGallery.setOnClickListener {
-            val intent = Intent(this, GalleryActivity::class.java)
-            startActivity(intent)
+            btnGallery.setOnClickListener {
+                val intent = Intent(this, GalleryActivity::class.java)
+                startActivity(intent)
+            }
+
+            webView.loadUrl("https://aiphotostudio.co")
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error in onCreate", e)
+            Toast.makeText(this, "Critical Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
-
-        webView.loadUrl("https://aiphotostudio.co")
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -96,6 +105,10 @@ class MainActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 return false
             }
+            
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                Log.e("MainActivity", "WebView Error: ${error?.description}")
+            }
         }
 
         webView.webChromeClient = object : WebChromeClient() {
@@ -104,9 +117,17 @@ class MainActivity : AppCompatActivity() {
                 filePathCallback: ValueCallback<Array<Uri>>?,
                 fileChooserParams: FileChooserParams?
             ): Boolean {
+                Log.d("MainActivity", "onShowFileChooser called")
                 this@MainActivity.filePathCallback?.onReceiveValue(null)
                 this@MainActivity.filePathCallback = filePathCallback
-                openChooser(fileChooserParams)
+                try {
+                    openChooser(fileChooserParams)
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "Error opening chooser", e)
+                    this@MainActivity.filePathCallback?.onReceiveValue(null)
+                    this@MainActivity.filePathCallback = null
+                    return false
+                }
                 return true
             }
         }
@@ -167,24 +188,16 @@ class MainActivity : AppCompatActivity() {
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             
             val fileName = "bg_remover_${System.currentTimeMillis()}.png"
-            val outputStream: OutputStream?
             
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val values = android.content.ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                }
-                val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-                outputStream = uri?.let { contentResolver.openOutputStream(it) }
-            } else {
-                val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName)
-                outputStream = FileOutputStream(file)
-            }
+            val directory = File(filesDir, "saved_images")
+            if (!directory.exists()) directory.mkdirs()
 
-            outputStream?.use {
+            val file = File(directory, fileName)
+            val outputStream = FileOutputStream(file)
+
+            outputStream.use {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-                Toast.makeText(this, "Image saved to Downloads", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Image saved to app gallery", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             e.printStackTrace()

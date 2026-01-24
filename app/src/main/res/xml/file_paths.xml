@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <external-path name="my_images" path="Android/data/com.aiphotostudio.bgremover/files/Pictures" />
-    <external-files-path name="external_files" path="." />
+    <external-files-path name="camera_images" path="Pictures" />
+    <external-path name="external_files" path="." />
 </paths>

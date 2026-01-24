@@ -1,15 +1,14 @@
 package com.example.bgremover
 
-import android.content.ContentUris
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.io.File
 
 class GalleryActivity : AppCompatActivity() {
 
@@ -36,31 +35,13 @@ class GalleryActivity : AppCompatActivity() {
     private fun loadImages() {
         val imageList = mutableListOf<Uri>()
         
-        val projection = arrayOf(
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DISPLAY_NAME
-        )
-        
-        // We look for images in the Downloads and Pictures folders
-        val selection = "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?"
-        val selectionArgs = arrayOf("%Download%")
-        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
-
-        contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            sortOrder
-        )?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val contentUri = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    id
-                )
-                imageList.add(contentUri)
+        // Load from app's private internal storage
+        val directory = File(filesDir, "saved_images")
+        if (directory.exists()) {
+            val files = directory.listFiles()
+            files?.sortByDescending { it.lastModified() }
+            files?.forEach { file ->
+                imageList.add(Uri.fromFile(file))
             }
         }
 
@@ -70,16 +51,23 @@ class GalleryActivity : AppCompatActivity() {
         } else {
             tvEmpty.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-            adapter = GalleryAdapter(imageList) { uri ->
-                // Delete logic
-                try {
-                    contentResolver.delete(uri, null, null)
-                    loadImages() // Refresh
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
+            adapter = GalleryAdapter(imageList, 
+                onDeleteClick = { uri -> deleteImage(uri) },
+                onDownloadClick = { /* Not needed for local internal files */ }
+            )
             recyclerView.adapter = adapter
+        }
+    }
+
+    private fun deleteImage(uri: Uri) {
+        try {
+            val file = File(uri.path!!)
+            if (file.exists()) {
+                file.delete()
+                loadImages() // Refresh gallery
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

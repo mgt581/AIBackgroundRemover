@@ -20,7 +20,7 @@
         android:theme="@style/Theme.AIBackgroundRemover">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,12 +29,15 @@
         </activity>
 
         <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".GalleryActivity"
             android:exported="false"
             android:label="My Gallery"
             android:parentActivityName=".MainActivity" />
 
-        <!-- Required for Camera functionality -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.aiphotostudio.bgremover.provider"
