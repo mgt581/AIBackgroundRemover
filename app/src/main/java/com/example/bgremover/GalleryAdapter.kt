@@ -8,7 +8,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-
 class GalleryAdapter(
     private val images: MutableList<Uri>,
     private val onDeleteClick: (Uri) -> Unit,
