@@ -104,9 +104,10 @@ class MainActivity : AppCompatActivity() {
                     false
                 } else {
                     try {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
                         true
                     } catch (e: Exception) {
+                        Log.e("MainActivity", "Failed to open URL", e)
                         false
                     }
                 }
@@ -125,7 +126,6 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
 
-            // Handle sign-in popups by loading them in the main WebView
             override fun onCreateWindow(
                 view: WebView?,
                 isDialog: Boolean,
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
                     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                         val url = request?.url.toString()
                         if (url.contains("accounts.google") || url.contains("facebook.com")) {
-                            webView.loadUrl(url)
+                            this@MainActivity.webView.loadUrl(url)
                             return true
                         }
                         return false
