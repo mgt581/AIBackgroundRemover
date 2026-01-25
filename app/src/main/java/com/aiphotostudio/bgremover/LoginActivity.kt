@@ -12,6 +12,7 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
@@ -49,6 +50,18 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Initiates the Google Sign-In process using the Android Credential Manager API.
+     *
+     * This function handles the UI state transitions by showing a progress bar and
+     * hiding the sign-in button. It configures the [GetGoogleIdOption] with the
+     * server's web client ID and launches the credential retrieval request within
+     * the [lifecycleScope].
+     *
+     * Upon success, it passes the result to [handleSignIn]. In case of failure,
+     * it resets the UI and displays a toast message unless the operation was
+     * explicitly canceled by the user.
+     */
     private fun signIn() {
         Log.d("LoginActivity", "Initiating sign in")
         progressBar.visibility = View.VISIBLE
@@ -74,17 +87,10 @@ class LoginActivity : AppCompatActivity() {
                 )
                 handleSignIn(result)
             } catch (e: GetCredentialException) {
-                Log.e("LoginActivity", "Credential Manager error: ${e.type}", e)
+                Log.e("LoginActivity", "Credential Manager error", e)
                 resetUi()
-                if (when (e.type) {
-                    GetCredentialException.TYPE_USER_CANCELED -> {
-                        false
-                    }
-                    else -> {
-                        true
-                    }
-                }
-                ) {
+                
+                if (e !is GetCredentialCancellationException) {
                     Toast.makeText(
                         this@LoginActivity,
                         "Sign in failed: ${e.message}",
