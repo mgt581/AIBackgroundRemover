@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "495715411996-kklekum8ltivprbbmbuvjprg36m5mjtm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudio.bgremover",
+            "certificate_hash": "b07c47d06f719d6812194a82b8f61955fd996fb1"
+          }
+        },
+        {
           "client_id": "495715411996-iijvtbo02cn7tgvk6tp7284kjmdhefu0.apps.googleusercontent.com",
           "client_type": 3
         }
