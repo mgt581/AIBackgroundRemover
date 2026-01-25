@@ -11,6 +11,8 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.PasswordCredential
+import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
@@ -82,13 +84,25 @@ class LoginActivity : AppCompatActivity() {
 
     private fun handleSignIn(result: GetCredentialResponse) {
         val credential = result.credential
+        Log.d("LoginActivity", "Received credential type: ${credential.type}")
         
         when (credential) {
             is GoogleIdTokenCredential -> {
+                Log.d("LoginActivity", "Processing GoogleIdTokenCredential")
                 firebaseAuthWithGoogle(credential.idToken)
             }
+            is PasswordCredential -> {
+                Log.d("LoginActivity", "Processing PasswordCredential")
+                // Handle password credential if needed
+                resetUi()
+            }
+            is PublicKeyCredential -> {
+                Log.d("LoginActivity", "Processing PublicKeyCredential")
+                // Handle public key credential if needed
+                resetUi()
+            }
             is CustomCredential -> {
-                // This is the fix for "Unexpected credential type"
+                Log.d("LoginActivity", "Processing CustomCredential: ${credential.type}")
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     try {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
