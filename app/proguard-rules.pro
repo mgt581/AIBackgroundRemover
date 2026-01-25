@@ -4,7 +4,7 @@
 -keep class com.google.android.libraries.identity.googleid.** { *; }
 
 # Credentials Manager
--keep class androidx.credentials.auth.** { *; }
+-keep class androidx.credentials.** { *; }
 
 # Glide
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
