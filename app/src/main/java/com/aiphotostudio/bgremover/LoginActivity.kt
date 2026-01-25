@@ -8,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
@@ -31,7 +32,6 @@ class LoginActivity : AppCompatActivity() {
         
         auth = FirebaseAuth.getInstance()
         
-        // Check if user is already signed in
         if (auth.currentUser != null) {
             startMainActivity()
             return
@@ -73,9 +73,8 @@ class LoginActivity : AppCompatActivity() {
                 )
                 handleSignIn(result)
             } catch (e: GetCredentialException) {
-                Log.e("LoginActivity", "Credential Manager error", e)
-                progressBar.visibility = View.GONE
-                btnSignIn.visibility = View.VISIBLE
+                Log.e("LoginActivity", "Credential Manager error: ${e.type}", e)
+                resetUi()
                 Toast.makeText(this@LoginActivity, "Sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
@@ -84,14 +83,28 @@ class LoginActivity : AppCompatActivity() {
     private fun handleSignIn(result: GetCredentialResponse) {
         val credential = result.credential
         
-        if (credential is GoogleIdTokenCredential) {
-            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-            val idToken = googleIdTokenCredential.idToken
-            firebaseAuthWithGoogle(idToken)
-        } else {
-            Log.e("LoginActivity", "Unexpected credential type")
-            progressBar.visibility = View.GONE
-            btnSignIn.visibility = View.VISIBLE
+        when (credential) {
+            is GoogleIdTokenCredential -> {
+                firebaseAuthWithGoogle(credential.idToken)
+            }
+            is CustomCredential -> {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    try {
+                        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                        firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
+                    } catch (e: Exception) {
+                        Log.e("LoginActivity", "Error parsing Google ID Token", e)
+                        resetUi()
+                    }
+                } else {
+                    Log.e("LoginActivity", "Unexpected custom credential type: ${credential.type}")
+                    resetUi()
+                }
+            }
+            else -> {
+                Log.e("LoginActivity", "Unexpected credential type: ${credential::class.java.name}")
+                resetUi()
+            }
         }
     }
 
@@ -104,11 +117,15 @@ class LoginActivity : AppCompatActivity() {
                     startMainActivity()
                 } else {
                     Log.e("LoginActivity", "Firebase authentication failed", task.exception)
-                    progressBar.visibility = View.GONE
-                    btnSignIn.visibility = View.VISIBLE
-                    Toast.makeText(this, "Authentication Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    resetUi()
+                    Toast.makeText(this, "Auth Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    private fun resetUi() {
+        progressBar.visibility = View.GONE
+        btnSignIn.visibility = View.VISIBLE
     }
 
     private fun startMainActivity() {
