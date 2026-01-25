@@ -7,7 +7,7 @@
     <option name="DEPLOY_AS_INSTANT" value="false" />
     <option name="ARTIFACT_NAME" value="" />
     <option name="PM_INSTALL_OPTIONS" value="" />
-    <option name="ALL_USERS" value="false" />
+    <option name="ALL_USERS" value="true" />
     <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
     <option name="ALLOW_ASSUME_VERIFIED" value="false" />
     <option name="CLEAR_APP_STORAGE" value="false" />
@@ -18,7 +18,7 @@
     <option name="RESTORE_FILE" value="" />
     <option name="RESTORE_FRESH_INSTALL_ONLY" value="false" />
     <option name="CLEAR_LOGCAT" value="true" />
-    <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+    <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
     <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
     <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
     <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
