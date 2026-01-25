@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
                 return if (url.contains("aiphotostudio.co") || 
                     url.contains("accounts.google") || 
                     url.contains("facebook.com") ||
-                    url.contains("firebaseapp.com")) {
+                    url.contains("Firebase.com")) {
                     false
                 } else {
                     try {
