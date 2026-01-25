@@ -22,7 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri // THIS IS THE KTX IMPORT YOU NEED AT THE TOP
+import androidx.core.net.toUri
 import java.io.File
 import java.io.FileOutputStream
 
@@ -63,7 +63,6 @@ class MainActivity : AppCompatActivity() {
             checkAndRequestPermissions()
 
             btnGallery.setOnClickListener {
-                // Ensure GalleryActivity is created in your project
                 startActivity(Intent(this, GalleryActivity::class.java))
             }
 
@@ -88,7 +87,6 @@ class MainActivity : AppCompatActivity() {
             allowContentAccess = true
             loadWithOverviewMode = true
             useWideViewPort = true
-            // Removed databaseEnabled to fix deprecation warning
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
@@ -98,7 +96,11 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co") || url.contains("accounts.google") || url.contains("facebook.com")) {
+                
+                return if (url.contains("aiphotostudio.co") || 
+                    url.contains("accounts.google") || 
+                    url.contains("facebook.com") ||
+                    url.contains("firebaseapp.com")) {
                     false
                 } else {
                     try {
@@ -120,6 +122,33 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.filePathCallback?.onReceiveValue(null)
                 this@MainActivity.filePathCallback = filePathCallback
                 showSourceDialog()
+                return true
+            }
+
+            // Handle sign-in popups by loading them in the main WebView
+            override fun onCreateWindow(
+                view: WebView?,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: android.os.Message?
+            ): Boolean {
+                val newWebView = WebView(this@MainActivity)
+                newWebView.settings.javaScriptEnabled = true
+                
+                newWebView.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                        val url = request?.url.toString()
+                        if (url.contains("accounts.google") || url.contains("facebook.com")) {
+                            webView.loadUrl(url)
+                            return true
+                        }
+                        return false
+                    }
+                }
+
+                val transport = resultMsg?.obj as WebView.WebViewTransport
+                transport.webView = newWebView
+                resultMsg.sendToTarget()
                 return true
             }
         }
@@ -179,7 +208,6 @@ class MainActivity : AppCompatActivity() {
                 handleDataUri(url)
             } else {
                 try {
-                    // Using the .toUri() extension properly now
                     val request = DownloadManager.Request(url.toUri()).apply {
                         setMimeType(mimetype)
                         addRequestHeader("User-Agent", userAgent)
