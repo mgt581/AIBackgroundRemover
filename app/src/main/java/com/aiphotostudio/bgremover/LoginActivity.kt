@@ -88,6 +88,7 @@ class LoginActivity : AppCompatActivity() {
                 firebaseAuthWithGoogle(credential.idToken)
             }
             is CustomCredential -> {
+                // This is the fix for "Unexpected credential type"
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     try {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
@@ -97,12 +98,12 @@ class LoginActivity : AppCompatActivity() {
                         resetUi()
                     }
                 } else {
-                    Log.e("LoginActivity", "Unexpected custom credential type: ${credential.type}")
+                    Log.e("LoginActivity", "Unexpected custom type: ${credential.type}")
                     resetUi()
                 }
             }
             else -> {
-                Log.e("LoginActivity", "Unexpected credential type: ${credential::class.java.name}")
+                Log.e("LoginActivity", "Unexpected type: ${credential::class.java.simpleName}")
                 resetUi()
             }
         }
@@ -113,12 +114,11 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(firebaseCredential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Log.d("LoginActivity", "Firebase authentication successful")
                     startMainActivity()
                 } else {
-                    Log.e("LoginActivity", "Firebase authentication failed", task.exception)
+                    Log.e("LoginActivity", "Firebase Auth Failed", task.exception)
                     resetUi()
-                    Toast.makeText(this, "Auth Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Authentication Failed", Toast.LENGTH_SHORT).show()
                 }
             }
     }
