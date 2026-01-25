@@ -56,6 +56,7 @@ class LoginActivity : AppCompatActivity() {
         btnSignIn.visibility = View.GONE
 
         val webClientId = getString(R.string.default_web_client_id)
+        Log.d("LoginActivity", "Using Web Client ID: $webClientId")
         
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
@@ -85,6 +86,7 @@ class LoginActivity : AppCompatActivity() {
     private fun handleSignIn(result: GetCredentialResponse) {
         val credential = result.credential
         Log.d("LoginActivity", "Received credential type: ${credential.type}")
+        Log.d("LoginActivity", "Credential class: ${credential::class.java.name}")
         
         when (credential) {
             is GoogleIdTokenCredential -> {
@@ -93,22 +95,22 @@ class LoginActivity : AppCompatActivity() {
             }
             is PasswordCredential -> {
                 Log.d("LoginActivity", "Processing PasswordCredential")
-                // Handle password credential if needed
                 resetUi()
             }
             is PublicKeyCredential -> {
                 Log.d("LoginActivity", "Processing PublicKeyCredential")
-                // Handle public key credential if needed
                 resetUi()
             }
             is CustomCredential -> {
                 Log.d("LoginActivity", "Processing CustomCredential: ${credential.type}")
-                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                // Check if this is actually a Google ID Token credential masked as a CustomCredential
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL ||
+                    credential.type == "com.google.android.libraries.identity.googleid.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL") {
                     try {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
                     } catch (e: Exception) {
-                        Log.e("LoginActivity", "Error parsing Google ID Token", e)
+                        Log.e("LoginActivity", "Error parsing Google ID Token from CustomCredential", e)
                         resetUi()
                     }
                 } else {
