@@ -1,15 +1,14 @@
 # Firebase Auth and Google Sign-In
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
+-keep class com.google.firebase.auth.** { *; }
+-keep class com.google.android.gms.auth.** { *; }
 -keep class com.google.android.libraries.identity.googleid.** { *; }
 
 # Credentials Manager
--keep class androidx.credentials.** { *; }
+-keep class androidx.credentials.auth.** { *; }
 
 # Glide
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
 -keep public class * extends com.bumptech.glide.module.LibraryGlideModule
--keep class com.bumptech.glide.GeneratedAppGlideModuleImpl
 -keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
   **[] $VALUES;
   public *;
