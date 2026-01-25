@@ -104,8 +104,7 @@ class LoginActivity : AppCompatActivity() {
             is CustomCredential -> {
                 Log.d("LoginActivity", "Processing CustomCredential: ${credential.type}")
                 // Check if this is actually a Google ID Token credential masked as a CustomCredential
-                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL ||
-                    credential.type == "com.google.android.libraries.identity.googleid.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL") {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     try {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
