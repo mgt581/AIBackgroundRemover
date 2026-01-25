@@ -12,7 +12,6 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
-import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
@@ -31,9 +30,9 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         auth = FirebaseAuth.getInstance()
-        
+
         if (auth.currentUser != null) {
             startMainActivity()
             return
@@ -51,13 +50,12 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun signIn() {
-        Log.d("LoginActivity", "Initiating sign in with Credential Manager")
+        Log.d("LoginActivity", "Initiating sign in")
         progressBar.visibility = View.VISIBLE
         btnSignIn.visibility = View.GONE
 
         val webClientId = getString(R.string.default_web_client_id)
-        Log.d("LoginActivity", "Using Web Client ID: $webClientId")
-        
+
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(webClientId)
@@ -78,48 +76,51 @@ class LoginActivity : AppCompatActivity() {
             } catch (e: GetCredentialException) {
                 Log.e("LoginActivity", "Credential Manager error: ${e.type}", e)
                 resetUi()
-                Toast.makeText(this@LoginActivity, "Sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                if (when (e.type) {
+                    GetCredentialException.TYPE_USER_CANCELED -> {
+                        false
+                    }
+                    else -> {
+                        true
+                    }
+                }
+                ) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Sign in failed: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
 
     private fun handleSignIn(result: GetCredentialResponse) {
         val credential = result.credential
-        Log.d("LoginActivity", "Received credential type: ${credential.type}")
-        Log.d("LoginActivity", "Credential class: ${credential::class.java.name}")
-        
-        when (credential) {
-            is GoogleIdTokenCredential -> {
-                Log.d("LoginActivity", "Processing GoogleIdTokenCredential")
+
+        when {
+            // Case 1: Direct GoogleIdTokenCredential
+            credential is GoogleIdTokenCredential -> {
+                Log.d("LoginActivity", "Direct GoogleIdTokenCredential received")
                 firebaseAuthWithGoogle(credential.idToken)
             }
-            is PasswordCredential -> {
-                Log.d("LoginActivity", "Processing PasswordCredential")
-                resetUi()
-            }
-            is PublicKeyCredential -> {
-                Log.d("LoginActivity", "Processing PublicKeyCredential")
-                resetUi()
-            }
-            is CustomCredential -> {
-                Log.d("LoginActivity", "Processing CustomCredential: ${credential.type}")
-                // Check if this is actually a Google ID Token credential masked as a CustomCredential
-                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                    try {
-                        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                        firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
-                    } catch (e: Exception) {
-                        Log.e("LoginActivity", "Error parsing Google ID Token from CustomCredential", e)
-                        resetUi()
-                    }
-                } else {
-                    Log.e("LoginActivity", "Unexpected custom type: ${credential.type}")
+
+            // Case 2: CustomCredential (The Android 14+ Fix)
+            credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL -> {
+                try {
+                    Log.d("LoginActivity", "Unpacking CustomCredential")
+                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
+                } catch (e: Exception) {
+                    Log.e("LoginActivity", "Failed to parse CustomCredential", e)
                     resetUi()
                 }
             }
+
             else -> {
-                Log.e("LoginActivity", "Unexpected type: ${credential::class.java.simpleName}")
+                Log.e("LoginActivity", "Unexpected credential type: ${credential.type}")
                 resetUi()
+                Toast.makeText(this, "Authentication type not recognized", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -129,11 +130,13 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(firebaseCredential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    Log.d("LoginActivity", "Firebase login success")
                     startMainActivity()
                 } else {
-                    Log.e("LoginActivity", "Firebase Auth Failed", task.exception)
+                    Log.e("LoginActivity", "Firebase login failed", task.exception)
                     resetUi()
-                    Toast.makeText(this, "Authentication Failed", Toast.LENGTH_SHORT).show()
+                    // If this fails, double check your SHA-1 in Firebase Console!
+                    Toast.makeText(this, "Firebase Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
