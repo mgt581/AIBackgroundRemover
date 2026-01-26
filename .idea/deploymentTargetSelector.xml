@@ -39,6 +39,15 @@
       <SelectionState runConfigName="app.main">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="AIBackgroundRemover-main.AIBackgroundRemover.app.androidTest~1">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="AIBackgroundRemover-main.AIBackgroundRemover.app.unitTest~1">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="AIBackgroundRemover-main.AIBackgroundRemover.app.main~1">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
