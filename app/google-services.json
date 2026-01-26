@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:495715411996:android:ac9e925c00ae395b0617d9",
         "android_client_info": {
-          "package_name": "com.aiphotostudio.moreover"
+          "package_name": "com.aiphotostudio.bgremover"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "495715411996-3not71nemqj26o4pem3jkj7lpqfhfl34.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.aiphotostudio.moreover",
+            "package_name": "com.aiphotostudio.bgremover",
             "certificate_hash": "80481d884a0eb6fb11f2424ae4cb82a659698d9b"
           }
         },
@@ -25,7 +25,7 @@
           "client_id": "495715411996-944k3m1ncjpd4190eb4htq8caindi7fa.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.aiphotostudio.moreover",
+            "package_name": "com.aiphotostudio.bgremover",
             "certificate_hash": "ed1769cc68887992668fe15a93b9a65cd1aaa7d1"
           }
         },
@@ -33,7 +33,7 @@
           "client_id": "495715411996-kklekum8ltivprbbmbuvjprg36m5mjtm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.aiphotostudio.moreover",
+            "package_name": "com.aiphotostudio.bgremover",
             "certificate_hash": "b07c47d06f719d6812194a82b8f61955fd996fb1"
           }
         },
