@@ -38,6 +38,14 @@
       </SelectionState>
       <SelectionState runConfigName="app.main">
         <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-01-26T22:54:36.204326Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/alexbryantmacm12020/.android/avd/Pixel_7_Pro.avd" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
       </SelectionState>
       <SelectionState runConfigName="AIBackgroundRemover-main.AIBackgroundRemover.app.androidTest~1">
         <option name="selectionMode" value="DROPDOWN" />
@@ -46,6 +54,12 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="AIBackgroundRemover-main.AIBackgroundRemover.app.main~1">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="ExampleInstrumentedTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="useAppContext()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
