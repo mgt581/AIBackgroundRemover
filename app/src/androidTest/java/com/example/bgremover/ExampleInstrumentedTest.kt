@@ -9,6 +9,9 @@ import org.junit.runner.RunWith
 import org.junit.Assert.*
 
 private val test: Any
+    get() {
+        TODO()
+    }
 
 /**
  * Instrumented test, which will execute on an Android device.
