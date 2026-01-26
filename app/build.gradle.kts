@@ -11,7 +11,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.aiphotostudio.bgremover"
+        applicationId = "com.aiphotostudio.moreover"
         minSdk = 24
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 36
