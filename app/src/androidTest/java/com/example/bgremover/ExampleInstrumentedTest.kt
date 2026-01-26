@@ -8,6 +8,8 @@ import org.junit.runner.RunWith
 
 import org.junit.Assert.*
 
+private val test: Any
+
 /**
  * Instrumented test, which will execute on an Android device.
  *
