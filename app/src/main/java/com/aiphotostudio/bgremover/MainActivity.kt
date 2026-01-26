@@ -89,14 +89,24 @@ class MainActivity : AppCompatActivity() {
             useWideViewPort = true
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
+            @Suppress("DEPRECATION")
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.webViewClient = object : WebViewClient() {
+            @Deprecated("Deprecated in Java")
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                if (url == null) return false
+                return handleUrl(url)
+            }
+
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                
+                return handleUrl(url)
+            }
+
+            private fun handleUrl(url: String): Boolean {
                 return if (url.contains("aiphotostudio.co") || 
                     url.contains("accounts.google") || 
                     url.contains("facebook.com") ||
@@ -160,6 +170,7 @@ class MainActivity : AppCompatActivity() {
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
 
+            @Suppress("DEPRECATION")
             val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
             if (!directory.exists()) directory.mkdirs()
 
@@ -213,6 +224,7 @@ class MainActivity : AppCompatActivity() {
                         addRequestHeader("User-Agent", userAgent)
                         setTitle("AI Background Remover Download")
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                        @Suppress("DEPRECATION")
                         setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "processed_image.png")
                     }
                     (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
@@ -226,6 +238,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            @Suppress("DEPRECATION")
             requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE))
         } else {
             requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
