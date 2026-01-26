@@ -7,15 +7,6 @@ plugins {
 }
 
 android {
-    signingConfigs {
-        getByName("debug") {
-            storeFile =
-                file("/Users/alexbryantmacm12020/Desktop/backups/AI-Studio---Google-Play-package-main/keystore/keystore.jks")
-            storePassword = "32Heaton?"
-            keyAlias = "32Heaton?"
-            keyPassword = "32Heaton?"
-        }
-    }
     namespace = "com.aiphotostudio.bgremover"
     compileSdk = 36
 
