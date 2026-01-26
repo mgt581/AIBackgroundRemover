@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
-        webView.webViewClient = object : WebViewClient() {
+        object : WebViewClient() {
             @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 if (url == null) return false
@@ -107,8 +107,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             private fun handleUrl(url: String): Boolean {
-                return if (url.contains("aiphotostudio.co") || 
-                    url.contains("accounts.google") || 
+                return if (url.contains("aiphotostudio.co") ||
+                    url.contains("accounts.google") ||
                     url.contains("facebook.com") ||
                     url.contains("Firebase.com")) {
                     false
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
+        }.also { webView.webViewClient = it }
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
