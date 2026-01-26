@@ -1,17 +1,18 @@
 package com.aiphotostudio.bgremover
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
-import androidx.credentials.PasswordCredential
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
@@ -45,23 +46,24 @@ class LoginActivity : AppCompatActivity() {
         btnSignIn = findViewById(R.id.btn_google_sign_in)
         credentialManager = CredentialManager.create(this)
 
+        val tvPrivacy = findViewById<TextView>(R.id.tv_privacy_policy)
+        val tvTerms = findViewById<TextView>(R.id.tv_terms_of_service)
+
         btnSignIn.setOnClickListener {
             signIn()
         }
+
+        tvPrivacy.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://aiphotostudio.co/privacy-policy"))
+            startActivity(intent)
+        }
+
+        tvTerms.setOnClickListener {
+            val intent = Intent(this, TermsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
-    /**
-     * Initiates the Google Sign-In process using the Android Credential Manager API.
-     *
-     * This function handles the UI state transitions by showing a progress bar and
-     * hiding the sign-in button. It configures the [GetGoogleIdOption] with the
-     * server's web client ID and launches the credential retrieval request within
-     * the [lifecycleScope].
-     *
-     * Upon success, it passes the result to [handleSignIn]. In case of failure,
-     * it resets the UI and displays a toast message unless the operation was
-     * explicitly canceled by the user.
-     */
     private fun signIn() {
         Log.d("LoginActivity", "Initiating sign in")
         progressBar.visibility = View.VISIBLE
@@ -105,13 +107,11 @@ class LoginActivity : AppCompatActivity() {
         val credential = result.credential
 
         when {
-            // Case 1: Direct GoogleIdTokenCredential
             credential is GoogleIdTokenCredential -> {
                 Log.d("LoginActivity", "Direct GoogleIdTokenCredential received")
                 firebaseAuthWithGoogle(credential.idToken)
             }
 
-            // Case 2: CustomCredential (The Android 14+ Fix)
             credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL -> {
                 try {
                     Log.d("LoginActivity", "Unpacking CustomCredential")
@@ -141,7 +141,6 @@ class LoginActivity : AppCompatActivity() {
                 } else {
                     Log.e("LoginActivity", "Firebase login failed", task.exception)
                     resetUi()
-                    // If this fails, double check your SHA-1 in Firebase Console!
                     Toast.makeText(this, "Firebase Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }

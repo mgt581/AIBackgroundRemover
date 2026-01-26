@@ -36,6 +36,12 @@
             android:label="My Gallery"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".TermsActivity"
+            android:exported="false"
+            android:label="Terms of Service"
+            android:parentActivityName=".LoginActivity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
