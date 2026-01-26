@@ -15,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
@@ -104,6 +105,15 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
+        // Log App Check status for debugging
+        FirebaseAppCheck.getInstance().getAppCheckToken(false)
+            .addOnSuccessListener { _ ->
+                Log.d("LoginActivity", "App Check token successfully obtained")
+            }
+            .addOnFailureListener { e ->
+                Log.e("LoginActivity", "App Check token retrieval failed: ${e.message}", e)
+            }
+
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
@@ -113,8 +123,13 @@ class LoginActivity : AppCompatActivity() {
                 } else {
                     val exception = task.exception
                     Log.e("LoginActivity", "Firebase Auth failed", exception)
+                    
+                    if (exception?.message?.contains("App Check") == true) {
+                        Toast.makeText(this, "App Check Failed. Register your debug token in Firebase Console.", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this, "Firebase Error: ${exception?.localizedMessage}", Toast.LENGTH_LONG).show()
+                    }
                     resetUi()
-                    Toast.makeText(this, "Firebase Error: ${exception?.localizedMessage}", Toast.LENGTH_LONG).show()
                 }
             }
     }

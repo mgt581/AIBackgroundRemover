@@ -13,20 +13,28 @@ class AIApplication : Application() {
         super.onCreate()
         
         try {
+            // Initialize Firebase
             Firebase.initialize(this)
             
             val appCheck = Firebase.appCheck
+
+            // Enable auto-refresh of App Check tokens
+            appCheck.setTokenAutoRefreshEnabled(true)
+
             if (BuildConfig.DEBUG) {
-                Log.d("AIApplication", "Installing DebugAppCheckProviderFactory")
+                Log.d("AIApplication", "App Check: Installing DebugAppCheckProviderFactory")
+                // IMPORTANT: Find the debug secret in Logcat and add it to Firebase Console
                 appCheck.installAppCheckProviderFactory(
                     DebugAppCheckProviderFactory.getInstance()
                 )
             } else {
-                Log.d("AIApplication", "Installing PlayIntegrityAppCheckProviderFactory")
+                Log.d("AIApplication", "App Check: Installing PlayIntegrityAppCheckProviderFactory")
                 appCheck.installAppCheckProviderFactory(
                     PlayIntegrityAppCheckProviderFactory.getInstance()
                 )
             }
+
+            Log.d("AIApplication", "Firebase and App Check initialized successfully")
         } catch (e: Exception) {
             Log.e("AIApplication", "Firebase initialization failed", e)
         }

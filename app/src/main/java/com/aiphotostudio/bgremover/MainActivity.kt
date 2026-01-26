@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
                 return handleUrl(url)
             }
 
-            @Deprecated("Deprecated in Java")
+            @Suppress("DEPRECATION")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 if (url == null) return false
                 return handleUrl(url)
