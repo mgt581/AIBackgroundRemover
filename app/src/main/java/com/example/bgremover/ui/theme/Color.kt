@@ -1,1 +1,0 @@
-// Deleted - moved to com.aiphotostudio.bgremover.ui.theme
