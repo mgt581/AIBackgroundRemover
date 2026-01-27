@@ -17,6 +17,7 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -37,6 +38,10 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
     private lateinit var auth: FirebaseAuth
+
+    private lateinit var btnAuthAction: Button
+    private lateinit var btnHeaderGallery: Button
+    private lateinit var tvSignedInStatus: TextView
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
@@ -59,34 +64,30 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
-
-        if (auth.currentUser == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            return
-        }
-
+        
         try {
             setContentView(R.layout.activity_main)
 
             webView = findViewById(R.id.webView)
-            val btnSignOut = findViewById<Button>(R.id.btn_auth_action)
-            val btnGallery = findViewById<Button>(R.id.btn_header_gallery)
-            val tvStatus = findViewById<TextView>(R.id.tv_signed_in_status)
+            btnAuthAction = findViewById(R.id.btn_auth_action)
+            btnHeaderGallery = findViewById(R.id.btn_header_gallery)
+            tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
 
-            tvStatus.visibility = View.VISIBLE
-            btnSignOut.text = getString(R.string.sign_out)
-            btnGallery.visibility = View.VISIBLE
+            updateHeaderUi()
 
             setupWebView()
             setupDownloadListener()
             checkAndRequestPermissions()
 
-            btnSignOut.setOnClickListener {
-                signOut()
+            btnAuthAction.setOnClickListener {
+                if (auth.currentUser != null) {
+                    signOut()
+                } else {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                }
             }
 
-            btnGallery.setOnClickListener {
+            btnHeaderGallery.setOnClickListener {
                 startActivity(Intent(this, GalleryActivity::class.java))
             }
 
@@ -98,11 +99,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateHeaderUi()
+    }
+
+    private fun updateHeaderUi() {
+        val user = auth.currentUser
+        if (user != null) {
+            btnAuthAction.text = getString(R.string.sign_out)
+            tvSignedInStatus.visibility = View.VISIBLE
+            btnHeaderGallery.visibility = View.VISIBLE
+        } else {
+            btnAuthAction.text = getString(R.string.sign_in)
+            tvSignedInStatus.visibility = View.GONE
+            btnHeaderGallery.visibility = View.GONE
+        }
+    }
+
     private fun signOut() {
         auth.signOut()
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
         GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+            updateHeaderUi()
+            // Redirect to LoginActivity as requested
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
         }
     }
@@ -127,7 +150,7 @@ class MainActivity : AppCompatActivity() {
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
-        object : WebViewClient() {
+        webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
                 return handleUrl(url)
@@ -149,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }.also { webView.webViewClient = it }
+        }
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(

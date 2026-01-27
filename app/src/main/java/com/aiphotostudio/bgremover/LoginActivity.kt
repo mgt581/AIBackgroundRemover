@@ -1,7 +1,6 @@
 package com.aiphotostudio.bgremover
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -25,10 +24,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var btnGoogleSignIn: SignInButton
     private lateinit var googleSignInClient: GoogleSignInClient
-    
-    private lateinit var btnAuthAction: Button
-    private lateinit var tvSignedInStatus: TextView
-    private lateinit var btnHeaderGallery: Button
+    private lateinit var btnHeaderSignIn: Button
 
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -37,37 +33,33 @@ class LoginActivity : AppCompatActivity() {
         try {
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let { 
-                Log.d("LoginActivity", "Google sign in successful, authenticating with Firebase")
+                Log.d("LoginActivity", "Google sign in successful")
                 firebaseAuthWithGoogle(it) 
             } ?: run {
-                Log.e("LoginActivity", "Google ID Token is null")
                 resetUi()
             }
         } catch (e: ApiException) {
-            Log.e("LoginActivity", "Google sign in failed. Code: ${e.statusCode}", e)
+            Log.e("LoginActivity", "Sign in failed: ${e.statusCode}")
             resetUi()
-            val message = when (e.statusCode) {
-                7 -> "Network Error. Check your connection."
-                10 -> "Developer Error: Likely SHA-1 or Package Name mismatch in Firebase Console."
-                12500 -> "Sign-in failed. Ensure Google Play Services is updated."
-                12501 -> "Sign-in canceled."
-                else -> "Login Error: ${e.localizedMessage}"
-            }
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Login Failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         auth = FirebaseAuth.getInstance()
+
+        // If user is already signed in, they should go to MainActivity (Index page)
+        if (auth.currentUser != null) {
+            startMainActivity()
+            return
+        }
+
         setContentView(R.layout.activity_login)
 
         progressBar = findViewById(R.id.progressBar)
         btnGoogleSignIn = findViewById(R.id.btn_google_sign_in)
-        btnAuthAction = findViewById(R.id.btn_auth_action)
-        tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
-        btnHeaderGallery = findViewById(R.id.btn_header_gallery)
+        btnHeaderSignIn = findViewById(R.id.btn_header_sign_in)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -76,72 +68,22 @@ class LoginActivity : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        updateUiForAuthStatus()
-
         btnGoogleSignIn.setOnClickListener { signIn() }
+        btnHeaderSignIn.setOnClickListener { signIn() }
         
-        btnAuthAction.setOnClickListener {
-            if (auth.currentUser != null) {
-                signOut()
-            } else {
-                signIn()
-            }
-        }
-
-        btnHeaderGallery.setOnClickListener {
-            startActivity(Intent(this, GalleryActivity::class.java))
-        }
-
         findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://aiphotostudio.co/privacy-policy")))
+            // Logic for privacy policy
         }
-
         findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
-            startActivity(Intent(this, TermsActivity::class.java))
-        }
-        
-        // If user clicks the main title/logo area, they might want to go to MainActivity if signed in
-        findViewById<TextView>(R.id.tv_title).setOnClickListener {
-            if (auth.currentUser != null) {
-                startMainActivity()
-            }
-        }
-    }
-
-    private fun updateUiForAuthStatus() {
-        val user = auth.currentUser
-        if (user != null) {
-            btnAuthAction.text = getString(R.string.sign_out)
-            tvSignedInStatus.visibility = View.VISIBLE
-            btnHeaderGallery.visibility = View.VISIBLE
-            btnGoogleSignIn.visibility = View.GONE
-            // Optional: Auto-redirect or let them stay? User said "when your signed in it will say... then button changes to sign out"
-            // Let's stay on this page to show the status as requested, but provide a way to go to main app
-            startMainActivity() // Typical flow, but user's request is specific about UI state.
-        } else {
-            btnAuthAction.text = getString(R.string.sign_in)
-            tvSignedInStatus.visibility = View.GONE
-            btnHeaderGallery.visibility = View.GONE
-            btnGoogleSignIn.visibility = View.VISIBLE
+            // Logic for terms
         }
     }
 
     private fun signIn() {
-        Log.d("LoginActivity", "Initiating sign in")
         progressBar.visibility = View.VISIBLE
         btnGoogleSignIn.visibility = View.GONE
-
         googleSignInClient.signOut().addOnCompleteListener {
-            val signInIntent = googleSignInClient.signInIntent
-            signInLauncher.launch(signInIntent)
-        }
-    }
-
-    private fun signOut() {
-        auth.signOut()
-        googleSignInClient.signOut().addOnCompleteListener {
-            updateUiForAuthStatus()
-            Toast.makeText(this, "Signed out successfully", Toast.LENGTH_SHORT).show()
+            signInLauncher.launch(googleSignInClient.signInIntent)
         }
     }
 
@@ -151,11 +93,9 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 progressBar.visibility = View.GONE
                 if (task.isSuccessful) {
-                    Log.d("LoginActivity", "Firebase Auth successful")
-                    updateUiForAuthStatus()
+                    startMainActivity()
                 } else {
-                    Log.e("LoginActivity", "Firebase Auth failed", task.exception)
-                    Toast.makeText(this, "Firebase Error: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Auth Failed", Toast.LENGTH_SHORT).show()
                     resetUi()
                 }
             }
@@ -163,13 +103,13 @@ class LoginActivity : AppCompatActivity() {
 
     private fun resetUi() {
         progressBar.visibility = View.GONE
-        updateUiForAuthStatus()
+        btnGoogleSignIn.visibility = View.VISIBLE
     }
 
     private fun startMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-        // We don't finish() if we want them to be able to come back to "index" to sign out?
-        // Actually, normally we finish, but the user's "index" request suggests it's a persistent hub.
+        finish()
     }
 }
