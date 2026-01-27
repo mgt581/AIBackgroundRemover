@@ -56,8 +56,8 @@
     </Native>
     <Profilers>
       <option name="ADVANCED_PROFILING_ENABLED" value="false" />
-      <option name="STARTUP_PROFILING_ENABLED" value="true" />
-      <option name="STARTUP_CPU_PROFILING_ENABLED" value="true" />
+      <option name="STARTUP_PROFILING_ENABLED" value="false" />
+      <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
       <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="System Trace" />
       <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
       <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
