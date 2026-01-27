@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.AIBackgroundRemover" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
-    </style>
+    <style name="Theme.AIBackgroundRemover" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Force White Background for all transitions -->
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
 
-    <!-- Base application theme. -->
-    <!-- <style name="Theme.AIBackgroundRemover" parent="Theme.Material3.Light.NoActionBar">
-        <!- Force White Background for all transitions -->
-        </resources>
+        <!-- Force Black Text -->
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:editTextColor">@android:color/black</item>
+
+        <!-- Material 3 Colors -->
+        <item name="colorPrimary">@android:color/black</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/black</item>
+    </style>
+</resources>
