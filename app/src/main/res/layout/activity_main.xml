@@ -18,65 +18,97 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:padding="10dp">
+            android:padding="5dp">
 
             <TextView
                 android:id="@+id/tv_header_logo"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Ai Photo Studio Background remover"
+                android:text="AI Photo Studio"
                 android:textColor="@android:color/black"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/h_scroll_header"/>
 
-            <LinearLayout
-                android:id="@+id/ll_auth_section"
+            <HorizontalScrollView
+                android:id="@+id/h_scroll_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="end|center_vertical"
-                android:orientation="horizontal"
+                android:scrollbars="none"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <Button
-                    android:id="@+id/btn_header_gallery"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gallery"
-                    android:textColor="@android:color/black"
-                    android:visibility="gone" />
-
                 <LinearLayout
+                    android:id="@+id/ll_auth_section"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:gravity="end|center_vertical"
+                    android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/btn_auth_action"
-                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:id="@+id/btn_header_gallery"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sign In"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="8dp"
+                        android:text="Gallery"
                         android:textColor="@android:color/black" />
 
-                    <TextView
-                        android:id="@+id/tv_signed_in_status"
+                    <Button
+                        android:id="@+id/btn_header_settings"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="✓ Signed in"
-                        android:textColor="#4CAF50"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
-                </LinearLayout>
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="8dp"
+                        android:text="Settings"
+                        android:textColor="@android:color/black" />
 
-            </LinearLayout>
+                    <Button
+                        android:id="@+id/btn_header_signup"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="8dp"
+                        android:text="Sign Up"
+                        android:textColor="@android:color/black" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="4dp">
+
+                        <Button
+                            android:id="@+id/btn_auth_action"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:text="Sign In"
+                            android:textColor="@android:color/black" />
+
+                        <TextView
+                            android:id="@+id/tv_signed_in_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="✓ Signed in"
+                            android:textColor="#4CAF50"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </HorizontalScrollView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

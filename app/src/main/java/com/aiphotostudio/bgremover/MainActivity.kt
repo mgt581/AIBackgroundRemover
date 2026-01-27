@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var btnAuthAction: Button
     private lateinit var btnHeaderGallery: Button
+    private lateinit var btnHeaderSignup: Button
+    private lateinit var btnHeaderSettings: Button
     private lateinit var tvSignedInStatus: TextView
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -48,15 +50,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        filePathCallback?.onReceiveValue(if (success && cameraImageUri != null) arrayOf(cameraImageUri!!) else null)
+        if (success && cameraImageUri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
         filePathCallback = null
     }
 
     private val requestPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions[Manifest.permission.CAMERA] == false) {
+        if (permissions[Manifest.permission.CAMERA] == true) {
+            launchCamera()
+        } else {
             Toast.makeText(this, "Camera permission required for photos", Toast.LENGTH_SHORT).show()
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
         }
     }
 
@@ -70,6 +80,8 @@ class MainActivity : AppCompatActivity() {
             webView = findViewById(R.id.webView)
             btnAuthAction = findViewById(R.id.btn_auth_action)
             btnHeaderGallery = findViewById(R.id.btn_header_gallery)
+            btnHeaderSignup = findViewById(R.id.btn_header_signup)
+            btnHeaderSettings = findViewById(R.id.btn_header_settings)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
 
             updateHeaderUi()
@@ -90,6 +102,15 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, GalleryActivity::class.java))
             }
 
+            btnHeaderSignup.setOnClickListener {
+                // Open signup page or same login activity
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+
+            btnHeaderSettings.setOnClickListener {
+                Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show()
+            }
+
             if (savedInstanceState == null) {
                 webView.loadUrl("https://aiphotostudio.co")
             }
@@ -107,13 +128,13 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user != null) {
             btnAuthAction.text = "Sign Out"
-            tvSignedInStatus.text = "Signed in as ${user.email ?: "Guest"}"
+            tvSignedInStatus.text = "✓ ${user.email?.take(10) ?: "User"}"
             tvSignedInStatus.visibility = View.VISIBLE
-            btnHeaderGallery.visibility = View.VISIBLE
+            btnHeaderSignup.visibility = View.GONE
         } else {
             btnAuthAction.text = "Sign In"
             tvSignedInStatus.visibility = View.GONE
-            btnHeaderGallery.visibility = View.GONE
+            btnHeaderSignup.visibility = View.VISIBLE
         }
     }
 
@@ -203,7 +224,7 @@ class MainActivity : AppCompatActivity() {
 
             val uri = FileProvider.getUriForFile(
                 this,
-                "${applicationContext.packageName}.provider",
+                "com.aiphotostudio.bgremover.fileprovider",
                 file
             )
 
@@ -233,8 +254,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            val imageFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_${System.currentTimeMillis()}.jpg")
-            val uri = FileProvider.getUriForFile(this, "${applicationContext.packageName}.provider", imageFile)
+            val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
+            if (!directory.exists()) directory.mkdirs()
+            val imageFile = File(directory, "temp_${System.currentTimeMillis()}.jpg")
+            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.fileprovider", imageFile)
             cameraImageUri = uri
             takePicture.launch(uri)
         } else {
@@ -269,10 +292,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAndRequestPermissions() {
+        val permissions = mutableListOf<String>()
+        permissions.add(Manifest.permission.CAMERA)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE))
-        } else {
-            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+        
+        val toRequest = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        
+        if (toRequest.isNotEmpty()) {
+            requestPermissionsLauncher.launch(toRequest.toTypedArray())
         }
     }
 }
