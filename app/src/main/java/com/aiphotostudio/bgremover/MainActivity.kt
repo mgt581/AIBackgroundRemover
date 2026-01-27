@@ -17,7 +17,6 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -107,11 +106,11 @@ class MainActivity : AppCompatActivity() {
     private fun updateHeaderUi() {
         val user = auth.currentUser
         if (user != null) {
-            btnAuthAction.text = getString(R.string.sign_out)
+            btnAuthAction.text = "Sign Out"
             tvSignedInStatus.visibility = View.VISIBLE
             btnHeaderGallery.visibility = View.VISIBLE
         } else {
-            btnAuthAction.text = getString(R.string.sign_in)
+            btnAuthAction.text = "Sign In"
             tvSignedInStatus.visibility = View.GONE
             btnHeaderGallery.visibility = View.GONE
         }
@@ -122,7 +121,6 @@ class MainActivity : AppCompatActivity() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
         GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
             updateHeaderUi()
-            // Redirect to LoginActivity as requested
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
