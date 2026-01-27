@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.aiphotostudio.bgremover
 
 import android.content.Intent
@@ -5,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -64,6 +67,11 @@ class LoginActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         val btnGoogleSignIn = findViewById<SignInButton>(R.id.btn_google_sign_in)
         val btnHeaderSignIn = findViewById<Button>(R.id.btn_header_sign_in)
+        
+        val etEmail = findViewById<EditText>(R.id.et_email)
+        val etPassword = findViewById<EditText>(R.id.et_password)
+        val btnEmailLogin = findViewById<Button>(R.id.btn_email_login)
+        val btnAnonymousSignIn = findViewById<Button>(R.id.btn_anonymous_sign_in)
 
         // Hardcoded Web Client ID from your google-services.json for maximum reliability
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -75,6 +83,20 @@ class LoginActivity : AppCompatActivity() {
 
         btnGoogleSignIn.setOnClickListener { signIn() }
         btnHeaderSignIn.setOnClickListener { signIn() }
+        
+        btnEmailLogin.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                loginWithEmail(email, password)
+            } else {
+                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnAnonymousSignIn.setOnClickListener {
+            loginAnonymously()
+        }
         
         findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
             // Privacy policy logic
@@ -89,6 +111,44 @@ class LoginActivity : AppCompatActivity() {
         googleSignInClient.signOut().addOnCompleteListener {
             signInLauncher.launch(googleSignInClient.signInIntent)
         }
+    }
+
+    private fun loginWithEmail(email: String, password: String) {
+        progressBar.visibility = View.VISIBLE
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    startMainActivity()
+                } else {
+                    // If sign in fails, try to create a new user
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(this) { createTab ->
+                            progressBar.visibility = View.GONE
+                            if (createTab.isSuccessful) {
+                                startMainActivity()
+                            } else {
+                                Log.e("LoginActivity", "Email Auth failed", createTab.exception)
+                                Toast.makeText(this, "Authentication Failed: ${createTab.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
+                                resetUi()
+                            }
+                        }
+                }
+            }
+    }
+
+    private fun loginAnonymously() {
+        progressBar.visibility = View.VISIBLE
+        auth.signInAnonymously()
+            .addOnCompleteListener(this) { task ->
+                progressBar.visibility = View.GONE
+                if (task.isSuccessful) {
+                    startMainActivity()
+                } else {
+                    Log.e("LoginActivity", "Anonymous Auth failed", task.exception)
+                    Toast.makeText(this, "Guest login failed", Toast.LENGTH_SHORT).show()
+                    resetUi()
+                }
+            }
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
