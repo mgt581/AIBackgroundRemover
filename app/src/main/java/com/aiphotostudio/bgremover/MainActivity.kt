@@ -107,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user != null) {
             btnAuthAction.text = "Sign Out"
+            tvSignedInStatus.text = "Signed in as ${user.email ?: "Guest"}"
             tvSignedInStatus.visibility = View.VISIBLE
             btnHeaderGallery.visibility = View.VISIBLE
         } else {
@@ -121,10 +122,7 @@ class MainActivity : AppCompatActivity() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
         GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
             updateHeaderUi()
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
+            Toast.makeText(this, "Signed out successfully", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -190,18 +188,32 @@ class MainActivity : AppCompatActivity() {
         try {
             val base64String = dataUri.substringAfter(",")
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                ?: return
 
-            val directory = File(filesDir, "saved_images")
+            val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
             if (!directory.exists()) directory.mkdirs()
 
             val file = File(directory, "bg_${System.currentTimeMillis()}.png")
+
             FileOutputStream(file).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                out.flush()
             }
-            Toast.makeText(this, "Image saved to Gallery!", Toast.LENGTH_SHORT).show()
+
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${applicationContext.packageName}.provider",
+                file
+            )
+
+            sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
+
+            Toast.makeText(this, "Image saved to Gallery", Toast.LENGTH_LONG).show()
+
         } catch (e: Exception) {
-            Log.e("MainActivity", "Save failed", e)
+            Log.e("MainActivity", "Failed to save data URI image", e)
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
         }
     }
 
