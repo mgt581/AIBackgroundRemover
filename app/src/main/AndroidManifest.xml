@@ -7,6 +7,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
     <application
         android:name=".AIApplication"
@@ -35,14 +36,17 @@
         <activity
             android:name=".GalleryActivity"
             android:exported="false"
-            android:label="My Gallery"
-            android:parentActivityName=".MainActivity" />
+            android:label="My Gallery" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="Settings" />
 
         <activity
             android:name=".TermsActivity"
             android:exported="false"
-            android:label="Terms of Service"
-            android:parentActivityName=".LoginActivity" />
+            android:label="Terms of Service" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

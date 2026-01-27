@@ -43,6 +43,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHeaderSignup: Button
     private lateinit var btnHeaderSettings: Button
     private lateinit var tvSignedInStatus: TextView
+    
+    private lateinit var btnFooterTerms: Button
+    private lateinit var btnFooterPrivacy: Button
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
@@ -62,11 +65,9 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions[Manifest.permission.CAMERA] == true) {
-            launchCamera()
+            // Permission granted
         } else {
             Toast.makeText(this, "Camera permission required for photos", Toast.LENGTH_SHORT).show()
-            filePathCallback?.onReceiveValue(null)
-            filePathCallback = null
         }
     }
 
@@ -83,6 +84,9 @@ class MainActivity : AppCompatActivity() {
             btnHeaderSignup = findViewById(R.id.btn_header_signup)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+            
+            btnFooterTerms = findViewById(R.id.btn_footer_terms)
+            btnFooterPrivacy = findViewById(R.id.btn_footer_privacy)
 
             updateHeaderUi()
 
@@ -103,12 +107,19 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnHeaderSignup.setOnClickListener {
-                // Open signup page or same login activity
                 startActivity(Intent(this, LoginActivity::class.java))
             }
 
             btnHeaderSettings.setOnClickListener {
-                Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
+            
+            btnFooterTerms.setOnClickListener {
+                webView.loadUrl("https://aiphotostudio.co/terms")
+            }
+            
+            btnFooterPrivacy.setOnClickListener {
+                webView.loadUrl("https://aiphotostudio.co/privacy")
             }
 
             if (savedInstanceState == null) {
@@ -212,7 +223,8 @@ class MainActivity : AppCompatActivity() {
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 ?: return
 
-            val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
+            // Save to internal 'saved_images' for GalleryActivity
+            val directory = File(filesDir, "saved_images")
             if (!directory.exists()) directory.mkdirs()
 
             val file = File(directory, "bg_${System.currentTimeMillis()}.png")
@@ -222,15 +234,7 @@ class MainActivity : AppCompatActivity() {
                 out.flush()
             }
 
-            val uri = FileProvider.getUriForFile(
-                this,
-                "com.aiphotostudio.bgremover.fileprovider",
-                file
-            )
-
-            sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
-
-            Toast.makeText(this, "Image saved to Gallery", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Image saved to App Gallery", Toast.LENGTH_SHORT).show()
 
         } catch (e: Exception) {
             Log.e("MainActivity", "Failed to save data URI image", e)
@@ -270,7 +274,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupDownloadListener() {
-        webView.setDownloadListener { url, userAgent, _, mimetype, _ ->
+        webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
             if (url.startsWith("data:")) {
                 handleDataUri(url)
             } else {
@@ -280,7 +284,7 @@ class MainActivity : AppCompatActivity() {
                         addRequestHeader("User-Agent", userAgent)
                         setTitle("AI Background Remover Download")
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "processed_image.png")
+                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "processed_image_${System.currentTimeMillis()}.png")
                     }
                     (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
                     Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
