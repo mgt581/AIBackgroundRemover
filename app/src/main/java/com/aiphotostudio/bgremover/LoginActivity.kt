@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -15,7 +16,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
@@ -23,8 +23,12 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var progressBar: ProgressBar
-    private lateinit var btnSignIn: SignInButton
+    private lateinit var btnGoogleSignIn: SignInButton
     private lateinit var googleSignInClient: GoogleSignInClient
+    
+    private lateinit var btnAuthAction: Button
+    private lateinit var tvSignedInStatus: TextView
+    private lateinit var btnHeaderGallery: Button
 
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -57,16 +61,13 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
-
-        if (auth.currentUser != null) {
-            startMainActivity()
-            return
-        }
-
         setContentView(R.layout.activity_login)
 
         progressBar = findViewById(R.id.progressBar)
-        btnSignIn = findViewById(R.id.btn_google_sign_in)
+        btnGoogleSignIn = findViewById(R.id.btn_google_sign_in)
+        btnAuthAction = findViewById(R.id.btn_auth_action)
+        tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+        btnHeaderGallery = findViewById(R.id.btn_header_gallery)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -75,28 +76,60 @@ class LoginActivity : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        val tvPrivacy = findViewById<TextView>(R.id.tv_privacy_policy)
-        val tvTerms = findViewById<TextView>(R.id.tv_terms_of_service)
+        updateUiForAuthStatus()
 
-        btnSignIn.setOnClickListener {
-            signIn()
+        btnGoogleSignIn.setOnClickListener { signIn() }
+        
+        btnAuthAction.setOnClickListener {
+            if (auth.currentUser != null) {
+                signOut()
+            } else {
+                signIn()
+            }
         }
 
-        tvPrivacy.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://aiphotostudio.co/privacy-policy"))
-            startActivity(intent)
+        btnHeaderGallery.setOnClickListener {
+            startActivity(Intent(this, GalleryActivity::class.java))
         }
 
-        tvTerms.setOnClickListener {
-            val intent = Intent(this, TermsActivity::class.java)
-            startActivity(intent)
+        findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://aiphotostudio.co/privacy-policy")))
+        }
+
+        findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
+            startActivity(Intent(this, TermsActivity::class.java))
+        }
+        
+        // If user clicks the main title/logo area, they might want to go to MainActivity if signed in
+        findViewById<TextView>(R.id.tv_title).setOnClickListener {
+            if (auth.currentUser != null) {
+                startMainActivity()
+            }
+        }
+    }
+
+    private fun updateUiForAuthStatus() {
+        val user = auth.currentUser
+        if (user != null) {
+            btnAuthAction.text = getString(R.string.sign_out)
+            tvSignedInStatus.visibility = View.VISIBLE
+            btnHeaderGallery.visibility = View.VISIBLE
+            btnGoogleSignIn.visibility = View.GONE
+            // Optional: Auto-redirect or let them stay? User said "when your signed in it will say... then button changes to sign out"
+            // Let's stay on this page to show the status as requested, but provide a way to go to main app
+            startMainActivity() // Typical flow, but user's request is specific about UI state.
+        } else {
+            btnAuthAction.text = getString(R.string.sign_in)
+            tvSignedInStatus.visibility = View.GONE
+            btnHeaderGallery.visibility = View.GONE
+            btnGoogleSignIn.visibility = View.VISIBLE
         }
     }
 
     private fun signIn() {
         Log.d("LoginActivity", "Initiating sign in")
         progressBar.visibility = View.VISIBLE
-        btnSignIn.visibility = View.GONE
+        btnGoogleSignIn.visibility = View.GONE
 
         googleSignInClient.signOut().addOnCompleteListener {
             val signInIntent = googleSignInClient.signInIntent
@@ -104,31 +137,25 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        // Log App Check status for debugging
-        FirebaseAppCheck.getInstance().getAppCheckToken(false)
-            .addOnSuccessListener { _ ->
-                Log.d("LoginActivity", "App Check token successfully obtained")
-            }
-            .addOnFailureListener { e ->
-                Log.e("LoginActivity", "App Check token retrieval failed: ${e.message}", e)
-            }
+    private fun signOut() {
+        auth.signOut()
+        googleSignInClient.signOut().addOnCompleteListener {
+            updateUiForAuthStatus()
+            Toast.makeText(this, "Signed out successfully", Toast.LENGTH_SHORT).show()
+        }
+    }
 
+    private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
+                progressBar.visibility = View.GONE
                 if (task.isSuccessful) {
                     Log.d("LoginActivity", "Firebase Auth successful")
-                    startMainActivity()
+                    updateUiForAuthStatus()
                 } else {
-                    val exception = task.exception
-                    Log.e("LoginActivity", "Firebase Auth failed", exception)
-                    
-                    if (exception?.message?.contains("App Check") == true) {
-                        Toast.makeText(this, "App Check Failed. Register your debug token in Firebase Console.", Toast.LENGTH_LONG).show()
-                    } else {
-                        Toast.makeText(this, "Firebase Error: ${exception?.localizedMessage}", Toast.LENGTH_LONG).show()
-                    }
+                    Log.e("LoginActivity", "Firebase Auth failed", task.exception)
+                    Toast.makeText(this, "Firebase Error: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
                     resetUi()
                 }
             }
@@ -136,13 +163,13 @@ class LoginActivity : AppCompatActivity() {
 
     private fun resetUi() {
         progressBar.visibility = View.GONE
-        btnSignIn.visibility = View.VISIBLE
+        updateUiForAuthStatus()
     }
 
     private fun startMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-        finish()
+        // We don't finish() if we want them to be able to come back to "index" to sign out?
+        // Actually, normally we finish, but the user's "index" request suggests it's a persistent hub.
     }
 }

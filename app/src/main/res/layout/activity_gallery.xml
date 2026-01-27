@@ -11,6 +11,7 @@
         android:background="?attr/colorPrimary"
         app:title="My Gallery"
         app:titleTextColor="@android:color/white"
+        app:navigationIcon="?attr/homeAsUpIndicator"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView

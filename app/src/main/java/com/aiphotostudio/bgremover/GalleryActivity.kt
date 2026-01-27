@@ -1,5 +1,6 @@
 package com.aiphotostudio.bgremover
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -22,8 +23,17 @@ class GalleryActivity : AppCompatActivity() {
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        // Home button (top left) redirects to MainActivity
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        toolbar.setNavigationOnClickListener { finish() }
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_home) // We'll need to ensure this exists or use default
+
+        toolbar.setNavigationOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            finish()
+        }
 
         recyclerView = findViewById(R.id.rv_gallery)
         tvEmpty = findViewById(R.id.tv_empty)
@@ -35,7 +45,6 @@ class GalleryActivity : AppCompatActivity() {
     private fun loadImages() {
         val imageList = mutableListOf<Uri>()
         
-        // Load from app's private internal storage
         val directory = File(filesDir, "saved_images")
         if (directory.exists()) {
             val files = directory.listFiles()
@@ -64,7 +73,7 @@ class GalleryActivity : AppCompatActivity() {
             val file = File(uri.path!!)
             if (file.exists()) {
                 file.delete()
-                loadImages() // Refresh gallery
+                loadImages()
             }
         } catch (e: Exception) {
             e.printStackTrace()

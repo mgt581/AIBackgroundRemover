@@ -14,8 +14,10 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Base64
 import android.util.Log
+import android.view.View
 import android.webkit.*
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,6 +25,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
 
@@ -31,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
+    private lateinit var auth: FirebaseAuth
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
@@ -52,15 +58,33 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
+
+        if (auth.currentUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
         try {
             setContentView(R.layout.activity_main)
 
             webView = findViewById(R.id.webView)
-            val btnGallery = findViewById<Button>(R.id.btn_gallery)
+            val btnSignOut = findViewById<Button>(R.id.btn_auth_action)
+            val btnGallery = findViewById<Button>(R.id.btn_header_gallery)
+            val tvStatus = findViewById<TextView>(R.id.tv_signed_in_status)
+
+            tvStatus.visibility = View.VISIBLE
+            btnSignOut.text = getString(R.string.sign_out)
+            btnGallery.visibility = View.VISIBLE
 
             setupWebView()
             setupDownloadListener()
             checkAndRequestPermissions()
+
+            btnSignOut.setOnClickListener {
+                signOut()
+            }
 
             btnGallery.setOnClickListener {
                 startActivity(Intent(this, GalleryActivity::class.java))
@@ -71,6 +95,15 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
+        }
+    }
+
+    private fun signOut() {
+        auth.signOut()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+        GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
         }
     }
 
@@ -95,15 +128,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         object : WebViewClient() {
-
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                return handleUrl(url)
-            }
-
-            @Suppress("DEPRECATION")
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                if (url == null) return false
                 return handleUrl(url)
             }
 
@@ -136,32 +162,6 @@ class MainActivity : AppCompatActivity() {
                 showSourceDialog()
                 return true
             }
-
-            override fun onCreateWindow(
-                view: WebView?,
-                isDialog: Boolean,
-                isUserGesture: Boolean,
-                resultMsg: android.os.Message?
-            ): Boolean {
-                val newWebView = WebView(this@MainActivity)
-                newWebView.settings.javaScriptEnabled = true
-                
-                newWebView.webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                        val url = request?.url.toString()
-                        if (url.contains("accounts.google") || url.contains("facebook.com")) {
-                            this@MainActivity.webView.loadUrl(url)
-                            return true
-                        }
-                        return false
-                    }
-                }
-
-                val transport = resultMsg?.obj as WebView.WebViewTransport
-                transport.webView = newWebView
-                resultMsg.sendToTarget()
-                return true
-            }
         }
     }
 
@@ -171,8 +171,7 @@ class MainActivity : AppCompatActivity() {
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
 
-            @Suppress("DEPRECATION")
-            val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
+            val directory = File(filesDir, "saved_images")
             if (!directory.exists()) directory.mkdirs()
 
             val file = File(directory, "bg_${System.currentTimeMillis()}.png")
@@ -225,7 +224,6 @@ class MainActivity : AppCompatActivity() {
                         addRequestHeader("User-Agent", userAgent)
                         setTitle("AI Background Remover Download")
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        @Suppress("DEPRECATION")
                         setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "processed_image.png")
                     }
                     (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
@@ -239,7 +237,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            @Suppress("DEPRECATION")
             requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE))
         } else {
             requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
