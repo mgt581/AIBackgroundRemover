@@ -4,4 +4,8 @@
     <style name="Theme.AIBackgroundRemover" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
     </style>
-</resources>
+
+    <!-- Base application theme. -->
+    <!-- <style name="Theme.AIBackgroundRemover" parent="Theme.Material3.Light.NoActionBar">
+        <!- Force White Background for all transitions -->
+        </resources>
