@@ -33,15 +33,23 @@ class LoginActivity : AppCompatActivity() {
         try {
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let { 
-                Log.d("LoginActivity", "Google sign in successful")
+                Log.d("LoginActivity", "Google sign in successful, authenticating with Firebase")
                 firebaseAuthWithGoogle(it) 
             } ?: run {
+                Log.e("LoginActivity", "Google ID Token is null")
                 resetUi()
             }
         } catch (e: ApiException) {
-            Log.e("LoginActivity", "Sign in failed: ${e.statusCode}")
+            Log.e("LoginActivity", "Google sign in failed. Code: ${e.statusCode}", e)
             resetUi()
-            Toast.makeText(this, "Login Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            val message = when (e.statusCode) {
+                7 -> "Network Error. Check your connection."
+                10 -> "Developer Error: SHA-1 mismatch or Package Name error in Firebase."
+                12500 -> "Sign-in failed. Check Play Services or SHA-1."
+                12501 -> "Sign-in canceled."
+                else -> "Login Error: ${e.localizedMessage}"
+            }
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -49,7 +57,6 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
 
-        // If user is already signed in, they should go to MainActivity (Index page)
         if (auth.currentUser != null) {
             startMainActivity()
             return
@@ -62,7 +69,7 @@ class LoginActivity : AppCompatActivity() {
         btnHeaderSignIn = findViewById(R.id.btn_header_sign_in)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken("495715411996-iijvtbo02cn7tgvk6tp7284kjmdhefu0.apps.googleusercontent.com")
             .requestEmail()
             .build()
 
@@ -70,20 +77,14 @@ class LoginActivity : AppCompatActivity() {
 
         btnGoogleSignIn.setOnClickListener { signIn() }
         btnHeaderSignIn.setOnClickListener { signIn() }
-        
-        findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
-            // Logic for privacy policy
-        }
-        findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
-            // Logic for terms
-        }
     }
 
     private fun signIn() {
         progressBar.visibility = View.VISIBLE
         btnGoogleSignIn.visibility = View.GONE
         googleSignInClient.signOut().addOnCompleteListener {
-            signInLauncher.launch(googleSignInClient.signInIntent)
+            val signInIntent = googleSignInClient.signInIntent
+            signInLauncher.launch(signInIntent)
         }
     }
 
@@ -93,9 +94,11 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 progressBar.visibility = View.GONE
                 if (task.isSuccessful) {
+                    Log.d("LoginActivity", "Firebase Auth successful")
                     startMainActivity()
                 } else {
-                    Toast.makeText(this, "Auth Failed", Toast.LENGTH_SHORT).show()
+                    Log.e("LoginActivity", "Firebase Auth failed", task.exception)
+                    Toast.makeText(this, "Firebase Error: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
                     resetUi()
                 }
             }
