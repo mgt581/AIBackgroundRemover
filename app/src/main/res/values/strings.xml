@@ -4,7 +4,19 @@
     <string name="default_web_client_id" translatable="false">495715411996-iijvtbo02cn7tgvk6tp7284kjmdhefu0.apps.googleusercontent.com</string>
     <string name="ai_background_remover" translatable="false">AI Background Remover</string>
     <string name="signed_in_status">✓ Signed in</string>
+    <string name="signed_in_as">✓ %1$s</string>
     <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
     <string name="sign_out">Sign Out</string>
     <string name="gallery">Gallery</string>
+    <string name="user_placeholder">User</string>
+    <string name="signed_out_success">Signed out successfully</string>
+    <string name="processing_download">Processing download...</string>
+    <string name="saved_to_gallery">Saved to Gallery</string>
+    <string name="save_failed">Save failed: %1$s</string>
+    <string name="download_started">Download started...</string>
+    <string name="camera_permission_required">Camera permission required for photos</string>
+    <string name="select_image_source">Select Image Source</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="choose_from_gallery">Choose from Gallery</string>
 </resources>
