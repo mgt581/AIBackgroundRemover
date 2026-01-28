@@ -178,10 +178,48 @@ class MainActivity : AppCompatActivity() {
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
+        // Add Javascript Interface to handle Blobs
+        webView.addJavascriptInterface(object {
+            @JavascriptInterface
+            fun processBlob(base64Data: String) {
+                runOnUiThread {
+                    saveImageFromBase64(base64Data)
+                }
+            }
+        }, "AndroidInterface")
+
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
                 return handleUrl(url)
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                // Inject script to intercept blob downloads
+                webView.loadUrl("""
+                    javascript:(function() {
+                        window.addEventListener('click', function(e) {
+                            var link = e.target.closest('a');
+                            if (link && link.href.startsWith('blob:')) {
+                                e.preventDefault();
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('GET', link.href, true);
+                                xhr.responseType = 'blob';
+                                xhr.onload = function() {
+                                    if (xhr.status === 200) {
+                                        var reader = new FileReader();
+                                        reader.onloadend = function() {
+                                            AndroidInterface.processBlob(reader.result);
+                                        };
+                                        reader.readAsDataURL(xhr.response);
+                                    }
+                                };
+                                xhr.send();
+                            }
+                        }, true);
+                    })();
+                """.trimIndent())
             }
 
             private fun handleUrl(url: String): Boolean {
@@ -216,28 +254,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDataUri(dataUri: String) {
+    private fun saveImageFromBase64(base64Data: String) {
         try {
-            val base64String = dataUri.substringAfter(",")
+            val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 ?: return
 
-            // Save to internal 'saved_images' for GalleryActivity
             val directory = File(filesDir, "saved_images")
             if (!directory.exists()) directory.mkdirs()
 
-            val file = File(directory, "bg_${System.currentTimeMillis()}.png")
+            val fileName = "bg_${System.currentTimeMillis()}.png"
+            val file = File(directory, fileName)
 
             FileOutputStream(file).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
                 out.flush()
             }
 
-            Toast.makeText(this, "Image saved to App Gallery", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Image saved to Gallery successfully!", Toast.LENGTH_SHORT).show()
 
         } catch (e: Exception) {
-            Log.e("MainActivity", "Failed to save data URI image", e)
+            Log.e("MainActivity", "Failed to save image", e)
             Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
         }
     }
@@ -276,7 +314,10 @@ class MainActivity : AppCompatActivity() {
     private fun setupDownloadListener() {
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
             if (url.startsWith("data:")) {
-                handleDataUri(url)
+                saveImageFromBase64(url)
+            } else if (url.startsWith("blob:")) {
+                // Blobs are handled by the JavascriptInterface + injected script
+                Log.d("MainActivity", "Blob download detected, handling via JS interface")
             } else {
                 try {
                     val request = DownloadManager.Request(url.toUri()).apply {
