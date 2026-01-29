@@ -46,9 +46,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHeaderSignup: Button
     private lateinit var btnHeaderSettings: Button
     private lateinit var tvSignedInStatus: TextView
-    
+
     private lateinit var btnFooterTerms: Button
     private lateinit var btnFooterPrivacy: Button
+
+    // Prevent injecting the same JS multiple times
+    private var bridgeInjectedForUrl: String? = null
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
@@ -77,7 +80,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
-        
+
         try {
             setContentView(R.layout.activity_main)
 
@@ -87,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             btnHeaderSignup = findViewById(R.id.btn_header_signup)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
-            
+
             btnFooterTerms = findViewById(R.id.btn_footer_terms)
             btnFooterPrivacy = findViewById(R.id.btn_footer_privacy)
 
@@ -116,11 +119,11 @@ class MainActivity : AppCompatActivity() {
             btnHeaderSettings.setOnClickListener {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }
-            
+
             btnFooterTerms.setOnClickListener {
                 webView.loadUrl("https://aiphotostudio.co/terms")
             }
-            
+
             btnFooterPrivacy.setOnClickListener {
                 webView.loadUrl("https://aiphotostudio.co/privacy")
             }
@@ -178,22 +181,27 @@ class MainActivity : AppCompatActivity() {
             javaScriptCanOpenWindowsAutomatically = true
             @Suppress("DEPRECATION")
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString =
+                "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
-        // Add Javascript Interface to handle Blobs before loadUrl
+        // Add Javascript Interface to handle Blobs BEFORE loadUrl
         webView.addJavascriptInterface(object {
             @JavascriptInterface
             fun processBlob(base64Data: String) {
+                // IMPORTANT: Do not do heavy work on UI thread
                 runOnUiThread {
-                    // Requirement: Temporary Toast for verification
                     Toast.makeText(this@MainActivity, "Processing download...", Toast.LENGTH_SHORT).show()
-                    saveImageToGallery(base64Data)
                 }
+
+                Thread {
+                    saveImageToGallery(base64Data)
+                }.start()
             }
         }, "AndroidInterface")
 
         webView.webViewClient = object : WebViewClient() {
+
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
                 return handleUrl(url)
@@ -201,37 +209,20 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                // Improved script to reliably intercept blob downloads and convert to Base64
-                webView.loadUrl("""
-                    javascript:(function() {
-                        window.addEventListener('click', function(e) {
-                            var link = e.target.closest('a');
-                            if (link && link.href && link.href.startsWith('blob:')) {
-                                e.preventDefault();
-                                var xhr = new XMLHttpRequest();
-                                xhr.open('GET', link.href, true);
-                                xhr.responseType = 'blob';
-                                xhr.onload = function() {
-                                    if (xhr.status === 200) {
-                                        var reader = new FileReader();
-                                        reader.onloadend = function() {
-                                            AndroidInterface.processBlob(reader.result);
-                                        };
-                                        reader.readAsDataURL(xhr.response);
-                                    }
-                                };
-                                xhr.send();
-                            }
-                        }, true);
-                    })();
-                """.trimIndent())
+
+                // Avoid re-injecting repeatedly for same url
+                if (url != null && bridgeInjectedForUrl == url) return
+                bridgeInjectedForUrl = url
+
+                injectBlobBridge()
             }
 
             private fun handleUrl(url: String): Boolean {
                 return if (url.contains("aiphotostudio.co") ||
                     url.contains("accounts.google") ||
                     url.contains("facebook.com") ||
-                    url.contains("Firebase.com")) {
+                    url.contains("firebase.com", ignoreCase = true)
+                ) {
                     false
                 } else {
                     try {
@@ -259,45 +250,124 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * This injection is MUCH more reliable than only listening for <a href="blob:..."> clicks.
+     * It hooks URL.createObjectURL(blob) and also keeps the click-capture fallback.
+     */
+    private fun injectBlobBridge() {
+        val js = """
+            javascript:(function() {
+              try {
+                if (window.__AI_BG_BRIDGE_INSTALLED__) return;
+                window.__AI_BG_BRIDGE_INSTALLED__ = true;
+
+                // Hook createObjectURL so we capture blobs regardless of UI element type.
+                var originalCreateObjectURL = URL.createObjectURL;
+                URL.createObjectURL = function(blob) {
+                  try {
+                    if (blob && (blob.type || '').indexOf('image') !== -1) {
+                      var reader = new FileReader();
+                      reader.onloadend = function() {
+                        try { AndroidInterface.processBlob(reader.result); } catch(e) {}
+                      };
+                      reader.readAsDataURL(blob);
+                    }
+                  } catch(e) {}
+                  return originalCreateObjectURL.call(URL, blob);
+                };
+
+                // Fallback: intercept clicks on anchors with blob href
+                window.addEventListener('click', function(e) {
+                  var link = e.target && e.target.closest ? e.target.closest('a') : null;
+                  if (link && link.href && link.href.indexOf('blob:') === 0) {
+                    e.preventDefault();
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', link.href, true);
+                    xhr.responseType = 'blob';
+                    xhr.onload = function() {
+                      try {
+                        var reader = new FileReader();
+                        reader.onloadend = function() {
+                          try { AndroidInterface.processBlob(reader.result); } catch(e) {}
+                        };
+                        reader.readAsDataURL(xhr.response);
+                      } catch(e) {}
+                    };
+                    xhr.send();
+                  }
+                }, true);
+
+              } catch(err) {
+                // swallow errors to avoid breaking the page
+              }
+            })();
+        """.trimIndent()
+
+        webView.loadUrl(js)
+    }
+
     private fun saveImageToGallery(base64Data: String) {
         try {
             val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+
+            // Decode bitmap (optional but useful for ensuring valid PNG)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 ?: throw Exception("Failed to decode image data")
 
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
-            
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val values = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
+                    put(
+                        MediaStore.Images.Media.RELATIVE_PATH,
+                        Environment.DIRECTORY_PICTURES + "/AI Background Remover"
+                    )
                 }
 
                 val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-                uri?.let {
-                    contentResolver.openOutputStream(it).use { outputStream ->
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream!!)
-                    }
+                    ?: throw Exception("Failed to create MediaStore entry")
+
+                contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                } ?: throw Exception("Failed to open output stream")
+
+                runOnUiThread {
                     Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
-                } ?: throw Exception("Failed to create MediaStore entry")
+                }
+
             } else {
                 // Older versions
-                val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
+                val directory = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                    "AI Background Remover"
+                )
                 if (!directory.exists()) directory.mkdirs()
+
                 val file = File(directory, fileName)
                 FileOutputStream(file).use { out ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
                 }
-                // Notify MediaScanner to make it visible in Gallery
-                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
-                Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+
+                MediaScannerConnection.scanFile(
+                    this,
+                    arrayOf(file.absolutePath),
+                    arrayOf("image/png"),
+                    null
+                )
+
+                runOnUiThread {
+                    Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+                }
             }
 
         } catch (e: Exception) {
             Log.e("MainActivity", "Failed to save image", e)
-            Toast.makeText(this, "Save failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            runOnUiThread {
+                Toast.makeText(this, "Save failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -334,24 +404,33 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupDownloadListener() {
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
-            if (url.startsWith("data:")) {
-                saveImageToGallery(url)
-            } else if (url.startsWith("blob:")) {
-                // Blobs are handled by the JavascriptInterface + injected script
-                Log.d("MainActivity", "Blob download detected, handling via JS interface")
-            } else {
-                try {
-                    val request = DownloadManager.Request(url.toUri()).apply {
-                        setMimeType(mimetype)
-                        addRequestHeader("User-Agent", userAgent)
-                        setTitle("AI Background Remover Download")
-                        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "processed_image_${System.currentTimeMillis()}.png")
+            when {
+                url.startsWith("data:") -> {
+                    // data:image/png;base64,...
+                    Thread { saveImageToGallery(url) }.start()
+                }
+                url.startsWith("blob:") -> {
+                    // Blobs are handled by the JavascriptInterface + injected script
+                    Log.d("MainActivity", "Blob download detected, handling via JS interface")
+                    Toast.makeText(this, "Preparing save…", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    try {
+                        val request = DownloadManager.Request(url.toUri()).apply {
+                            setMimeType(mimetype)
+                            addRequestHeader("User-Agent", userAgent)
+                            setTitle("AI Background Remover Download")
+                            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                            setDestinationInExternalPublicDir(
+                                Environment.DIRECTORY_DOWNLOADS,
+                                "processed_image_${System.currentTimeMillis()}.png"
+                            )
+                        }
+                        (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
+                        Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "Download failed", e)
                     }
-                    (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
-                    Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) {
-                    Log.e("MainActivity", "Download failed", e)
                 }
             }
         }
@@ -360,14 +439,16 @@ class MainActivity : AppCompatActivity() {
     private fun checkAndRequestPermissions() {
         val permissions = mutableListOf<String>()
         permissions.add(Manifest.permission.CAMERA)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+
+        // WRITE_EXTERNAL_STORAGE only required pre-Android 10 for saving to public dirs
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
-        
+
         val toRequest = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-        
+
         if (toRequest.isNotEmpty()) {
             requestPermissionsLauncher.launch(toRequest.toTypedArray())
         }
