@@ -105,10 +105,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intent: Intent?) {
         val data = intent?.data
-        if (data != null && data.path == "/auth/callback") {
+        if (data != null && data.path?.startsWith("/auth/callback") == true) {
             // OAuth callback deep link - load the full URL with query parameters
             webView.loadUrl(data.toString())
-        } else if (webView.url.isNullOrEmpty()) {
+        } else {
             // No deep link, load the default URL
             webView.loadUrl("https://aiphotostudio.co")
         }
