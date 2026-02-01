@@ -91,10 +91,26 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (savedInstanceState == null) {
-                webView.loadUrl("https://aiphotostudio.co")
+                handleIntent(intent)
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        val data = intent?.data
+        if (data != null && data.path == "/auth/callback") {
+            // OAuth callback deep link - load the full URL with query parameters
+            webView.loadUrl(data.toString())
+        } else if (webView.url.isNullOrEmpty()) {
+            // No deep link, load the default URL
+            webView.loadUrl("https://aiphotostudio.co")
         }
     }
 
