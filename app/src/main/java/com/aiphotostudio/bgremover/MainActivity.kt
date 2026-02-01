@@ -105,7 +105,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intent: Intent?) {
         val data = intent?.data
-        if (data != null && data.path?.startsWith("/auth/callback") == true) {
+        val path = data?.path
+        if (data != null && (path == "/auth/callback" || path == "/auth/callback/")) {
             // OAuth callback deep link - load the full URL with query parameters
             webView.loadUrl(data.toString())
         } else {
