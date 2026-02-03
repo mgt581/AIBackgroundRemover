@@ -1,6 +1,5 @@
 package com.aiphotostudio.bgremover
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.ActivityNotFoundException
@@ -19,17 +18,14 @@ fun Context.openUrl(url: String) {
         return
     }
     val intent = Intent(Intent.ACTION_VIEW, parsedUri)
-    if (this !is Activity) {
+    if (this !is android.app.Activity) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     try {
         startActivity(intent)
     } catch (error: ActivityNotFoundException) {
         val safeUrl = buildString {
-            append(parsedUri.scheme)
-            append("://")
-            append(parsedUri.host ?: "")
-            append(parsedUri.path ?: "")
+            append(parsedUri.buildUpon().clearQuery().fragment(null).build().toString())
             if (!parsedUri.query.isNullOrBlank()) append("?…")
             if (!parsedUri.fragment.isNullOrBlank()) append("#…")
         }
