@@ -23,8 +23,8 @@ fun Context.openUrl(url: String) {
     }
     try {
         startActivity(intent)
-    } catch (error: ActivityNotFoundException) {
-        Log.w("UrlUtils", "No browser available to open URL ${parsedUri.toSafeLoggableString()}")
+    } catch (exception: ActivityNotFoundException) {
+        Log.w("UrlUtils", "No browser available to open URL ${parsedUri.toSafeLoggableString()}. Please install a web browser.")
     }
 }
 
