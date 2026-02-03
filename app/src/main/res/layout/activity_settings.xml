@@ -3,16 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@color/brand_background">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/white"
+        android:background="@color/brand_surface"
         app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@android:drawable/ic_menu_revert"
         app:title="Settings"
-        app:titleTextColor="@android:color/black" />
+        app:titleTextColor="@color/brand_text" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -30,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Account"
-                android:textColor="@color/black"
+                android:textColor="@color/brand_text"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -40,51 +41,19 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Not signed in"
-                android:textColor="@android:color/darker_gray" />
+                android:textColor="@color/brand_text_secondary" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="16dp"
-                android:background="#EEEEEE" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="App Preferences"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Auto-save to Gallery"
-                    android:textColor="@color/black" />
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_autosave"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="16dp"
-                android:background="#EEEEEE" />
+                android:background="@color/brand_border" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="About"
-                android:textColor="@color/black"
+                android:textColor="@color/brand_text"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -94,7 +63,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
-                android:text="Terms of Service" />
+                android:text="Terms of Service"
+                android:textColor="@color/brand_accent" />
 
             <Button
                 android:id="@+id/btn_about_privacy"
@@ -102,16 +72,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start"
-                android:text="Privacy Policy" />
+                android:text="Privacy Policy"
+                android:textColor="@color/brand_accent" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:text="Version 5.2"
-                android:textColor="@android:color/darker_gray"
+                android:text="Version 6.0"
+                android:textColor="@color/brand_text_secondary"
                 android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btn_back_home"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:backgroundTint="@color/brand_primary"
+                android:text="Back to Home"
+                android:textColor="@color/white" />
 
         </LinearLayout>
     </ScrollView>
