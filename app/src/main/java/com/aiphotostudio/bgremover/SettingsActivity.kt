@@ -23,7 +23,7 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
+            goToHome()
         }
 
         val tvUserEmail = findViewById<TextView>(R.id.tv_user_email)
@@ -37,6 +37,17 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_about_privacy).setOnClickListener {
             openUrl("https://aiphotostudio.co/privacy")
         }
+
+        findViewById<Button>(R.id.btn_back_home).setOnClickListener {
+            goToHome()
+        }
+    }
+
+    private fun goToHome() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finish()
     }
 
     private fun openUrl(url: String) {
