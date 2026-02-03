@@ -7,7 +7,7 @@ import android.util.Log
 
 fun Context.openUrl(url: String) {
     if (url.isBlank()) {
-        Log.w("UrlUtils", "No browser available to open URL: $url")
+        Log.w("UrlUtils", "Empty URL provided; skipping openUrl call")
         return
     }
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
