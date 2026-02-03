@@ -177,8 +177,10 @@ fun LoginScreen(
 
         Spacer(Modifier.height(20.dp))
 
+        // We use ic_launcher_background here as it is a supported VectorDrawable
+        // Or you can use any other PNG/JPG resource you have.
         Image(
-            painter = painterResource(id = R.mipmap.ic_launcher),
+            painter = painterResource(id = R.drawable.ic_launcher_background),
             contentDescription = "Logo",
             modifier = Modifier.size(160.dp),
             contentScale = ContentScale.Fit
