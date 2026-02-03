@@ -394,4 +394,5 @@ class MainActivity : AppCompatActivity() {
         val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         if (toRequest.isNotEmpty()) requestPermissionsLauncher.launch(toRequest.toTypedArray())
     }
+
 }
