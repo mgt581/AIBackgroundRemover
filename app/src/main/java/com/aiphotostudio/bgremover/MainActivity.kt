@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAuthAction: Button
     private lateinit var btnHeaderGallery: Button
     private lateinit var btnHeaderSignup: Button
-    private lateinit var btnHeaderSettings: Button
+    private lateinit var btnHeaderSettings: ImageButton
     private lateinit var tvSignedInStatus: TextView
 
     private lateinit var btnFooterTerms: Button
