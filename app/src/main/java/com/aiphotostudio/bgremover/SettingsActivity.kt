@@ -3,6 +3,7 @@ package com.aiphotostudio.bgremover
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -55,7 +56,7 @@ class SettingsActivity : AppCompatActivity() {
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
-            android.util.Log.w("SettingsActivity", "No activity found to open URL: $url")
+            Log.w("SettingsActivity", "No activity found to open URL: $url")
         }
     }
 }
