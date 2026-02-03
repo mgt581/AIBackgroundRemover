@@ -8,7 +8,7 @@ import android.util.Log
 
 fun Context.openUrl(url: String) {
     if (url.isBlank()) {
-        Log.w("UrlUtils", "Empty URL provided; skipping openUrl call (${this::class.java.simpleName})")
+        Log.w("UrlUtils", "Empty URL provided; skipping openUrl call (${this.javaClass.simpleName})")
         return
     }
     val parsedUri = Uri.parse(url)
@@ -24,6 +24,12 @@ fun Context.openUrl(url: String) {
     if (intent.resolveActivity(packageManager) != null) {
         startActivity(intent)
     } else {
-        Log.w("UrlUtils", "No browser available to open URL")
+        val safeUrl = buildString {
+            append(parsedUri.scheme)
+            append("://")
+            append(parsedUri.host ?: "")
+            append(parsedUri.path ?: "")
+        }
+        Log.w("UrlUtils", "No browser available to open URL $safeUrl")
     }
 }
