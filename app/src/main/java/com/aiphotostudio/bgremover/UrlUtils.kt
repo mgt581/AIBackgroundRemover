@@ -1,5 +1,6 @@
 package com.aiphotostudio.bgremover
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -17,6 +18,9 @@ fun Context.openUrl(url: String) {
         return
     }
     val intent = Intent(Intent.ACTION_VIEW, parsedUri)
+    if (this !is Activity) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
     if (intent.resolveActivity(packageManager) != null) {
         startActivity(intent)
     } else {
