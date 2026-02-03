@@ -30,7 +30,8 @@
 
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
+            android:exported="true"
+            android:theme="@style/Theme.AIBackgroundRemover.NoActionBar" />
 
         <activity
             android:name=".GalleryActivity"
