@@ -24,11 +24,14 @@ fun Context.openUrl(url: String) {
     try {
         startActivity(intent)
     } catch (error: ActivityNotFoundException) {
-        val safeUrl = buildString {
-            append(parsedUri.buildUpon().clearQuery().fragment(null).build().toString())
-            if (!parsedUri.query.isNullOrBlank()) append("?…")
-            if (!parsedUri.fragment.isNullOrBlank()) append("#…")
-        }
-        Log.w("UrlUtils", "No browser available to open URL $safeUrl")
+        Log.w("UrlUtils", "No browser available to open URL ${parsedUri.toSafeLoggableString()}")
+    }
+}
+
+private fun Uri.toSafeLoggableString(): String {
+    return buildString {
+        append(buildUpon().clearQuery().fragment(null).build().toString())
+        if (!query.isNullOrBlank()) append("?…")
+        if (!fragment.isNullOrBlank()) append("#…")
     }
 }
