@@ -62,7 +62,7 @@
 
                 <Button
                     android:id="@+id/btn_header_signup"
-                    style="@style/Widget.Material3.Button.Filled"
+                    style="@style/Widget.Material3.Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/brand_primary"
