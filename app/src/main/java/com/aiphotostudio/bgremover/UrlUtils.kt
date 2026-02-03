@@ -8,13 +8,13 @@ import android.util.Log
 
 fun Context.openUrl(url: String) {
     if (url.isBlank()) {
-        Log.w("UrlUtils", "Empty URL provided; skipping openUrl call")
+        Log.w("UrlUtils", "Empty URL provided; skipping openUrl call (${this::class.java.simpleName})")
         return
     }
     val parsedUri = Uri.parse(url)
     val scheme = parsedUri.scheme?.lowercase()
     if (scheme != "http" && scheme != "https") {
-        Log.w("UrlUtils", "Unsupported URL scheme; skipping openUrl call")
+        Log.w("UrlUtils", "Unsupported URL scheme ($scheme); skipping openUrl call")
         return
     }
     val intent = Intent(Intent.ACTION_VIEW, parsedUri)
