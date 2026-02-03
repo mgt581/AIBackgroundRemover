@@ -84,7 +84,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Settings"
                     android:src="@android:drawable/ic_menu_manage"
-                    app:tint="@color/brand_text_secondary" />
+                    app:tint="@color/brand_text_secondary"
+                    tools:ignore="TouchTargetSizeCheck" />
 
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
