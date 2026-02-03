@@ -10,10 +10,16 @@ fun Context.openUrl(url: String) {
         Log.w("UrlUtils", "Empty URL provided; skipping openUrl call")
         return
     }
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    val parsedUri = Uri.parse(url)
+    val scheme = parsedUri.scheme?.lowercase()
+    if (scheme != "http" && scheme != "https") {
+        Log.w("UrlUtils", "Unsupported URL scheme; skipping openUrl call")
+        return
+    }
+    val intent = Intent(Intent.ACTION_VIEW, parsedUri)
     if (intent.resolveActivity(packageManager) != null) {
         startActivity(intent)
     } else {
-        Log.w("UrlUtils", "No browser available to open URL: $url")
+        Log.w("UrlUtils", "No browser available to open URL")
     }
 }
