@@ -11,7 +11,8 @@ import com.bumptech.glide.Glide
 
 class GalleryAdapter(
     private val images: MutableList<Uri>,
-    private val onDeleteClick: (Uri) -> Unit
+    private val onDeleteClick: (Uri) -> Unit,
+    private val onDownloadClick: (Uri) -> Unit
 ) : RecyclerView.Adapter<GalleryAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -38,8 +39,9 @@ class GalleryAdapter(
             onDeleteClick(uri)
         }
 
-        // Hide download button as these are already local internal files
-        holder.btnDownload.visibility = View.GONE
+        holder.btnDownload.setOnClickListener {
+            onDownloadClick(uri)
+        }
     }
 
     override fun getItemCount() = images.size
