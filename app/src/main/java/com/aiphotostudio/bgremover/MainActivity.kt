@@ -20,7 +20,6 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -43,16 +42,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var btnAuthAction: Button
-    private lateinit var btnHeaderGallery: Button
     private lateinit var btnHeaderSignup: Button
-    private lateinit var btnHeaderSettings: ImageButton
+    private lateinit var btnHeaderSettings: Button
     private lateinit var tvSignedInStatus: TextView
 
     private lateinit var btnFooterTerms: Button
     private lateinit var btnFooterPrivacy: Button
 
+    private lateinit var btnLinkBds: Button
+    private lateinit var btnLinkBgh: Button
+    private lateinit var btnLinkMpa: Button
+    private lateinit var btnLinkEmail: Button
+
     private var bridgeInjectedForUrl: String? = null
     private var lastBridgeInjectionMs: Long = 0L
+    private var lastCapturedBase64: String? = null
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
@@ -87,7 +91,6 @@ class MainActivity : AppCompatActivity() {
 
             webView = findViewById(R.id.webView)
             btnAuthAction = findViewById(R.id.btn_auth_action)
-            btnHeaderGallery = findViewById(R.id.btn_header_gallery)
             btnHeaderSignup = findViewById(R.id.btn_header_signup)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
@@ -95,11 +98,24 @@ class MainActivity : AppCompatActivity() {
             btnFooterTerms = findViewById(R.id.btn_footer_terms)
             btnFooterPrivacy = findViewById(R.id.btn_footer_privacy)
 
+            btnLinkBds = findViewById(R.id.btn_link_bds)
+            btnLinkBgh = findViewById(R.id.btn_link_bgh)
+            btnLinkMpa = findViewById(R.id.btn_link_mpa)
+            btnLinkEmail = findViewById(R.id.btn_link_email)
+
             updateHeaderUi()
 
             setupWebView()
             setupDownloadListener()
             checkAndRequestPermissions()
+
+            findViewById<View>(R.id.fab_save).setOnClickListener {
+                lastCapturedBase64?.let {
+                    saveImageToGallery(it)
+                } ?: run {
+                    Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+                }
+            }
 
             btnAuthAction.setOnClickListener {
                 if (auth.currentUser != null) {
@@ -107,10 +123,6 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     startActivity(Intent(this, LoginActivity::class.java))
                 }
-            }
-
-            btnHeaderGallery.setOnClickListener {
-                startActivity(Intent(this, GalleryActivity::class.java))
             }
 
             btnHeaderSignup.setOnClickListener {
@@ -129,12 +141,26 @@ class MainActivity : AppCompatActivity() {
                 webView.loadUrl("https://aiphotostudio.co/privacy")
             }
 
+            btnLinkBds.setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
+            btnLinkBgh.setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
+            btnLinkMpa.setOnClickListener { openUrl("https://multipostapp.co.uk") }
+            btnLinkEmail.setOnClickListener {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:alex@bryantdigitalsolutions.com")
+                }
+                startActivity(intent)
+            }
+
             if (savedInstanceState == null) {
                 webView.loadUrl("https://aiphotostudio.co")
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
         }
+    }
+
+    private fun openUrl(url: String) {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     }
 
     override fun onResume() {
@@ -180,8 +206,6 @@ class MainActivity : AppCompatActivity() {
             useWideViewPort = true
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
-            // Allow mixed content (HTTP content in HTTPS pages) for WebView compatibility
-            // This is required for the app to properly load and display content from aiphotostudio.co
             @Suppress("DEPRECATION")
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
@@ -190,12 +214,10 @@ class MainActivity : AppCompatActivity() {
         webView.addJavascriptInterface(object {
             @JavascriptInterface
             fun processBlob(base64Data: String) {
+                lastCapturedBase64 = base64Data
                 runOnUiThread {
-                    Toast.makeText(this@MainActivity, getString(R.string.processing_download), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
                 }
-                Thread {
-                    saveImageToGallery(base64Data)
-                }.start()
             }
 
             @JavascriptInterface
@@ -240,13 +262,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
-            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                if (consoleMessage != null) {
-                    Log.d("WebViewConsole", "${consoleMessage.messageLevel()} ${consoleMessage.message()}")
-                }
-                return super.onConsoleMessage(consoleMessage)
-            }
-
             override fun onShowFileChooser(
                 webView: WebView?,
                 filePathCallback: ValueCallback<Array<Uri>>?,
@@ -319,6 +334,7 @@ class MainActivity : AppCompatActivity() {
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
             runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+            lastCapturedBase64 = null // Clear after saving once
         } catch (e: Exception) {
             runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
         }
@@ -351,25 +367,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupDownloadListener() {
-        webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
-            when {
-                url.startsWith("data:") -> Thread { saveImageToGallery(url) }.start()
-                url.startsWith("blob:") -> { /* Handled by bridge */ }
-                else -> {
-                    try {
-                        val request = DownloadManager.Request(url.toUri()).apply {
-                            setMimeType(mimetype)
-                            addRequestHeader("User-Agent", userAgent)
-                            setTitle(getString(R.string.app_name))
-                            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "processed_${System.currentTimeMillis()}.png")
-                        }
-                        (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
-                        Toast.makeText(this, getString(R.string.download_started), Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Log.e("MainActivity", "Download failed", e)
-                    }
-                }
+        webView.setDownloadListener { url, _, _, _, _ ->
+            if (url.startsWith("data:")) {
+                lastCapturedBase64 = url
+                Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
             }
         }
     }
