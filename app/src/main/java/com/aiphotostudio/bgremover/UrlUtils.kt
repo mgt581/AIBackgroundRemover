@@ -6,10 +6,14 @@ import android.net.Uri
 import android.util.Log
 
 fun Context.openUrl(url: String) {
+    if (url.isBlank()) {
+        Log.w("UrlUtils", "No browser available to open URL: $url")
+        return
+    }
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
     if (intent.resolveActivity(packageManager) != null) {
         startActivity(intent)
     } else {
-        Log.w("UrlUtils", "No activity found to open URL: $url")
+        Log.w("UrlUtils", "No browser available to open URL: $url")
     }
 }
