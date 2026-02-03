@@ -54,6 +54,8 @@ class SettingsActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
+        } else {
+            android.util.Log.w("SettingsActivity", "No activity found to open URL: $url")
         }
     }
 }
