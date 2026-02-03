@@ -149,12 +149,16 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     
-    val purplePrimary = Color(0xFF6342FF)
+    val bgColor = Color(0xFF0B1221)
+    val surfaceColor = Color(0xFF161E2E)
+    val primaryColor = Color(0xFF6342FF)
+    val accentColor = Color(0xFF4285F4)
+    val textSecondary = Color(0xFF94A3B8)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(bgColor)
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -166,7 +170,7 @@ fun LoginScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back home",
-                    tint = Color.Gray
+                    tint = textSecondary
                 )
             }
         }
@@ -181,10 +185,10 @@ fun LoginScreen(
         )
 
         val annotatedTitle = buildAnnotatedString {
-            withStyle(style = SpanStyle(color = Color(0xFF4256FF), fontWeight = FontWeight.Bold)) {
+            withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
                 append("AI Background ")
             }
-            withStyle(style = SpanStyle(color = Color(0xFFA642FF), fontWeight = FontWeight.Normal)) {
+            withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Normal)) {
                 append("Remover")
             }
         }
@@ -200,15 +204,17 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            placeholder = { Text("Email address", color = Color.Gray) },
+            placeholder = { Text("Email address", color = textSecondary) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.LightGray,
-                unfocusedBorderColor = Color.LightGray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = surfaceColor,
+                focusedContainerColor = surfaceColor,
+                unfocusedContainerColor = surfaceColor
             )
         )
 
@@ -217,16 +223,18 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            placeholder = { Text("Password", color = Color.Gray) },
+            placeholder = { Text("Password", color = textSecondary) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.LightGray,
-                unfocusedBorderColor = Color.LightGray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = primaryColor,
+                unfocusedBorderColor = surfaceColor,
+                focusedContainerColor = surfaceColor,
+                unfocusedContainerColor = surfaceColor
             )
         )
 
@@ -234,7 +242,7 @@ fun LoginScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 Text(
                     text = "Forgot password?",
-                    color = Color(0xFF4256FF),
+                    color = accentColor,
                     fontSize = 14.sp,
                     modifier = Modifier
                         .padding(vertical = 12.dp)
@@ -250,29 +258,29 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = purplePrimary)
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
         ) {
-            Text(if (isSignUp) "Sign Up" else "Sign In", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(if (isSignUp) "Sign Up" else "Sign In", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
         }
 
         Spacer(Modifier.height(24.dp))
 
-        Text(text = "OR", color = Color.Gray, fontSize = 14.sp)
+        Text(text = "OR", color = textSecondary, fontSize = 14.sp)
 
         Spacer(Modifier.height(24.dp))
 
         OutlinedButton(
             onClick = onGoogleSignIn,
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(8.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.DarkGray)
+            shape = RoundedCornerShape(12.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, surfaceColor),
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = surfaceColor, contentColor = Color.White)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "G ", 
-                    color = Color(0xFF4285F4), 
+                    color = Color.White,
                     fontWeight = FontWeight.Black, 
                     fontSize = 20.sp
                 )
@@ -286,12 +294,12 @@ fun LoginScreen(
         Row {
             Text(
                 text = if (isSignUp) "Already have an account? " else "No account? ",
-                color = Color.DarkGray,
+                color = textSecondary,
                 fontSize = 15.sp
             )
             Text(
                 text = if (isSignUp) "Sign in" else "Sign up",
-                color = Color(0xFF4256FF),
+                color = accentColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable { onToggleMode() }
