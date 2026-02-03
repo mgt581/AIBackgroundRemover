@@ -395,12 +395,4 @@ class MainActivity : AppCompatActivity() {
         if (toRequest.isNotEmpty()) requestPermissionsLauncher.launch(toRequest.toTypedArray())
     }
 
-    private fun openUrl(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            Log.w("MainActivity", "No activity found to open URL: $url")
-        }
-    }
 }
