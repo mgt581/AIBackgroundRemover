@@ -10,7 +10,6 @@ fun Context.openUrl(url: String) {
     if (intent.resolveActivity(packageManager) != null) {
         startActivity(intent)
     } else {
-        val tag = this::class.java.simpleName.ifEmpty { "UrlUtils" }
-        Log.w(tag, "No activity found to open URL: $url")
+        Log.w("UrlUtils", "No activity found to open URL: $url")
     }
 }
