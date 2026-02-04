@@ -55,6 +55,21 @@ class MainActivity : AppCompatActivity() {
     private var lastBridgeInjectionMs: Long = 0L
     private var lastCapturedBase64: String? = null
 
+    inner class WebAppInterface {
+        @JavascriptInterface
+        fun processBlob(base64Data: String) {
+            lastCapturedBase64 = base64Data
+            runOnUiThread {
+                Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        @JavascriptInterface
+        fun downloadImage(base64Data: String, fileName: String) {
+            saveImageToGallery(base64Data, fileName)
+        }
+    }
+
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
         filePathCallback = null
@@ -212,15 +227,7 @@ class MainActivity : AppCompatActivity() {
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
-        webView.addJavascriptInterface(object {
-            @JavascriptInterface
-            fun processBlob(base64Data: String) {
-                lastCapturedBase64 = base64Data
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
-                }
-            }
-        }, "AndroidInterface")
+        webView.addJavascriptInterface(WebAppInterface(), "Studio")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -279,7 +286,9 @@ class MainActivity : AppCompatActivity() {
                 var reader = new FileReader();
                 reader.onloadend = function() {
                   if (typeof reader.result === 'string' && reader.result.indexOf('data:image') === 0) {
-                    AndroidInterface.processBlob(reader.result);
+                    if (window.Studio && typeof window.Studio.processBlob === 'function') {
+                      window.Studio.processBlob(reader.result);
+                    }
                   }
                 };
                 reader.readAsDataURL(blob);
@@ -289,6 +298,57 @@ class MainActivity : AppCompatActivity() {
                 if (blob && blob.size > 2000) sendBlobToAndroid(blob);
                 return originalCreateObjectURL.call(URL, blob);
               };
+              if (!window.__AI_BG_SAVE_INSTALLED__) {
+                window.__AI_BG_SAVE_INSTALLED__ = true;
+                if (!document.getElementById('save-status-popup')) {
+                  var popup = document.createElement('div');
+                  popup.id = 'save-status-popup';
+                  popup.style.position = 'fixed';
+                  popup.style.top = '20px';
+                  popup.style.right = '20px';
+                  popup.style.background = 'rgba(0,0,0,0.7)';
+                  popup.style.color = 'white';
+                  popup.style.padding = '10px';
+                  popup.style.borderRadius = '5px';
+                  popup.style.display = 'none';
+                  popup.style.zIndex = '10000';
+                  popup.textContent = '✓ Auto-Saved';
+                  (document.body || document.documentElement).appendChild(popup);
+                }
+                window.showSaveMessage = function() {
+                  var msg = document.getElementById('save-status-popup');
+                  if (!msg) return;
+                  msg.style.display = 'block';
+                  setTimeout(function() { msg.style.display = 'none'; }, 2500);
+                };
+                window.saveToPhoneGallery = function(base64Data, name) {
+                  if (window.Studio && typeof window.Studio.downloadImage === 'function') {
+                    window.Studio.downloadImage(base64Data, name || 'ai_photo.png');
+                    window.showSaveMessage();
+                  } else {
+                    console.error('Android Studio interface not found');
+                  }
+                };
+                function setupGalleryObserver() {
+                  var galleryElem = document.getElementById('gallery');
+                  if (!galleryElem || galleryElem.__aiBgObserverInstalled) return;
+                  galleryElem.__aiBgObserverInstalled = true;
+                  var cached = localStorage.getItem('user_gallery_cache');
+                  if (cached) {
+                    galleryElem.innerHTML = cached;
+                  }
+                  var observer = new MutationObserver(function() {
+                    localStorage.setItem('user_gallery_cache', galleryElem.innerHTML);
+                    console.log('Gallery state auto-saved to LocalStorage');
+                  });
+                  observer.observe(galleryElem, { childList: true, subtree: true });
+                }
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', setupGalleryObserver);
+                } else {
+                  setupGalleryObserver();
+                }
+              }
               window.addEventListener('click', function(e) {
                 var link = e.target.closest('a');
                 if (link && link.href && link.href.indexOf('blob:') === 0) {
@@ -305,24 +365,26 @@ class MainActivity : AppCompatActivity() {
         webView.evaluateJavascript(js, null)
     }
 
-    private fun saveImageToGallery(base64Data: String) {
+    private fun saveImageToGallery(base64Data: String, fileNameOverride: String? = null) {
         try {
             val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: throw Exception("Decode error")
-            val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
+            val fileName = fileNameOverride
+                ?.takeIf { it.isNotBlank() }
+                ?.let { File(it).name }
+                ?: "AI_Studio_${System.currentTimeMillis()}.png"
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val values = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
                 }
                 val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw Exception("Insert error")
                 contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
             } else {
-                val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
-                if (!directory.exists()) directory.mkdirs()
+                val directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                 val file = File(directory, fileName)
                 FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
