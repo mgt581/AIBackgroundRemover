@@ -3,7 +3,6 @@ package com.aiphotostudio.bgremover
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.DownloadManager
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -42,12 +41,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     private lateinit var btnAuthAction: Button
-    private lateinit var btnHeaderSignup: Button
     private lateinit var btnHeaderSettings: Button
     private lateinit var tvSignedInStatus: TextView
 
     private lateinit var btnFooterTerms: Button
-    private lateinit var btnFooterPrivacy: Button
 
     private lateinit var btnLinkBds: Button
     private lateinit var btnLinkBgh: Button
@@ -75,9 +72,7 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions[Manifest.permission.CAMERA] == true) {
-            // Permission granted
-        } else {
+        if (permissions[Manifest.permission.CAMERA] != true) {
             Toast.makeText(this, getString(R.string.camera_permission_required), Toast.LENGTH_SHORT).show()
         }
     }
@@ -91,12 +86,10 @@ class MainActivity : AppCompatActivity() {
 
             webView = findViewById(R.id.webView)
             btnAuthAction = findViewById(R.id.btn_auth_action)
-            btnHeaderSignup = findViewById(R.id.btn_header_signup)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
 
             btnFooterTerms = findViewById(R.id.btn_footer_terms)
-            btnFooterPrivacy = findViewById(R.id.btn_footer_privacy)
 
             btnLinkBds = findViewById(R.id.btn_link_bds)
             btnLinkBgh = findViewById(R.id.btn_link_bgh)
@@ -106,7 +99,6 @@ class MainActivity : AppCompatActivity() {
             updateHeaderUi()
 
             setupWebView()
-            setupDownloadListener()
             checkAndRequestPermissions()
 
             findViewById<View>(R.id.fab_save).setOnClickListener {
@@ -125,20 +117,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            btnHeaderSignup.setOnClickListener {
-                startActivity(Intent(this, LoginActivity::class.java))
-            }
-
             btnHeaderSettings.setOnClickListener {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }
 
             btnFooterTerms.setOnClickListener {
                 webView.loadUrl("https://aiphotostudio.co/terms")
-            }
-
-            btnFooterPrivacy.setOnClickListener {
-                webView.loadUrl("https://aiphotostudio.co/privacy")
             }
 
             btnLinkBds.setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
@@ -159,6 +143,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error opening URL", e)
+        }
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
@@ -168,10 +160,8 @@ class MainActivity : AppCompatActivity() {
         val data = intent?.data
         val path = data?.path
         if (data != null && (path == "/auth/callback" || path == "/auth/callback/")) {
-            // OAuth callback deep link - load the full URL with query parameters
             webView.loadUrl(data.toString())
         } else {
-            // No deep link, load the default URL
             webView.loadUrl("https://aiphotostudio.co")
         }
     }
@@ -185,13 +175,11 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user != null) {
             btnAuthAction.text = getString(R.string.sign_out)
-            tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(10) ?: getString(R.string.user_placeholder))
+            tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(15) ?: "User")
             tvSignedInStatus.visibility = View.VISIBLE
-            btnHeaderSignup.visibility = View.GONE
         } else {
             btnAuthAction.text = getString(R.string.sign_in)
             tvSignedInStatus.visibility = View.GONE
-            btnHeaderSignup.visibility = View.VISIBLE
         }
     }
 
@@ -232,17 +220,21 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
                 }
             }
-
-            @JavascriptInterface
-            fun debugLog(msg: String) {
-                Log.d("WebViewBridge", msg)
-            }
         }, "AndroidInterface")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                return handleUrl(url)
+                return if (url.contains("aiphotostudio.co") ||
+                    url.contains("accounts.google") ||
+                    url.contains("facebook.com") ||
+                    url.contains("firebase")
+                ) {
+                    false
+                } else {
+                    openUrl(url)
+                    true
+                }
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -253,24 +245,6 @@ class MainActivity : AppCompatActivity() {
                 lastBridgeInjectionMs = now
                 injectBlobBridge()
                 webView.postDelayed({ injectBlobBridge() }, 1200)
-            }
-
-            private fun handleUrl(url: String): Boolean {
-                return if (url.contains("aiphotostudio.co") ||
-                    url.contains("accounts.google") ||
-                    url.contains("facebook.com") ||
-                    url.contains("firebase.com", ignoreCase = true)
-                ) {
-                    false
-                } else {
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                        true
-                    } catch (e: Exception) {
-                        Log.e("MainActivity", "Failed to open URL", e)
-                        false
-                    }
-                }
             }
         }
 
@@ -284,6 +258,13 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.filePathCallback = filePathCallback
                 showSourceDialog()
                 return true
+            }
+        }
+        
+        webView.setDownloadListener { url, _, _, _, _ ->
+            if (url.startsWith("data:")) {
+                lastCapturedBase64 = url
+                Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -347,7 +328,7 @@ class MainActivity : AppCompatActivity() {
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
             runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
-            lastCapturedBase64 = null // Clear after saving once
+            lastCapturedBase64 = null
         } catch (e: Exception) {
             runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
         }
@@ -377,15 +358,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchGallery() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-    }
-
-    private fun setupDownloadListener() {
-        webView.setDownloadListener { url, _, _, _, _ ->
-            if (url.startsWith("data:")) {
-                lastCapturedBase64 = url
-                Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun checkAndRequestPermissions() {

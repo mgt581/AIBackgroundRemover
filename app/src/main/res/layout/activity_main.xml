@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:text="@string/ai_background_remover"
+                android:text="AI BACKGROUND"
                 android:textColor="@color/brand_text"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -67,25 +67,14 @@
                     tools:visibility="visible" />
 
                 <Button
-                    android:id="@+id/btn_header_signup"
+                    android:id="@+id/btn_auth_action"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
-                    android:layout_marginEnd="4dp"
-                    android:paddingHorizontal="8dp"
-                    android:text="@string/sign_up"
-                    android:textSize="11sp"
-                    android:backgroundTint="@color/brand_primary"
-                    android:textColor="@color/white" />
-
-                <Button
-                    android:id="@+id/btn_auth_action"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:paddingHorizontal="8dp"
+                    android:paddingHorizontal="12dp"
                     android:text="@string/sign_in"
-                    android:textColor="@color/brand_accent"
+                    android:backgroundTint="@color/brand_primary"
+                    android:textColor="@color/white"
                     android:textSize="11sp" />
 
                 <Button
@@ -150,7 +139,7 @@
             app:flow_horizontalGap="8dp"
             app:flow_horizontalStyle="packed"
             app:flow_wrapMode="aligned"
-            app:constraint_referenced_ids="btn_link_bds,btn_link_bgh,btn_link_mpa,btn_link_email,btn_footer_privacy,btn_footer_terms" />
+            app:constraint_referenced_ids="btn_link_bds,btn_link_bgh,btn_link_mpa,btn_link_email,btn_footer_terms" />
 
         <Button
             android:id="@+id/btn_link_bds"
@@ -193,17 +182,6 @@
             android:paddingHorizontal="4dp"
             android:text="@string/owner_email"
             android:textColor="@color/brand_accent"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
-
-        <Button
-            android:id="@+id/btn_footer_privacy"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:paddingHorizontal="4dp"
-            android:text="@string/privacy_policy"
-            android:textColor="@color/brand_text_secondary"
             android:textSize="10sp"
             tools:ignore="SmallSp" />
 
