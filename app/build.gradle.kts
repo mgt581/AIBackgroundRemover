@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
+    implementation(libs.firebase.appcheck.safetynet)
     implementation(libs.play.services.auth)
     implementation(libs.play.services.basement)
     

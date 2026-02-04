@@ -6,6 +6,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
+import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory
 import com.google.firebase.initialize
 
 class AIApplication : Application() {
@@ -28,9 +29,14 @@ class AIApplication : Application() {
                     DebugAppCheckProviderFactory.getInstance()
                 )
             } else {
-                Log.d("AIApplication", "App Check: Installing PlayIntegrityAppCheckProviderFactory")
+                Log.d("AIApplication", "App Check: Installing PlayIntegrity and SafetyNet Factories")
+                // Use Play Integrity as primary and SafetyNet as fallback
                 appCheck.installAppCheckProviderFactory(
                     PlayIntegrityAppCheckProviderFactory.getInstance()
+                )
+                // Note: SafetyNet is deprecated but useful as a fallback for the recaptcha error
+                appCheck.installAppCheckProviderFactory(
+                    SafetyNetAppCheckProviderFactory.getInstance()
                 )
             }
 
