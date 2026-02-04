@@ -105,15 +105,17 @@ class MainActivity : AppCompatActivity() {
                 lastCapturedBase64?.let {
                     saveImageToGallery(it)
                 } ?: run {
-                    Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "No image to save yet. Upload and process an image first.", Toast.LENGTH_SHORT).show()
                 }
             }
 
             btnAuthAction.setOnClickListener {
+                Log.d("MainActivity", "Auth action button clicked. User: ${auth.currentUser?.email}")
                 if (auth.currentUser != null) {
                     signOut()
                 } else {
-                    startActivity(Intent(this, LoginActivity::class.java))
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
                 }
             }
 
@@ -140,6 +142,7 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
+            Toast.makeText(this, "Initialization error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -147,7 +150,7 @@ class MainActivity : AppCompatActivity() {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
-            Log.e("MainActivity", "Error opening URL", e)
+            Log.e("MainActivity", "Error opening URL: $url", e)
         }
     }
 
@@ -173,13 +176,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateHeaderUi() {
         val user = auth.currentUser
-        if (user != null) {
-            btnAuthAction.text = getString(R.string.sign_out)
-            tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(15) ?: "User")
-            tvSignedInStatus.visibility = View.VISIBLE
-        } else {
-            btnAuthAction.text = getString(R.string.sign_in)
-            tvSignedInStatus.visibility = View.GONE
+        runOnUiThread {
+            if (user != null) {
+                btnAuthAction.text = getString(R.string.sign_out)
+                tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(15) ?: "User")
+                tvSignedInStatus.visibility = View.VISIBLE
+            } else {
+                btnAuthAction.text = getString(R.string.sign_in)
+                tvSignedInStatus.visibility = View.GONE
+            }
         }
     }
 
@@ -212,15 +217,23 @@ class MainActivity : AppCompatActivity() {
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
-        webView.addJavascriptInterface(object {
+        val bridge = object {
             @JavascriptInterface
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, "Image ready to save! Click the blue save button.", Toast.LENGTH_LONG).show()
                 }
             }
-        }, "AndroidInterface")
+
+            @JavascriptInterface
+            fun downloadImage(base64Data: String) {
+                processBlob(base64Data)
+            }
+        }
+
+        webView.addJavascriptInterface(bridge, "AndroidInterface")
+        webView.addJavascriptInterface(bridge, "Studio")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -274,6 +287,12 @@ class MainActivity : AppCompatActivity() {
             javascript:(function() {
               if (window.__AI_BG_BRIDGE_INSTALLED__) return;
               window.__AI_BG_BRIDGE_INSTALLED__ = true;
+              
+              // Compatibility for Studio.downloadImage
+              if (typeof window.Studio === 'undefined') {
+                 window.Studio = { downloadImage: function(b) { AndroidInterface.processBlob(b); } };
+              }
+
               function sendBlobToAndroid(blob) {
                 if (!blob) return;
                 var reader = new FileReader();
