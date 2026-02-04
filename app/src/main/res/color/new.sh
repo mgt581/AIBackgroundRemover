@@ -1,0 +1,2 @@
+    ./gradlew signingReport
+    
