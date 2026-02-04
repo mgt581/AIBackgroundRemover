@@ -1,2 +1,2 @@
-    ./gradlew signingReport
+    ./gradlew signingReport.xml
     
