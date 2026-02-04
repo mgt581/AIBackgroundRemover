@@ -3,6 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aiphotostudio.bgremover">
 
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <queries>
+        <intent>
+            <action android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN" />
+        </intent>
+        <package android:name="com.google.android.gms" />
+    </queries>
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -38,7 +49,18 @@
                 <data
                     android:scheme="https"
                     android:host="aiphotostudio.co"
-                    android:path="/auth/callback" />
+                    android:pathPrefix="/auth" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="aiphotostudio.co"
+                    android:path="/auth/callback"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
 
