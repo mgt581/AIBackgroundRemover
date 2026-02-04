@@ -11,7 +11,7 @@
     <string name="user_placeholder">User</string>
     <string name="signed_out_success">Signed out successfully</string>
     <string name="processing_download">Processing download...</string>
-    <string name="saved_to_gallery">Saved to Gallery</string>
+    <string name="saved_to_gallery">✓ Image Saved to Gallery</string>
     <string name="save_failed">Save failed: %1$s</string>
     <string name="download_started">Download started...</string>
     <string name="camera_permission_required">Camera permission required for photos</string>
