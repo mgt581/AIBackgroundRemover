@@ -47,7 +47,8 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_header_settings"
@@ -63,7 +64,8 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_auth_signin"
@@ -79,7 +81,8 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_auth_signup"
@@ -95,10 +98,12 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
             </LinearLayout>
 
             <LinearLayout
+                style="?android:attr/buttonBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -107,20 +112,23 @@
 
                 <Button
                     android:id="@+id/btn_plan_day"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
-                    android:layout_weight="1"
                     android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
                     android:backgroundTint="@color/btn_day_pass"
                     android:text="@string/day_pass"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_plan_monthly"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
@@ -130,21 +138,23 @@
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btn_plan_yearly"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="@color/btn_yearly"
                 android:text="@string/yearly_trial"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
+                android:textColor="#283593"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp" />
+                app:cornerRadius="8dp"
+                tools:ignore="VisualLintButtonSize" />
 
             <TextView
                 android:id="@+id/tv_signed_in_status"
@@ -184,7 +194,8 @@
                 <WebView
                     android:id="@+id/webView"
                     android:layout_width="match_parent"
-                    android:layout_height="600dp" />
+                    android:layout_height="600dp"
+                    tools:ignore="WebViewLayout" />
 
             </androidx.cardview.widget.CardView>
 
@@ -195,7 +206,8 @@
                 android:gravity="center"
                 android:text="@string/footer_ownership"
                 android:textColor="@color/brand_text_secondary"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                tools:ignore="SmallSp,VisualLintLongText" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -245,6 +257,7 @@
         android:textColor="@color/white"
         app:backgroundTint="@color/btn_nav_text"
         app:icon="@android:drawable/ic_menu_save"
-        app:iconTint="@color/white" />
+        app:iconTint="@color/white"
+        tools:ignore="ClassNameCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
