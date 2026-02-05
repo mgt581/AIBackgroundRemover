@@ -53,18 +53,37 @@ This will use the hooks directly from the `.github/hooks` directory.
 1. **Fetches latest changes** from remote
 2. **Checks sync status** - Counts commits ahead/behind
 3. **Prevents push if behind** - Stops you from pushing when remote has advanced
-4. **Warns on protected branches** - Asks for confirmation when pushing to main/master
+4. **Warns on protected branches** - Asks for confirmation when pushing to main/master (auto-approves in CI/non-interactive environments)
 5. **Provides helpful commands** - Shows exactly what to run to fix issues
+
+### Non-Interactive and CI Support
+
+The hook automatically detects non-interactive environments and skips the confirmation prompt when:
+- Running in CI/CD (detects `CI` or `GITHUB_ACTIONS` environment variables)
+- No TTY is available (stdin is not a terminal)
+- `SKIP_PUSH_CONFIRM` environment variable is set
+
+This ensures the hook works seamlessly in both local development and automated workflows.
 
 ## Bypassing Hooks (Use with Caution)
 
-If you need to bypass the hook:
+### For all pushes
+If you need to bypass the hook entirely:
 
 ```bash
 git push --no-verify
 ```
 
 **Warning:** Only use this if you know what you're doing!
+
+### For scripts and automation
+Set the `SKIP_PUSH_CONFIRM` environment variable to skip the protected branch confirmation:
+
+```bash
+SKIP_PUSH_CONFIRM=1 git push origin main
+```
+
+The hook automatically detects CI environments (`CI`, `GITHUB_ACTIONS`) and non-interactive terminals.
 
 ## Troubleshooting
 

@@ -41,11 +41,19 @@ fi
 # Check if pushing to protected branches
 if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
     echo "⚠️  WARNING: You are pushing to $current_branch branch!"
-    echo "Are you sure you want to continue? (y/n)"
-    read -r response
-    if [ "$response" != "y" ]; then
-        echo "Push cancelled."
-        exit 1
+    
+    # Check if we're in a non-interactive environment
+    # This includes CI/CD, scripts, or when SKIP_PUSH_CONFIRM is set
+    if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ] || [ -n "$SKIP_PUSH_CONFIRM" ] || [ ! -t 0 ]; then
+        echo "ℹ️  Non-interactive environment detected - auto-approving push"
+        echo "   (Set SKIP_PUSH_CONFIRM=1 or use --no-verify to bypass this check)"
+    else
+        echo "Are you sure you want to continue? (y/n)"
+        read -r response
+        if [ "$response" != "y" ]; then
+            echo "Push cancelled."
+            exit 1
+        fi
     fi
 fi
 
