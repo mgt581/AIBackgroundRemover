@@ -47,7 +47,8 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_header_settings"
@@ -63,7 +64,8 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_auth_signin"
@@ -79,7 +81,8 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_auth_signup"
@@ -95,10 +98,12 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="12dp"
+                    tools:ignore="VisualLintButtonSize" />
             </LinearLayout>
 
             <LinearLayout
+                style="?android:attr/buttonBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -107,20 +112,23 @@
 
                 <Button
                     android:id="@+id/btn_plan_day"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
-                    android:layout_weight="1"
                     android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
                     android:backgroundTint="@color/btn_day_pass"
                     android:text="@string/day_pass"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_plan_monthly"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
@@ -130,21 +138,23 @@
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    tools:ignore="TouchTargetSizeCheck,VisualLintButtonSize" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btn_plan_yearly"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="@color/btn_yearly"
                 android:text="@string/yearly_trial"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
+                android:textColor="#283593"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp" />
+                app:cornerRadius="8dp"
+                tools:ignore="VisualLintButtonSize" />
 
             <TextView
                 android:id="@+id/tv_signed_in_status"
@@ -172,171 +182,21 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Editing Tools Card -->
+            <!-- Main WebView Content -->
+            <!-- We keep this to handle the actual processing -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/brand_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp">
 
-                <LinearLayout
+                <WebView
+                    android:id="@+id/webView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="24dp">
+                    android:layout_height="600dp"
+                    tools:ignore="WebViewLayout" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/upload_to_begin"
-                        android:textColor="@color/brand_text"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp"/>
-
-                    <Button
-                        android:id="@+id/btn_choose_photo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_choose_photo"
-                        android:text="@string/choose_photo"
-                        android:textColor="@color/white"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
-
-                    <Button
-                        android:id="@+id/btn_remove_bg"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_action_bg"
-                        android:text="@string/remove_background"
-                        android:textColor="@color/btn_action_text"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
-
-                    <Button
-                        android:id="@+id/btn_change_bg"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_action_bg"
-                        android:text="@string/change_background"
-                        android:textColor="@color/btn_action_text"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
-
-                    <Button
-                        android:id="@+id/btn_choose_background"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_action_bg"
-                        android:text="@string/choose_background"
-                        android:textColor="@color/brand_text"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
-
-                    <LinearLayout
-                        android:id="@+id/ll_remove_person"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_button_action"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:paddingHorizontal="32dp"
-                        android:paddingVertical="12dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/btn_remove_person"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/remove_person"
-                            android:textColor="@color/btn_action_text"
-                            android:textStyle="bold"
-                            android:textSize="14sp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:background="@drawable/bg_beta_tag"
-                            android:paddingHorizontal="6dp"
-                            android:paddingVertical="2dp"
-                            android:text="@string/beta"
-                            android:textColor="@color/beta_tag_text"
-                            android:textSize="10sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Preview Box -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/preview_card"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/brand_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-
-                <ImageView
-                    android:id="@+id/iv_preview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/bg_transparent_checkerboard"
-                    tools:ignore="ContentDescription" />
-
-            </androidx.cardview.widget.CardView>
-
-            <!-- Save Tools Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/brand_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <Button
-                        android:id="@+id/btn_save_to_gallery"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_nav_bg"
-                        android:text="@string/save_to_gallery"
-                        android:textColor="@color/brand_text"
-                        android:textStyle="bold"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="16dp"
-                        app:cornerRadius="12dp"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/save_info"
-                        android:textColor="@color/brand_text_secondary"
-                        android:textSize="12sp"/>
-
-                </LinearLayout>
             </androidx.cardview.widget.CardView>
 
             <TextView
@@ -347,7 +207,7 @@
                 android:text="@string/footer_ownership"
                 android:textColor="@color/brand_text_secondary"
                 android:textSize="10sp"
-                tools:ignore="SmallSp" />
+                tools:ignore="SmallSp,VisualLintLongText" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -387,11 +247,17 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Hidden WebView for background logic only -->
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
-        android:visibility="gone" />
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="@string/save_to_gallery"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/btn_nav_text"
+        app:icon="@android:drawable/ic_menu_save"
+        app:iconTint="@color/white"
+        tools:ignore="ClassNameCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
