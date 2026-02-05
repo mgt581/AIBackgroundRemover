@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION", "DEPRECATION")
+
 package com.aiphotostudio.bgremover
 
 import android.Manifest
@@ -131,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("UseKtx")
     private fun openUrl(url: String) {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -176,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     private fun setupWebView() {
         webView.settings.apply {
             javaScriptEnabled = true
@@ -188,13 +191,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.addJavascriptInterface(object {
-            @JavascriptInterface
-            fun processBlob(base64Data: String) {
-                lastCapturedBase64 = base64Data
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Image ready to save!", Toast.LENGTH_SHORT).show()
-                }
-            }
         }, "AndroidInterface")
 
         webView.webViewClient = object : WebViewClient() {
@@ -252,7 +248,7 @@ class MainActivity : AppCompatActivity() {
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
             runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             runOnUiThread { Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show() }
         }
     }
