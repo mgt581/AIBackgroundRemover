@@ -1,6 +1,5 @@
 @file:Suppress("DEPRECATION")
 plugins {
-    
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
@@ -32,7 +31,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // This ensures debug symbols are stripped but kept for Play Console
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }
