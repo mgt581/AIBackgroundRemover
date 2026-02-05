@@ -1,8 +1,7 @@
-@file:Suppress("DEPRECATION", "DEPRECATION")
+@file:Suppress("DEPRECATION")
 
 package com.aiphotostudio.bgremover
 
-import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
@@ -42,7 +41,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        
         auth = FirebaseAuth.getInstance()
+        
+        // Initialize Views
+        webView = findViewById(R.id.webView)
+        btnHeaderGallery = findViewById(R.id.btn_header_gallery)
+        btnHeaderSettings = findViewById(R.id.btn_header_settings)
+        btnAuthSignin = findViewById(R.id.btn_auth_signin)
+        btnAuthSignup = findViewById(R.id.btn_auth_signup)
+        tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
 
         try {
             findViewById<View>(R.id.fab_save).setOnClickListener {
@@ -74,12 +83,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             findViewById<Button>(R.id.btn_plan_day).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { webUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { webUrl("https://aiphotostudio.co.uk/pricing") }
 
             findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
             findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
-            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/terms") }
+            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { webUrl("https://aiphotostudio.co.uk/terms") }
 
             if (savedInstanceState == null) {
                 handleIntent(intent)
@@ -89,13 +98,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("UseKtx")
-    private fun openUrl(url: String) {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error opening URL", e)
-        }
+    private fun webUrl(url: String) {
+        webView.loadUrl(url)
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -158,7 +162,8 @@ class MainActivity : AppCompatActivity() {
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
             runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Save failed", e)
             runOnUiThread { Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show() }
         }
     }
