@@ -19,6 +19,7 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -44,14 +45,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAuthSignin: Button
     private lateinit var btnAuthSignup: Button
     private lateinit var tvSignedInStatus: TextView
+    private lateinit var ivPreview: ImageView
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
+        if (uri != null) {
+            ivPreview.setImageURI(uri)
+            filePathCallback?.onReceiveValue(arrayOf(uri))
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
         filePathCallback = null
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success && cameraImageUri != null) {
+            ivPreview.setImageURI(cameraImageUri)
             filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
         } else {
             filePathCallback?.onReceiveValue(null)
@@ -82,12 +90,37 @@ class MainActivity : AppCompatActivity() {
             btnAuthSignin = findViewById(R.id.btn_auth_signin)
             btnAuthSignup = findViewById(R.id.btn_auth_signup)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+            ivPreview = findViewById(R.id.iv_preview)
 
             setupWebView()
             updateHeaderUi()
             checkAndRequestPermissions()
 
-            findViewById<View>(R.id.fab_save).setOnClickListener {
+            findViewById<Button>(R.id.btn_choose_photo).setOnClickListener {
+                showSourceDialog()
+            }
+
+            findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
+                Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
+                // Add your logic here
+            }
+
+            findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
+                Toast.makeText(this, "Changing background...", Toast.LENGTH_SHORT).show()
+                // Add your logic here
+            }
+
+            findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
+                Toast.makeText(this, "Choosing background...", Toast.LENGTH_SHORT).show()
+                // Add your logic here
+            }
+
+            findViewById<View>(R.id.btn_remove_person).setOnClickListener {
+                Toast.makeText(this, "Removing person (BETA)...", Toast.LENGTH_SHORT).show()
+                // Add your logic here
+            }
+
+            findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
                 lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
                     Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
                 }
@@ -115,13 +148,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            findViewById<Button>(R.id.btn_plan_day).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_day).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
 
             findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
             findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
-            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/terms") }
+            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
 
             if (savedInstanceState == null) {
                 handleIntent(intent)
@@ -142,9 +175,8 @@ class MainActivity : AppCompatActivity() {
     private fun handleIntent(intent: Intent?) {
         val data = intent?.data
         if (data != null && data.path?.contains("/auth") == true) {
+            // Keep hidden webview logic for auth if needed
             webView.loadUrl(data.toString())
-        } else {
-            webView.loadUrl("https://aiphotostudio.co.uk")
         }
     }
 
