@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAuthSignup: Button
     private lateinit var tvSignedInStatus: TextView
     private lateinit var ivPreview: ImageView
+    
+    private var viewsInitialized = false
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
@@ -81,93 +83,88 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
 
-        try {
-            setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main)
+        initViews()
+        setupWebView()
+        
+        updateHeaderUi()
+        checkAndRequestPermissions()
 
-            // Fix: Initialize the class-level webView property instead of creating a local one
-            webView = findViewById(R.id.webView)
-            
-            btnHeaderGallery = findViewById(R.id.btn_header_gallery)
-            btnHeaderSettings = findViewById(R.id.btn_header_settings)
-            btnAuthSignin = findViewById(R.id.btn_auth_signin)
-            btnAuthSignup = findViewById(R.id.btn_auth_signup)
-            tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
-            ivPreview = findViewById(R.id.iv_preview)
-
-            setupWebView()
-            updateHeaderUi()
-            checkAndRequestPermissions()
-
-            findViewById<Button>(R.id.btn_choose_photo).setOnClickListener {
-                showSourceDialog()
-            }
-
-            findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
-                Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
-            }
-
-            findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
-                Toast.makeText(this, "Changing background...", Toast.LENGTH_SHORT).show()
-            }
-
-            findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
-                Toast.makeText(this, "Choosing background...", Toast.LENGTH_SHORT).show()
-            }
-
-            findViewById<View>(R.id.btn_remove_person).setOnClickListener {
-                Toast.makeText(this, "Removing person (BETA)...", Toast.LENGTH_SHORT).show()
-            }
-
-            findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
-                lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
-                    Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            btnHeaderGallery.setOnClickListener {
-                startActivity(Intent(this, GalleryActivity::class.java))
-            }
-
-            btnHeaderSettings.setOnClickListener {
-                startActivity(Intent(this, SettingsActivity::class.java))
-            }
-
-            btnAuthSignin.setOnClickListener {
-                if (auth.currentUser != null) {
-                    signOut()
-                } else {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                }
-            }
-
-            btnAuthSignup.setOnClickListener {
-                if (auth.currentUser == null) {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                }
-            }
-
-            findViewById<Button>(R.id.btn_plan_day).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
-
-            findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
-            findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
-            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
-
-            if (savedInstanceState == null) {
-                handleIntent(intent)
-            }
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error in onCreate", e)
+        if (savedInstanceState == null) {
+            webView.loadUrl("https://aiphotostudio.co.uk/")
+            handleIntent(intent)
         }
     }
 
-    private fun openUrl(url: String) {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error opening URL", e)
+    private fun initViews() {
+        webView = findViewById(R.id.webView)
+        btnHeaderGallery = findViewById(R.id.btn_header_gallery)
+        btnHeaderSettings = findViewById(R.id.btn_header_settings)
+        btnAuthSignin = findViewById(R.id.btn_auth_signin)
+        btnAuthSignup = findViewById(R.id.btn_auth_signup)
+        tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+        ivPreview = findViewById(R.id.iv_preview)
+
+        findViewById<Button>(R.id.btn_choose_photo).setOnClickListener {
+            showSourceDialog()
         }
+
+        findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
+            webView.evaluateJavascript("javascript:if(window.removeBackground) window.removeBackground();", null)
+            Toast.makeText(this, "Processing background removal...", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
+            webView.evaluateJavascript("javascript:if(window.changeBackground) window.changeBackground();", null)
+            Toast.makeText(this, "Opening background editor...", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
+            webView.evaluateJavascript("javascript:if(window.chooseBackground) window.chooseBackground();", null)
+        }
+
+        findViewById<View>(R.id.btn_remove_person).setOnClickListener {
+            webView.evaluateJavascript("javascript:if(window.removePerson) window.removePerson();", null)
+            Toast.makeText(this, "Beta: Removing person...", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
+            lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
+                Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnHeaderGallery.setOnClickListener {
+            startActivity(Intent(this, GalleryActivity::class.java))
+        }
+
+        btnHeaderSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        btnAuthSignin.setOnClickListener {
+            if (auth.currentUser != null) {
+                signOut()
+            } else {
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+        }
+
+        btnAuthSignup.setOnClickListener {
+            if (auth.currentUser == null) {
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+        }
+
+        findViewById<Button>(R.id.btn_plan_day).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
+        findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
+        findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
+
+        findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
+        findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
+        findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
+        
+        viewsInitialized = true
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -179,7 +176,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        updateHeaderUi()
+        if (viewsInitialized) {
+            updateHeaderUi()
+        }
     }
 
     private fun updateHeaderUi() {
@@ -318,5 +317,13 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         if (toRequest.isNotEmpty()) requestPermissionsLauncher.launch(toRequest.toTypedArray())
+    }
+    
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error opening URL", e)
+        }
     }
 }
