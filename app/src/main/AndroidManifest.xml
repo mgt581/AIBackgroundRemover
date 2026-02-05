@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.aiphotostudio.bgremover">
+
+    <queries>
+        <intent>
+            <action android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN" />
+        </intent>
+        <package android:name="com.google.android.gms" />
+        <package android:name="com.android.chrome" />
+    </queries>
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
     <application
         android:name=".AIApplication"
@@ -18,22 +27,40 @@
         android:theme="@style/Theme.AIBackgroundRemover">
 
         <activity
-            android:name=".LoginActivity"
-            android:exported="true">
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="aiphotostudio.co.uk"
+                    android:pathPrefix="/auth" />
+            </intent-filter>
         </activity>
 
         <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AIBackgroundRemover.NoActionBar" />
 
         <activity
             android:name=".GalleryActivity"
             android:exported="false"
             android:label="My Gallery"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="Settings"
             android:parentActivityName=".MainActivity" />
 
         <activity
@@ -44,9 +71,9 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true"
+            android:authorities="com.aiphotostudio.bgremover.fileprovider">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
