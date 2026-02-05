@@ -40,4 +40,5 @@
     <string name="mpa_url">multipostapp.co.uk</string>
     <string name="owner_email">alex@bryantdigitalsolutions.com</string>
     <string name="terms_of_service">Terms of Service</string>
+    <string name="privacy_policy">Privacy Policy</string>
 </resources>
