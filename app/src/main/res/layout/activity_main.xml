@@ -182,8 +182,48 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <Button
+                    android:id="@+id/btn_choose_photo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/choose_photo"
+                    android:backgroundTint="@color/btn_choose_photo"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <Button
+                    android:id="@+id/btn_remove_bg"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/remove_background" />
+
+                <Button
+                    android:id="@+id/btn_change_bg"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_background" />
+
+            </LinearLayout>
+
             <!-- Main WebView Content -->
-            <!-- We keep this to handle the actual processing -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -234,14 +274,38 @@
                     android:textColor="@color/btn_nav_text"
                     android:textSize="12sp" />
 
-                <Button
-                    android:id="@+id/btn_footer_terms"
-                    style="@style/Widget.Material3.Button.TextButton"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/terms_of_service"
-                    android:textColor="@color/brand_text_secondary"
-                    android:textSize="12sp" />
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_footer_terms"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/terms_of_service"
+                        android:textColor="@color/brand_text_secondary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" | "
+                        android:textColor="@color/brand_text_secondary"
+                        android:layout_gravity="center_vertical" />
+
+                    <Button
+                        android:id="@+id/btn_footer_privacy"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Privacy Policy"
+                        android:textColor="@color/brand_text_secondary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
@@ -251,7 +315,7 @@
         android:id="@+id/fab_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="bottom|center_horizontal"
         android:layout_margin="16dp"
         android:text="@string/save_to_gallery"
         android:textColor="@color/white"
