@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         if (uri != null) {
             ivPreview.setImageURI(uri)
             filePathCallback?.onReceiveValue(arrayOf(uri))
+            
+            webView.evaluateJavascript("javascript:if(window.handleAppPhotoUpload) window.handleAppPhotoUpload();", null)
         } else {
             filePathCallback?.onReceiveValue(null)
         }
@@ -63,6 +65,8 @@ class MainActivity : AppCompatActivity() {
         if (success && cameraImageUri != null) {
             ivPreview.setImageURI(cameraImageUri)
             filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+            
+            webView.evaluateJavascript("javascript:if(window.handleAppPhotoUpload) window.handleAppPhotoUpload();", null)
         } else {
             filePathCallback?.onReceiveValue(null)
         }
@@ -110,27 +114,32 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
+            webView.evaluateJavascript("javascript:document.querySelector('button[aria-label=\"Remove Background\"]')?.click();", null)
             webView.evaluateJavascript("javascript:if(window.removeBackground) window.removeBackground();", null)
-            Toast.makeText(this, "Processing background removal...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
+            webView.evaluateJavascript("javascript:document.querySelector('button[aria-label=\"Change Background\"]')?.click();", null)
             webView.evaluateJavascript("javascript:if(window.changeBackground) window.changeBackground();", null)
             Toast.makeText(this, "Opening background editor...", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
+            webView.evaluateJavascript("javascript:document.querySelector('input[type=\"file\"]')?.click();", null)
             webView.evaluateJavascript("javascript:if(window.chooseBackground) window.chooseBackground();", null)
         }
 
         findViewById<View>(R.id.btn_remove_person).setOnClickListener {
             webView.evaluateJavascript("javascript:if(window.removePerson) window.removePerson();", null)
-            Toast.makeText(this, "Beta: Removing person...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Removing person...", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
+            webView.evaluateJavascript("javascript:if(window.downloadImage) window.downloadImage();", null)
+            
             lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
-                Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Capturing image from studio...", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -220,7 +229,7 @@ class MainActivity : AppCompatActivity() {
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Image ready to save!", Toast.LENGTH_SHORT).show()
+                    saveImageToGallery(base64Data)
                 }
             }
         }, "AndroidInterface")
@@ -251,8 +260,7 @@ class MainActivity : AppCompatActivity() {
 
         webView.setDownloadListener { url, _, _, _, _ ->
             if (url.startsWith("data:")) {
-                lastCapturedBase64 = url
-                Toast.makeText(this, "Image captured!", Toast.LENGTH_SHORT).show()
+                saveImageToGallery(url)
             }
         }
     }
@@ -269,9 +277,18 @@ class MainActivity : AppCompatActivity() {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
                     put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Photo Studio")
+                    put(MediaStore.Images.Media.IS_PENDING, 1)
                 }
+                
                 val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return
-                contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                contentResolver.openOutputStream(uri)?.use { 
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) 
+                }
+                
+                values.clear()
+                values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                contentResolver.update(uri, values, null, null)
+                
             } else {
                 @Suppress("DEPRECATION")
                 val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Photo Studio")
@@ -280,8 +297,11 @@ class MainActivity : AppCompatActivity() {
                 FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
-            runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+            runOnUiThread { 
+                Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() 
+            }
         } catch (e: Exception) {
+            Log.e("MainActivity", "Save failed", e)
             runOnUiThread { Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show() }
         }
     }
