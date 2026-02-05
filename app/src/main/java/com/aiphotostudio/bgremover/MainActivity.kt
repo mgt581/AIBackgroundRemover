@@ -2,12 +2,9 @@
 
 package com.aiphotostudio.bgremover
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaScannerConnection
@@ -23,11 +20,7 @@ import android.webkit.*
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -37,8 +30,6 @@ import java.io.FileOutputStream
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
-    private var filePathCallback: ValueCallback<Array<Uri>>? = null
-    private var cameraImageUri: Uri? = null
     private lateinit var auth: FirebaseAuth
 
     private lateinit var btnHeaderGallery: Button
@@ -47,28 +38,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAuthSignup: Button
     private lateinit var tvSignedInStatus: TextView
 
-    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
-        filePathCallback = null
-    }
-
-    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && cameraImageUri != null) {
-            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
-        } else {
-            filePathCallback?.onReceiveValue(null)
-        }
-        filePathCallback = null
-    }
-
-    private val requestPermissionsLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions[Manifest.permission.CAMERA] != true) {
-            Toast.makeText(this, getString(R.string.camera_permission_required), Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private var lastCapturedBase64: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,19 +45,6 @@ class MainActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         try {
-            setContentView(R.layout.activity_main)
-
-            webView = findViewById(R.id.webView)
-            btnHeaderGallery = findViewById(R.id.btn_header_gallery)
-            btnHeaderSettings = findViewById(R.id.btn_header_settings)
-            btnAuthSignin = findViewById(R.id.btn_auth_signin)
-            btnAuthSignup = findViewById(R.id.btn_auth_signup)
-            tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
-
-            setupWebView()
-            updateHeaderUi()
-            checkAndRequestPermissions()
-
             findViewById<View>(R.id.fab_save).setOnClickListener {
                 lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
                     Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
@@ -179,52 +135,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
-    private fun setupWebView() {
-        webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            allowFileAccess = true
-            allowContentAccess = true
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-        }
-
-        webView.addJavascriptInterface(object {
-        }, "AndroidInterface")
-
-        webView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co.uk") || url.contains("accounts.google") || url.contains("firebase")) {
-                    false
-                } else {
-                    openUrl(url)
-                    true
-                }
-            }
-        }
-
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onShowFileChooser(
-                webView: WebView?,
-                filePathCallback: ValueCallback<Array<Uri>>?,
-                fileChooserParams: FileChooserParams?
-            ): Boolean {
-                this@MainActivity.filePathCallback = filePathCallback
-                showSourceDialog()
-                return true
-            }
-        }
-
-        webView.setDownloadListener { url, _, _, _, _ ->
-            if (url.startsWith("data:")) {
-                lastCapturedBase64 = url
-                Toast.makeText(this, "Image captured!", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private fun saveImageToGallery(base64Data: String) {
         try {
             val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
@@ -253,36 +163,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSourceDialog() {
-        val options = arrayOf(getString(R.string.take_photo), getString(R.string.choose_from_gallery))
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.select_image_source))
-            .setItems(options) { _, which -> if (which == 0) launchCamera() else launchGallery() }
-            .setOnCancelListener { filePathCallback?.onReceiveValue(null) }
-            .show()
-    }
-
-    private fun launchCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
-            if (!directory.exists()) directory.mkdirs()
-            val imageFile = File(directory, "temp_${System.currentTimeMillis()}.jpg")
-            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.file provider", imageFile)
-            cameraImageUri = uri
-            takePicture.launch(uri)
-        } else {
-            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
-        }
-    }
-
-    private fun launchGallery() {
-        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-    }
-
-    private fun checkAndRequestPermissions() {
-        val permissions = mutableListOf(Manifest.permission.CAMERA)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
-        if (toRequest.isNotEmpty()) requestPermissionsLauncher.launch(toRequest.toTypedArray())
-    }
 }

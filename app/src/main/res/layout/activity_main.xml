@@ -313,7 +313,6 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Privacy Policy"
                         android:textColor="@color/brand_text_secondary"
                         android:textSize="12sp"
                         tools:ignore="HardcodedText" />
