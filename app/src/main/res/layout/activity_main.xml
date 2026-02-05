@@ -16,15 +16,100 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/ai_photo_studio"
-                android:textColor="@color/brand_text"
-                android:textSize="24sp"
+                android:textColor="#111827"
+                android:textSize="22sp"
                 android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_header_gallery"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:backgroundTint="#EEF2FF"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    android:text="@string/gallery"
+                    android:textAllCaps="false"
+                    android:textColor="#4F46E5"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp"
+                    tools:ignore="VisualLintButtonSize" />
+
+                <Button
+                    android:id="@+id/btn_header_settings"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="3dp"
+                    android:backgroundTint="#EEF2FF"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    android:text="@string/settings"
+                    android:textAllCaps="false"
+                    android:textColor="#4F46E5"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp"
+                    tools:ignore="VisualLintButtonSize" />
+
+                <Button
+                    android:id="@+id/btn_auth_signin"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="3dp"
+                    android:backgroundTint="#EEF2FF"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    android:text="@string/sign_in"
+                    android:textAllCaps="false"
+                    android:textColor="#4F46E5"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp"
+                    tools:ignore="VisualLintButtonSize" />
+
+                <Button
+                    android:id="@+id/btn_auth_signup"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:backgroundTint="#EEF2FF"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    android:text="@string/sign_up"
+                    android:textAllCaps="false"
+                    android:textColor="#4F46E5"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp"
+                    tools:ignore="VisualLintButtonSize" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -34,103 +119,37 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btn_header_gallery"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="4dp"
-                    android:backgroundTint="@color/btn_nav_bg"
-                    android:padding="0dp"
-                    android:text="@string/gallery"
-                    android:textAllCaps="false"
-                    android:textColor="@color/btn_nav_text"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="12dp" />
-
-                <Button
-                    android:id="@+id/btn_header_settings"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="4dp"
-                    android:backgroundTint="@color/btn_nav_bg"
-                    android:padding="0dp"
-                    android:text="@string/settings"
-                    android:textAllCaps="false"
-                    android:textColor="@color/btn_nav_text"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="12dp" />
-
-                <Button
-                    android:id="@+id/btn_auth_signin"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="4dp"
-                    android:backgroundTint="@color/btn_nav_bg"
-                    android:padding="0dp"
-                    android:text="@string/sign_in"
-                    android:textAllCaps="false"
-                    android:textColor="@color/btn_nav_text"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="12dp" />
-
-                <Button
-                    android:id="@+id/btn_auth_signup"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:backgroundTint="@color/btn_nav_bg"
-                    android:padding="0dp"
-                    android:text="@string/sign_up"
-                    android:textAllCaps="false"
-                    android:textColor="@color/btn_nav_text"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="12dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <Button
                     android:id="@+id/btn_plan_day"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
-                    android:layout_weight="1"
                     android:layout_marginEnd="8dp"
-                    android:backgroundTint="@color/btn_day_pass"
+                    android:layout_weight="1"
+                    android:backgroundTint="#71717A"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="@string/day_pass"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_plan_monthly"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/btn_monthly"
+                    android:backgroundTint="#2563EB"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="@string/monthly_pass"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp" />
+                    app:cornerRadius="8dp"
+                    tools:ignore="VisualLintButtonSize" />
             </LinearLayout>
 
             <Button
@@ -138,13 +157,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginTop="8dp"
-                android:backgroundTint="@color/btn_yearly"
+                android:layout_marginHorizontal="48dp"
+                android:backgroundTint="#22C55E"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="@string/yearly_trial"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp" />
+                app:cornerRadius="8dp"
+                tools:ignore="VisualLintButtonSize" />
 
             <TextView
                 android:id="@+id/tv_signed_in_status"
@@ -152,11 +175,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="8dp"
-                android:text="@string/user_placeholder"
                 android:textColor="@color/brand_text_secondary"
                 android:textSize="12sp"
                 android:visibility="gone"
-                tools:visibility="visible" />
+                tools:text="✓ user@example.com" />
 
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -172,171 +194,146 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Editing Tools Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="8dp"
                 app:cardBackgroundColor="@color/brand_surface"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
+                    android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:paddingVertical="32dp"
+                    android:paddingHorizontal="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/upload_to_begin"
-                        android:textColor="@color/brand_text"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp"/>
+                        android:textColor="#374151"
+                        android:textSize="16sp" />
 
                     <Button
                         android:id="@+id/btn_choose_photo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_choose_photo"
+                        android:layout_width="160dp"
+                        android:layout_height="54dp"
+                        android:layout_marginTop="20dp"
+                        android:backgroundTint="#8B5CF6"
                         android:text="@string/choose_photo"
+                        android:textAllCaps="false"
                         android:textColor="@color/white"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="12dp"
+                        tools:ignore="VisualLintButtonSize" />
+
+                    <ImageView
+                        android:id="@+id/iv_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        tools:src="@android:drawable/ic_menu_gallery"
+                        android:contentDescription="@string/choose_photo" />
 
                     <Button
                         android:id="@+id/btn_remove_bg"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_action_bg"
+                        android:layout_width="200dp"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="16dp"
+                        android:backgroundTint="#F3F4F6"
                         android:text="@string/remove_background"
-                        android:textColor="@color/btn_action_text"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
+                        android:textAllCaps="false"
+                        android:textColor="#4B5563"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="10dp"
+                        tools:ignore="VisualLintButtonSize" />
 
                     <Button
                         android:id="@+id/btn_change_bg"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_action_bg"
+                        android:layout_width="200dp"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp"
+                        android:backgroundTint="#F3F4F6"
                         android:text="@string/change_background"
-                        android:textColor="@color/btn_action_text"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
+                        android:textAllCaps="false"
+                        android:textColor="#4B5563"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="10dp"
+                        tools:ignore="VisualLintButtonSize" />
 
                     <Button
                         android:id="@+id/btn_choose_background"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_action_bg"
+                        android:layout_width="200dp"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp"
+                        android:backgroundTint="#F3F4F6"
                         android:text="@string/choose_background"
-                        android:textColor="@color/brand_text"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="12dp"
-                        app:cornerRadius="12dp"/>
+                        android:textAllCaps="false"
+                        android:textColor="#111827"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="10dp"
+                        tools:ignore="VisualLintButtonSize" />
 
-                    <LinearLayout
-                        android:id="@+id/ll_remove_person"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_button_action"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:paddingHorizontal="32dp"
-                        android:paddingVertical="12dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
+                    <FrameLayout
+                        android:layout_width="200dp"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp">
 
-                        <TextView
+                        <Button
                             android:id="@+id/btn_remove_person"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:backgroundTint="#F3F4F6"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
                             android:text="@string/remove_person"
-                            android:textColor="@color/btn_action_text"
+                            android:textAllCaps="false"
+                            android:textColor="#4B5563"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textSize="14sp"/>
+                            app:cornerRadius="10dp"
+                            tools:ignore="VisualLintButtonSize" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
+                            android:layout_gravity="center_vertical|end"
+                            android:layout_marginEnd="12dp"
                             android:background="@drawable/bg_beta_tag"
                             android:paddingHorizontal="6dp"
                             android:paddingVertical="2dp"
                             android:text="@string/beta"
-                            android:textColor="@color/beta_tag_text"
+                            android:textColor="#B45309"
                             android:textSize="10sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Preview Box -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/preview_card"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/brand_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-
-                <ImageView
-                    android:id="@+id/iv_preview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/bg_transparent_checkerboard"
-                    tools:ignore="ContentDescription" />
-
-            </androidx.cardview.widget.CardView>
-
-            <!-- Save Tools Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/brand_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="24dp">
+                            android:textStyle="bold"
+                            tools:ignore="SmallSp" />
+                    </FrameLayout>
 
                     <Button
                         android:id="@+id/btn_save_to_gallery"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/btn_nav_bg"
+                        android:layout_width="200dp"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="16dp"
+                        android:backgroundTint="#4F46E5"
                         android:text="@string/save_to_gallery"
-                        android:textColor="@color/brand_text"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:paddingHorizontal="32dp"
-                        android:layout_marginBottom="16dp"
-                        app:cornerRadius="12dp"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/save_info"
-                        android:textColor="@color/brand_text_secondary"
-                        android:textSize="12sp"/>
+                        app:cornerRadius="10dp"
+                        tools:ignore="VisualLintButtonSize" />
 
                 </LinearLayout>
+
             </androidx.cardview.widget.CardView>
 
             <TextView
@@ -345,7 +342,7 @@
                 android:layout_marginTop="24dp"
                 android:gravity="center"
                 android:text="@string/footer_ownership"
-                android:textColor="@color/brand_text_secondary"
+                android:textColor="#4B5563"
                 android:textSize="10sp"
                 tools:ignore="SmallSp" />
 
@@ -362,8 +359,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/bds_url"
-                    android:textColor="@color/btn_nav_text"
-                    android:textSize="12sp" />
+                    android:textColor="#4F46E5"
+                    android:textSize="12sp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_link_bgh"
@@ -371,8 +369,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/bgh_url"
-                    android:textColor="@color/btn_nav_text"
-                    android:textSize="12sp" />
+                    android:textColor="#4F46E5"
+                    android:textSize="12sp"
+                    tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_footer_terms"
@@ -380,18 +379,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/terms_of_service"
-                    android:textColor="@color/brand_text_secondary"
-                    android:textSize="12sp" />
+                    android:textColor="#4B5563"
+                    android:textSize="12sp"
+                    tools:ignore="VisualLintButtonSize" />
             </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Hidden WebView for background logic only -->
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
-        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
