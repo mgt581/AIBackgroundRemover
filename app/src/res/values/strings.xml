@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name" translatable="false">AI Background Remover</string>
+    <string name="default_web_client_id" translatable="false">495715411996-iijvtbo02cn7tgvk6tp7284kjmdhefu0.apps.googleusercontent.com</string>
+    <string name="todo">TODO</string>
+    <string name="ai_background_remover" translatable="false">Ai Photo Studio Background remover</string>
+    <string name="signed_in_status">✓ Signed in</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="gallery">Gallery</string>
+</resources>
