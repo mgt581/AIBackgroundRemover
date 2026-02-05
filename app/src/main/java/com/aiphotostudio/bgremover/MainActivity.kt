@@ -84,7 +84,9 @@ class MainActivity : AppCompatActivity() {
         try {
             setContentView(R.layout.activity_main)
 
+            // Fix: Initialize the class-level webView property instead of creating a local one
             webView = findViewById(R.id.webView)
+            
             btnHeaderGallery = findViewById(R.id.btn_header_gallery)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             btnAuthSignin = findViewById(R.id.btn_auth_signin)
@@ -102,22 +104,18 @@ class MainActivity : AppCompatActivity() {
 
             findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
                 Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
                 Toast.makeText(this, "Changing background...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
                 Toast.makeText(this, "Choosing background...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<View>(R.id.btn_remove_person).setOnClickListener {
                 Toast.makeText(this, "Removing person (BETA)...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
@@ -175,7 +173,6 @@ class MainActivity : AppCompatActivity() {
     private fun handleIntent(intent: Intent?) {
         val data = intent?.data
         if (data != null && data.path?.contains("/auth") == true) {
-            // Keep hidden webview logic for auth if needed
             webView.loadUrl(data.toString())
         }
     }
@@ -277,6 +274,7 @@ class MainActivity : AppCompatActivity() {
                 val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return
                 contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
             } else {
+                @Suppress("DEPRECATION")
                 val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Photo Studio")
                 if (!directory.exists()) directory.mkdirs()
                 val file = File(directory, fileName)

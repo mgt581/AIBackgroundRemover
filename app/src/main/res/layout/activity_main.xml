@@ -194,10 +194,11 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Card 1: Upload and Action Buttons -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
+                android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/brand_surface"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="1dp">
@@ -207,21 +208,21 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:paddingVertical="32dp"
+                    android:paddingVertical="24dp"
                     android:paddingHorizontal="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
                         android:text="@string/upload_to_begin"
-                        android:textColor="#374151"
-                        android:textSize="16sp" />
+                        android:textColor="#9CA3AF"
+                        android:textSize="14sp" />
 
                     <Button
                         android:id="@+id/btn_choose_photo"
                         android:layout_width="160dp"
                         android:layout_height="54dp"
-                        android:layout_marginTop="20dp"
                         android:backgroundTint="#8B5CF6"
                         android:text="@string/choose_photo"
                         android:textAllCaps="false"
@@ -230,16 +231,6 @@
                         android:textStyle="bold"
                         app:cornerRadius="12dp"
                         tools:ignore="VisualLintButtonSize" />
-
-                    <ImageView
-                        android:id="@+id/iv_preview"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        tools:src="@android:drawable/ic_menu_gallery"
-                        android:contentDescription="@string/choose_photo" />
 
                     <Button
                         android:id="@+id/btn_remove_bg"
@@ -318,19 +309,77 @@
                             tools:ignore="SmallSp" />
                     </FrameLayout>
 
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card 2: Checkerboard Preview Area -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/brand_surface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    android:layout_margin="16dp"
+                    android:background="@drawable/bg_transparent_checkerboard">
+
+                    <ImageView
+                        android:id="@+id/iv_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@string/choose_photo"
+                        tools:src="@android:drawable/ic_menu_gallery" />
+
+                </FrameLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card 3: Save to Gallery and Info -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/brand_surface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingVertical="32dp"
+                    android:paddingHorizontal="24dp">
+
                     <Button
                         android:id="@+id/btn_save_to_gallery"
-                        android:layout_width="200dp"
+                        android:layout_width="160dp"
                         android:layout_height="48dp"
-                        android:layout_marginTop="16dp"
-                        android:backgroundTint="#4F46E5"
+                        android:backgroundTint="#E5E7EB"
                         android:text="@string/save_to_gallery"
                         android:textAllCaps="false"
-                        android:textColor="@color/white"
+                        android:textColor="#111827"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         app:cornerRadius="10dp"
                         tools:ignore="VisualLintButtonSize" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:gravity="center"
+                        android:text="@string/save_info"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp"
+                        android:lineSpacingExtra="4dp" />
 
                 </LinearLayout>
 
@@ -339,10 +388,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:text="@string/footer_ownership"
-                android:textColor="#4B5563"
+                android:textColor="#9CA3AF"
                 android:textSize="10sp"
                 tools:ignore="SmallSp" />
 
@@ -386,5 +435,11 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
