@@ -331,11 +331,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_margin="16dp"
+        android:contentDescription="@string/save_to_gallery"
         android:text="@string/save_to_gallery"
         android:textColor="@color/white"
         app:backgroundTint="@color/btn_nav_text"
         app:icon="@android:drawable/ic_menu_save"
-        app:iconTint="@color/white"
-        tools:ignore="ClassNameCheck" />
+        app:iconTint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
