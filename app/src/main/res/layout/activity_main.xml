@@ -235,7 +235,7 @@
 
             </LinearLayout>
 
-            <!-- Main WebView Content (hidden or small if needed, but kept for logic) -->
+            <!-- Main WebView Content -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
