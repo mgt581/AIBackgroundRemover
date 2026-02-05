@@ -15,7 +15,6 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
-import android.webkit.*
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -28,7 +27,6 @@ import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var webView: WebView
     private lateinit var auth: FirebaseAuth
 
     private lateinit var btnHeaderGallery: Button
@@ -46,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         
         // Initialize Views
-        webView = findViewById(R.id.webView)
         btnHeaderGallery = findViewById(R.id.btn_header_gallery)
         btnHeaderSettings = findViewById(R.id.btn_header_settings)
         btnAuthSignin = findViewById(R.id.btn_auth_signin)
@@ -82,13 +79,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            findViewById<Button>(R.id.btn_plan_day).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { webUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { webUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_day).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
+            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
 
             findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
             findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
-            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { webUrl("https://aiphotostudio.co.uk/terms") }
+            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
 
             if (savedInstanceState == null) {
                 handleIntent(intent)
@@ -98,16 +95,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun webUrl(url: String) {
-        webView.loadUrl(url)
-    }
-
     private fun handleIntent(intent: Intent?) {
         val data = intent?.data
-        if (data != null && data.path?.contains("/auth") == true) {
-            webView.loadUrl(data.toString())
-        } else {
-            webView.loadUrl("https://aiphotostudio.co.uk")
+        if (data != null) {
+            openUrl(data.toString())
         }
     }
 
