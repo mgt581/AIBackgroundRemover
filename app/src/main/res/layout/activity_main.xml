@@ -336,6 +336,7 @@
         android:textColor="@color/white"
         app:backgroundTint="@color/btn_nav_text"
         app:icon="@android:drawable/ic_menu_save"
-        app:iconTint="@color/white" />
+        app:iconTint="@color/white"
+        tools:ignore="AccessibilityClassNameCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
