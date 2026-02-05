@@ -1,7 +1,6 @@
 package com.aiphotostudio.bgremover
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Intent
@@ -17,7 +16,6 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
-import android.webkit.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -27,16 +25,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var webView: WebView
-    private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
     private lateinit var auth: FirebaseAuth
 
@@ -50,21 +48,15 @@ class MainActivity : AppCompatActivity() {
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             ivPreview.setImageURI(uri)
-            filePathCallback?.onReceiveValue(arrayOf(uri))
-        } else {
-            filePathCallback?.onReceiveValue(null)
+            Toast.makeText(this, "Image selected", Toast.LENGTH_SHORT).show()
         }
-        filePathCallback = null
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success && cameraImageUri != null) {
             ivPreview.setImageURI(cameraImageUri)
-            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
-        } else {
-            filePathCallback?.onReceiveValue(null)
+            Toast.makeText(this, "Photo captured", Toast.LENGTH_SHORT).show()
         }
-        filePathCallback = null
     }
 
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -84,7 +76,6 @@ class MainActivity : AppCompatActivity() {
         try {
             setContentView(R.layout.activity_main)
 
-            webView = findViewById(R.id.webView)
             btnHeaderGallery = findViewById(R.id.btn_header_gallery)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             btnAuthSignin = findViewById(R.id.btn_auth_signin)
@@ -92,7 +83,6 @@ class MainActivity : AppCompatActivity() {
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
             ivPreview = findViewById(R.id.iv_preview)
 
-            setupWebView()
             updateHeaderUi()
             checkAndRequestPermissions()
 
@@ -102,27 +92,23 @@ class MainActivity : AppCompatActivity() {
 
             findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
                 Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
                 Toast.makeText(this, "Changing background...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
                 Toast.makeText(this, "Choosing background...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<View>(R.id.btn_remove_person).setOnClickListener {
                 Toast.makeText(this, "Removing person (BETA)...", Toast.LENGTH_SHORT).show()
-                // Add your logic here
             }
 
             findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
                 lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
-                    Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "No processed image to save yet", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -156,9 +142,6 @@ class MainActivity : AppCompatActivity() {
             findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
             findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
 
-            if (savedInstanceState == null) {
-                handleIntent(intent)
-            }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
         }
@@ -166,17 +149,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (e: Exception) {
             Log.e("MainActivity", "Error opening URL", e)
-        }
-    }
-
-    private fun handleIntent(intent: Intent?) {
-        val data = intent?.data
-        if (data != null && data.path?.contains("/auth") == true) {
-            // Keep hidden webview logic for auth if needed
-            webView.loadUrl(data.toString())
         }
     }
 
@@ -205,59 +180,6 @@ class MainActivity : AppCompatActivity() {
         GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
             updateHeaderUi()
             Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            allowFileAccess = true
-            allowContentAccess = true
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-        }
-
-        webView.addJavascriptInterface(object {
-            @JavascriptInterface
-            fun processBlob(base64Data: String) {
-                lastCapturedBase64 = base64Data
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Image ready to save!", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }, "AndroidInterface")
-
-        webView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co.uk") || url.contains("accounts.google") || url.contains("firebase")) {
-                    false
-                } else {
-                    openUrl(url)
-                    true
-                }
-            }
-        }
-
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onShowFileChooser(
-                webView: WebView?,
-                filePathCallback: ValueCallback<Array<Uri>>?,
-                fileChooserParams: FileChooserParams?
-            ): Boolean {
-                this@MainActivity.filePathCallback = filePathCallback
-                showSourceDialog()
-                return true
-            }
-        }
-
-        webView.setDownloadListener { url, _, _, _, _ ->
-            if (url.startsWith("data:")) {
-                lastCapturedBase64 = url
-                Toast.makeText(this, "Image captured!", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -294,7 +216,6 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.select_image_source))
             .setItems(options) { _, which -> if (which == 0) launchCamera() else launchGallery() }
-            .setOnCancelListener { filePathCallback?.onReceiveValue(null) }
             .show()
     }
 
