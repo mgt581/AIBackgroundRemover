@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         if (uri != null) {
             ivPreview.setImageURI(uri)
             filePathCallback?.onReceiveValue(arrayOf(uri))
+            // Signal the web app that a photo has been provided
             webView.evaluateJavascript("javascript:if(window.handleAppPhotoUpload) window.handleAppPhotoUpload();", null)
         } else {
             filePathCallback?.onReceiveValue(null)
@@ -87,6 +88,7 @@ class MainActivity : AppCompatActivity() {
         checkAndRequestPermissions()
 
         if (savedInstanceState == null) {
+            // Ensure the URL is loaded inside the WebView
             webView.loadUrl("https://aiphotostudio.co.uk/")
             handleIntent(intent)
         }
@@ -107,16 +109,45 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
-            webView.evaluateJavascript("(function(){ var b=Array.from(document.querySelectorAll('button')).find(x=>x.innerText.includes('Remove Background')); if(b) b.click(); })();", null)
+            // More robust selector for Remove Background
+            webView.evaluateJavascript("""
+                (function(){
+                    var buttons = Array.from(document.querySelectorAll('button, a, span'));
+                    var target = buttons.find(el => 
+                        el.innerText.toLowerCase().includes('remove background') || 
+                        el.getAttribute('aria-label')?.toLowerCase()?.includes('remove background')
+                    );
+                    if(target) target.click();
+                    else if(window.removeBackground) window.removeBackground();
+                })();
+            """.trimIndent(), null)
             Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
-            webView.evaluateJavascript("javascript:document.querySelector('button[aria-label=\"Change Background\"]')?.click();", null)
+            // More robust selector for Change Background
+            webView.evaluateJavascript("""
+                (function(){
+                    var buttons = Array.from(document.querySelectorAll('button, a, span'));
+                    var target = buttons.find(el => 
+                        el.innerText.toLowerCase().includes('change background') || 
+                        el.getAttribute('aria-label')?.toLowerCase()?.includes('change background')
+                    );
+                    if(target) target.click();
+                    else if(window.changeBackground) window.changeBackground();
+                })();
+            """.trimIndent(), null)
         }
 
         findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
-            webView.evaluateJavascript("(function(){ var i=document.querySelector('input[type=\"file\"]'); if(i) i.click(); })();", null)
+            // Triggers file input for background selection
+            webView.evaluateJavascript("""
+                (function(){
+                    var inputs = document.querySelectorAll('input[type="file"]');
+                    if(inputs.length > 0) inputs[inputs.length - 1].click(); 
+                    else if(window.chooseBackground) window.chooseBackground();
+                })();
+            """.trimIndent(), null)
         }
 
         findViewById<View>(R.id.btn_remove_person).setOnClickListener {
@@ -126,10 +157,13 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
             webView.evaluateJavascript("""
                 (function() {
+                    // Try to find the processed image
                     var canvas = document.querySelector('canvas') || document.querySelector('img[src^="blob:"]');
                     if(canvas) {
                         var dataUrl = canvas.tagName === 'CANVAS' ? canvas.toDataURL("image/png") : canvas.src;
                         AndroidInterface.processBlob(dataUrl);
+                    } else if(window.downloadImage) {
+                        window.downloadImage();
                     }
                 })();
             """.trimIndent(), null)
@@ -168,13 +202,27 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
+        // Crucial: Set a WebViewClient to keep navigation within the app
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val url = request?.url?.toString() ?: return false
+                // Allow internal navigation, external links open in browser
+                return if (url.contains("aiphotostudio.co.uk") || url.contains("google.com")) {
+                    false
+                } else {
+                    openUrl(url)
+                    true
+                }
+            }
+        }
+
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.addJavascriptInterface(object {
