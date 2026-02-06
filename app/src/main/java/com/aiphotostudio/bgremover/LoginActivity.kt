@@ -72,6 +72,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btn_header_sign_in).setOnClickListener {
+        findViewById<View>(R.id.btn_close_login).setOnClickListener {
             finish()
         }
 
@@ -122,6 +123,7 @@ class LoginActivity : AppCompatActivity() {
                     Log.d(TAG, "Email/password sign-in successful")
                     Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
                     navigateToMainActivity()
+                    finish()
                 } else {
                     val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
                     Log.e(TAG, "Email/password sign-in failed: ${task.exception?.message}, error code: $errorCode", task.exception)

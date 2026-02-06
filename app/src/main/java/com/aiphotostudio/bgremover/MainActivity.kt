@@ -1,5 +1,5 @@
 @file:Suppress("DEPRECATION")
-package com.aiphotostudio.bgremover
+package com.aiphototudio.bgremover
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -14,7 +14,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
+import android.prosvider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
@@ -62,8 +62,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && cameraImageUri != null) {
-            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        val uri = cameraImageUri
+        if (success && uri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(uri))
         } else {
             filePathCallback?.onReceiveValue(null)
         }
@@ -80,6 +81,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+        val firebaseAppCheck = FirebaseAppCheck.getInstance()
+        firebaseAppCheck.installAppCheckProviderFactory(DebugAppCheckProviderFactory.getInstance())
+
         auth = FirebaseAuth.getInstance()
 
         try {
