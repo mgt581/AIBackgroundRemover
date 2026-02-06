@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
@@ -39,6 +40,21 @@ class LoginActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.btn_google_sign_in).setOnClickListener {
             Toast.makeText(this, "Google Sign-In coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<View>(R.id.btn_header_sign_in).setOnClickListener {
+            // Already on login page, maybe just close or show message
+            finish()
+        }
+
+        findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
+            // Navigate to privacy policy or open URL
+            Toast.makeText(this, "Privacy Policy", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
+            // Navigate to terms or open URL
+            Toast.makeText(this, "Terms of Service", Toast.LENGTH_SHORT).show()
         }
     }
 

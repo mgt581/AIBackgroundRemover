@@ -29,6 +29,7 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAuthAction: Button
     private lateinit var btnHeaderSettings: Button
     private lateinit var tvSignedInStatus: TextView
+    private lateinit var fabSave: ExtendedFloatingActionButton
 
     private lateinit var btnFooterTerms: Button
 
@@ -88,6 +90,7 @@ class MainActivity : AppCompatActivity() {
             btnAuthAction = findViewById(R.id.btn_auth_action)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+            fabSave = findViewById(R.id.fab_save)
 
             btnFooterTerms = findViewById(R.id.btn_footer_terms)
 
@@ -101,7 +104,7 @@ class MainActivity : AppCompatActivity() {
             setupWebView()
             checkAndRequestPermissions()
 
-            findViewById<View>(R.id.fab_save).setOnClickListener {
+            fabSave.setOnClickListener {
                 lastCapturedBase64?.let {
                     saveImageToGallery(it)
                 } ?: run {
@@ -217,6 +220,7 @@ class MainActivity : AppCompatActivity() {
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
+                    fabSave.visibility = View.VISIBLE
                     Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
                 }
             }
@@ -265,6 +269,7 @@ class MainActivity : AppCompatActivity() {
             when {
                 url.startsWith("data:image") -> {
                     lastCapturedBase64 = url
+                    runOnUiThread { fabSave.visibility = View.VISIBLE }
                     Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
                 }
                 url.startsWith("blob:") -> {
@@ -408,7 +413,10 @@ class MainActivity : AppCompatActivity() {
                 FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
-            runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+            runOnUiThread { 
+                Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
+                fabSave.visibility = View.GONE
+            }
             lastCapturedBase64 = null
         } catch (e: Exception) {
             runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
