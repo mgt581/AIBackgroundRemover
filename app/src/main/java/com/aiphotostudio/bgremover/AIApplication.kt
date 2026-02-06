@@ -10,8 +10,6 @@ import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.initialize
 
-private val Firebase.appCheck: kotlin.Any
-
 class AIApplication : Application() {
     
     companion object {
@@ -42,7 +40,7 @@ class AIApplication : Application() {
                 appCheck.installAppCheckProviderFactory(
                     DebugAppCheckProviderFactory.getInstance()
                 )
-                appCheck.setTokenAutoRefreshEnabled(true)
+                appCheck.isTokenAutoRefreshEnabled = true
             } else {
                 val playServicesStatus = GoogleApiAvailability.getInstance()
                     .isGooglePlayServicesAvailable(this)
@@ -51,13 +49,12 @@ class AIApplication : Application() {
                     appCheck.installAppCheckProviderFactory(
                         PlayIntegrityAppCheckProviderFactory.getInstance()
                     )
-                    appCheck.setTokenAutoRefreshEnabled(true)
+                    appCheck.isTokenAutoRefreshEnabled = true
                 } else {
                     Log.w(
                         "AIApplication",
                         "App Check disabled: Play Services unavailable (${GoogleApiAvailability.getInstance().getErrorString(playServicesStatus)})"
                     )
-                    appCheck.setTokenAutoRefreshEnabled(false)
                 }
             }
 
