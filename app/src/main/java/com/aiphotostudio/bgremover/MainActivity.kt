@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             btnLinkMpa.setOnClickListener { openUrl("https://multipostapp.co.uk") }
             btnLinkEmail.setOnClickListener {
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:alex@bryantdigitalsolutions.com")
+                    data = "mailto:alex@bryantdigitalsolutions.com".toUri()
                 }
                 startActivity(intent)
             }
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (e: Exception) {
             Log.e("MainActivity", "Error opening URL", e)
         }
@@ -188,7 +188,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun signOut() {
         auth.signOut()
+        @Suppress("DEPRECATION")
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+        @Suppress("DEPRECATION")
         GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
             updateHeaderUi()
             Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
@@ -265,7 +267,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+        webView.setDownloadListener { url, _, _, mimetype, _ ->
             when {
                 url.startsWith("data:image") -> {
                     lastCapturedBase64 = url
@@ -273,7 +275,6 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
                 }
                 url.startsWith("blob:") -> {
-                    // For blob URLs, we need to fetch the content via JavaScript
                     val js = """
                         (function() {
                             var xhr = new XMLHttpRequest();
@@ -329,14 +330,12 @@ class MainActivity : AppCompatActivity() {
                 }
               }
               
-              // Intercept URL.createObjectURL
               var originalCreateObjectURL = URL.createObjectURL;
               URL.createObjectURL = function(blob) {
                 if (blob && blob.size > 2000) sendBlobToAndroid(blob);
                 return originalCreateObjectURL.call(URL, blob);
               };
               
-              // Intercept canvas toBlob
               if (HTMLCanvasElement.prototype.toBlob) {
                 var originalToBlob = HTMLCanvasElement.prototype.toBlob;
                 HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
@@ -348,7 +347,6 @@ class MainActivity : AppCompatActivity() {
                 };
               }
               
-              // Intercept canvas toDataURL
               if (HTMLCanvasElement.prototype.toDataURL) {
                 var originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
                 HTMLCanvasElement.prototype.toDataURL = function(type, quality) {
@@ -360,7 +358,6 @@ class MainActivity : AppCompatActivity() {
                 };
               }
               
-              // Intercept link and button clicks (both blob: and data: URLs)
               window.addEventListener('click', function(e) {
                 var element = e.target.closest('a, button');
                 if (!element) return;
@@ -368,7 +365,6 @@ class MainActivity : AppCompatActivity() {
                 var url = element.href || element.getAttribute('href');
                 if (!url) return;
                 
-                // Handle blob: URLs
                 if (url.indexOf('blob:') === 0) {
                   e.preventDefault();
                   var xhr = new XMLHttpRequest();
@@ -379,7 +375,6 @@ class MainActivity : AppCompatActivity() {
                   return;
                 }
                 
-                // Handle data: URLs
                 if (isDataURLImage(url)) {
                   e.preventDefault();
                   sendDataURLToAndroid(url);
