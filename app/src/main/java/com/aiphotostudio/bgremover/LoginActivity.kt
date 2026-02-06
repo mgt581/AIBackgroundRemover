@@ -104,22 +104,23 @@ class LoginActivity : AppCompatActivity() {
 
     private fun switchToSignInMode() {
         isSignUpMode = false
-        btnTabSignIn.setBackgroundColor(getColor(android.R.color.holo_blue_dark))
-        btnTabSignIn.setTextColor(getColor(android.R.color.white))
-        btnTabSignUp.setBackgroundColor(getColor(android.R.color.transparent))
-        btnTabSignUp.setTextColor(getColor(android.R.color.darker_gray))
+        updateTabStyles(btnTabSignIn, btnTabSignUp)
         btnLogin.text = getString(R.string.sign_in)
         Log.d(TAG, "Switched to Sign In mode")
     }
 
     private fun switchToSignUpMode() {
         isSignUpMode = true
-        btnTabSignUp.setBackgroundColor(getColor(android.R.color.holo_blue_dark))
-        btnTabSignUp.setTextColor(getColor(android.R.color.white))
-        btnTabSignIn.setBackgroundColor(getColor(android.R.color.transparent))
-        btnTabSignIn.setTextColor(getColor(android.R.color.darker_gray))
+        updateTabStyles(btnTabSignUp, btnTabSignIn)
         btnLogin.text = getString(R.string.sign_up)
         Log.d(TAG, "Switched to Sign Up mode")
+    }
+
+    private fun updateTabStyles(activeTab: Button, inactiveTab: Button) {
+        activeTab.setBackgroundColor(getColor(android.R.color.holo_blue_dark))
+        activeTab.setTextColor(getColor(android.R.color.white))
+        inactiveTab.setBackgroundColor(getColor(android.R.color.transparent))
+        inactiveTab.setTextColor(getColor(android.R.color.darker_gray))
     }
 
     private fun performLogin() {
