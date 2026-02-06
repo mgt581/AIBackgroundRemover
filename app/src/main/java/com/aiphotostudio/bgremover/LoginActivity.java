@@ -1,6 +1,3 @@
 package com.aiphotostudio.bgremover;
 
-import android.app.Activity;
-
-public class LoginActivity extends Activity {
-}
+// This file is no longer used and has been replaced by LoginActivity.kt
