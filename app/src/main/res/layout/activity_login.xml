@@ -85,6 +85,37 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
+            <!-- Sign In / Sign Up Tabs -->
+            <LinearLayout
+                android:id="@+id/tab_container"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="24dp"
+                android:background="@android:color/white"
+                android:orientation="horizontal"
+                android:padding="4dp">
+
+                <Button
+                    android:id="@+id/btn_tab_signin"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/sign_in"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_tab_signup"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/sign_up"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
             <!-- Email/Password Login -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_email"
@@ -124,7 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/login_with_email" />
+                android:text="@string/sign_in" />
 
             <TextView
                 android:id="@+id/tv_or"
