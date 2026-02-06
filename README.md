@@ -110,7 +110,7 @@ To enable sign-in functionality in debug builds:
 
 1. **Firebase Console Setup**:
    - Go to the [Firebase Console](https://console.firebase.google.com/)
-   - Select the project: `pwa-ai-photo-studio-pro`
+   - Select your Firebase project (this app uses: `pwa-ai-photo-studio-pro`)
    - Enable Email/Password authentication in Authentication > Sign-in methods
    - Enable Google Sign-In in Authentication > Sign-in methods
 
