@@ -466,8 +466,8 @@
     <!-- Hidden WebView for AI Processing -->
     <WebView
         android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:layout_gravity="bottom"
         android:visibility="invisible" />
 
