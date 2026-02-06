@@ -121,7 +121,7 @@
                 <Button
                     android:id="@+id/btn_plan_day"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="32dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:backgroundTint="#71717A"
@@ -130,15 +130,15 @@
                     android:text="@string/day_pass"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp"
+                    app:cornerRadius="16dp"
                     tools:ignore="VisualLintButtonSize" />
 
                 <Button
                     android:id="@+id/btn_plan_monthly"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="32dp"
                     android:layout_weight="1"
                     android:backgroundTint="#2563EB"
                     android:insetTop="0dp"
@@ -146,27 +146,27 @@
                     android:text="@string/monthly_pass"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp"
+                    app:cornerRadius="16dp"
                     tools:ignore="VisualLintButtonSize" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btn_plan_yearly"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="32dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="48dp"
+                android:layout_marginHorizontal="64dp"
                 android:backgroundTint="#22C55E"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="@string/yearly_trial"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp"
+                app:cornerRadius="16dp"
                 tools:ignore="VisualLintButtonSize" />
 
             <TextView
@@ -191,102 +191,59 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <!-- Card 1: Upload and Action Buttons -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/brand_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
+                <!-- Card 1: Upload and Action Buttons -->
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:paddingVertical="24dp"
-                    android:paddingHorizontal="24dp">
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/brand_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="1dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:text="@string/upload_to_begin"
-                        android:textColor="#9CA3AF"
-                        android:textSize="14sp" />
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:paddingVertical="24dp"
+                        android:paddingHorizontal="24dp">
 
-                    <Button
-                        android:id="@+id/btn_choose_photo"
-                        android:layout_width="160dp"
-                        android:layout_height="54dp"
-                        android:backgroundTint="#8B5CF6"
-                        android:text="@string/choose_photo"
-                        android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="12dp"
-                        tools:ignore="VisualLintButtonSize" />
-
-                    <Button
-                        android:id="@+id/btn_remove_bg"
-                        android:layout_width="200dp"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="16dp"
-                        android:backgroundTint="#F3F4F6"
-                        android:text="@string/remove_background"
-                        android:textAllCaps="false"
-                        android:textColor="#4B5563"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="10dp"
-                        tools:ignore="VisualLintButtonSize" />
-
-                    <Button
-                        android:id="@+id/btn_change_bg"
-                        android:layout_width="200dp"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="12dp"
-                        android:backgroundTint="#F3F4F6"
-                        android:text="@string/change_background"
-                        android:textAllCaps="false"
-                        android:textColor="#4B5563"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="10dp"
-                        tools:ignore="VisualLintButtonSize" />
-
-                    <Button
-                        android:id="@+id/btn_choose_background"
-                        android:layout_width="200dp"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="12dp"
-                        android:backgroundTint="#F3F4F6"
-                        android:text="@string/choose_background"
-                        android:textAllCaps="false"
-                        android:textColor="#111827"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="10dp"
-                        tools:ignore="VisualLintButtonSize" />
-
-                    <FrameLayout
-                        android:layout_width="200dp"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="12dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:text="@string/upload_to_begin"
+                            android:textColor="#9CA3AF"
+                            android:textSize="14sp" />
 
                         <Button
-                            android:id="@+id/btn_remove_person"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:id="@+id/btn_choose_photo"
+                            android:layout_width="160dp"
+                            android:layout_height="54dp"
+                            android:backgroundTint="#8B5CF6"
+                            android:text="@string/choose_photo"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="12dp"
+                            tools:ignore="VisualLintButtonSize" />
+
+                        <Button
+                            android:id="@+id/btn_remove_bg"
+                            android:layout_width="200dp"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="16dp"
                             android:backgroundTint="#F3F4F6"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:text="@string/remove_person"
+                            android:text="@string/remove_background"
                             android:textAllCaps="false"
                             android:textColor="#4B5563"
                             android:textSize="14sp"
@@ -294,143 +251,213 @@
                             app:cornerRadius="10dp"
                             tools:ignore="VisualLintButtonSize" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|end"
-                            android:layout_marginEnd="12dp"
-                            android:background="@drawable/bg_beta_tag"
-                            android:paddingHorizontal="6dp"
-                            android:paddingVertical="2dp"
-                            android:text="@string/beta"
-                            android:textColor="#B45309"
-                            android:textSize="10sp"
+                        <Button
+                            android:id="@+id/btn_change_bg"
+                            android:layout_width="200dp"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="12dp"
+                            android:backgroundTint="#F3F4F6"
+                            android:text="@string/change_background"
+                            android:textAllCaps="false"
+                            android:textColor="#4B5563"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            tools:ignore="SmallSp" />
+                            app:cornerRadius="10dp"
+                            tools:ignore="VisualLintButtonSize" />
+
+                        <Button
+                            android:id="@+id/btn_choose_background"
+                            android:layout_width="200dp"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="12dp"
+                            android:backgroundTint="#F3F4F6"
+                            android:text="@string/choose_background"
+                            android:textAllCaps="false"
+                            android:textColor="#111827"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="10dp"
+                            tools:ignore="VisualLintButtonSize" />
+
+                        <FrameLayout
+                            android:layout_width="200dp"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="12dp">
+
+                            <Button
+                                android:id="@+id/btn_remove_person"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:backgroundTint="#F3F4F6"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:text="@string/remove_person"
+                                android:textAllCaps="false"
+                                android:textColor="#4B5563"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                app:cornerRadius="10dp"
+                                tools:ignore="VisualLintButtonSize" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical|end"
+                                android:layout_marginEnd="12dp"
+                                android:background="@drawable/bg_beta_tag"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="2dp"
+                                android:text="@string/beta"
+                                android:textColor="#B45309"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                tools:ignore="SmallSp" />
+                        </FrameLayout>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Card 2: Preview Area -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/brand_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="1dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="240dp"
+                        android:layout_margin="16dp"
+                        android:background="@drawable/bg_transparent_checkerboard">
+
+                        <ImageView
+                            android:id="@+id/iv_preview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/choose_photo"
+                            tools:src="@android:drawable/ic_menu_gallery" />
+
                     </FrameLayout>
 
-                </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
-            </androidx.cardview.widget.CardView>
-
-            <!-- Card 2: Checkerboard Preview Area -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/brand_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp">
-
-                <FrameLayout
+                <!-- Card 3: Save to Gallery and Info -->
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="240dp"
-                    android:layout_margin="16dp"
-                    android:background="@drawable/bg_transparent_checkerboard">
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/brand_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="1dp">
 
-                    <ImageView
-                        android:id="@+id/iv_preview"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:contentDescription="@string/choose_photo"
-                        tools:src="@android:drawable/ic_menu_gallery" />
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:paddingVertical="32dp"
+                        android:paddingHorizontal="24dp">
 
-                </FrameLayout>
+                        <Button
+                            android:id="@+id/btn_save_to_gallery"
+                            android:layout_width="160dp"
+                            android:layout_height="48dp"
+                            android:backgroundTint="#E5E7EB"
+                            android:text="@string/save_to_gallery"
+                            android:textAllCaps="false"
+                            android:textColor="#111827"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="10dp"
+                            tools:ignore="VisualLintButtonSize" />
 
-            </androidx.cardview.widget.CardView>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="24dp"
+                            android:gravity="center"
+                            android:text="@string/save_info"
+                            android:textColor="#6B7280"
+                            android:textSize="12sp"
+                            android:lineSpacingExtra="4dp" />
 
-            <!-- Card 3: Save to Gallery and Info -->
-            <androidx.cardview.widget.CardView
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+            <!-- PURPLE FOOTER SECTION -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/brand_surface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp">
+                android:background="#8B5CF6"
+                android:orientation="vertical"
+                android:paddingVertical="32dp"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/footer_ownership"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    tools:ignore="SmallSp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:paddingVertical="32dp"
-                    android:paddingHorizontal="24dp">
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <Button
-                        android:id="@+id/btn_save_to_gallery"
-                        android:layout_width="160dp"
-                        android:layout_height="48dp"
-                        android:backgroundTint="#E5E7EB"
-                        android:text="@string/save_to_gallery"
-                        android:textAllCaps="false"
-                        android:textColor="#111827"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="10dp"
+                        android:id="@+id/btn_link_bds"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/bds_url"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
                         tools:ignore="VisualLintButtonSize" />
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/btn_link_bgh"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:gravity="center"
-                        android:text="@string/save_info"
-                        android:textColor="#6B7280"
+                        android:text="@string/bgh_url"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
-                        android:lineSpacingExtra="4dp" />
+                        tools:ignore="VisualLintButtonSize" />
 
+                    <Button
+                        android:id="@+id/btn_footer_terms"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/terms_of_service"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        tools:ignore="VisualLintButtonSize" />
+
+                    <Button
+                        android:id="@+id/btn_footer_privacy"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/privacy_policy"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        tools:ignore="VisualLintButtonSize" />
                 </LinearLayout>
 
-            </androidx.cardview.widget.CardView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text="@string/footer_ownership"
-                android:textColor="#9CA3AF"
-                android:textSize="10sp"
-                tools:ignore="SmallSp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/btn_link_bds"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/bds_url"
-                    android:textColor="#4F46E5"
-                    android:textSize="12sp"
-                    tools:ignore="VisualLintButtonSize" />
-
-                <Button
-                    android:id="@+id/btn_link_bgh"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/bgh_url"
-                    android:textColor="#4F46E5"
-                    android:textSize="12sp"
-                    tools:ignore="VisualLintButtonSize" />
-
-                <Button
-                    android:id="@+id/btn_footer_terms"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/terms_of_service"
-                    android:textColor="#4B5563"
-                    android:textSize="12sp"
-                    tools:ignore="VisualLintButtonSize" />
             </LinearLayout>
 
         </LinearLayout>
