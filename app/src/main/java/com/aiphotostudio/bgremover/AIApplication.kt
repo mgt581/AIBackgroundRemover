@@ -11,6 +11,15 @@ import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderF
 import com.google.firebase.initialize
 
 class AIApplication : Application() {
+    
+    companion object {
+        private const val LOG_SEPARATOR = "================================================================================"
+        
+        internal fun shouldEnablePlayIntegrity(playServicesStatus: Int): Boolean {
+            return playServicesStatus == ConnectionResult.SUCCESS
+        }
+    }
+    
     override fun onCreate() {
         super.onCreate()
         
@@ -21,7 +30,12 @@ class AIApplication : Application() {
             val appCheck = Firebase.appCheck
 
             if (BuildConfig.DEBUG) {
+                Log.d("AIApplication", LOG_SEPARATOR)
                 Log.d("AIApplication", "App Check: Installing DebugAppCheckProviderFactory")
+                Log.d("AIApplication", "IMPORTANT: Look for DebugAppCheckProvider log message below")
+                Log.d("AIApplication", "You MUST register the debug token in Firebase Console!")
+                Log.d("AIApplication", "Firebase Console > Project Settings > App Check > Manage debug tokens")
+                Log.d("AIApplication", LOG_SEPARATOR)
                 // IMPORTANT: Find the debug secret in Logcat and add it to Firebase Console
                 appCheck.installAppCheckProviderFactory(
                     DebugAppCheckProviderFactory.getInstance()
@@ -48,12 +62,6 @@ class AIApplication : Application() {
             Log.d("AIApplication", "Firebase and App Check initialized successfully")
         } catch (e: Exception) {
             Log.e("AIApplication", "Firebase initialization failed", e)
-        }
-    }
-
-    companion object {
-        internal fun shouldEnablePlayIntegrity(playServicesStatus: Int): Boolean {
-            return playServicesStatus == ConnectionResult.SUCCESS
         }
     }
 }
