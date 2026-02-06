@@ -66,8 +66,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && cameraImageUri != null) {
-            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        val uri = cameraImageUri
+        if (success && uri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(uri))
         } else {
             filePathCallback?.onReceiveValue(null)
         }
@@ -109,7 +110,6 @@ class MainActivity : AppCompatActivity() {
             btnLinkEmail = findViewById(R.id.btn_link_email)
 
             updateHeaderUi()
-
             setupWebView()
             checkAndRequestPermissions()
 
@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity() {
                 lastCapturedBase64 = url
                 runOnUiThread {
                     fabSave.visibility = View.VISIBLE
-                    Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
