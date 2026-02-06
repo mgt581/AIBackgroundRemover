@@ -27,8 +27,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
@@ -62,8 +66,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && cameraImageUri != null) {
-            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        val uri = cameraImageUri
+        if (success && uri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(uri))
         } else {
             filePathCallback?.onReceiveValue(null)
         }
@@ -78,20 +83,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Named class to avoid "unused" warning on JS interface
-    inner class WebAppInterface {
-        @JavascriptInterface
-        fun processBlob(base64Data: String) {
-            lastCapturedBase64 = base64Data
-            runOnUiThread {
-                fabSave.visibility = View.VISIBLE
-                Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+        val firebaseAppCheck = FirebaseAppCheck.getInstance()
+        firebaseAppCheck.installAppCheckProviderFactory(DebugAppCheckProviderFactory.getInstance())
+
         auth = FirebaseAuth.getInstance()
 
         try {
@@ -111,7 +110,6 @@ class MainActivity : AppCompatActivity() {
             btnLinkEmail = findViewById(R.id.btn_link_email)
 
             updateHeaderUi()
-
             setupWebView()
             checkAndRequestPermissions()
 
@@ -144,7 +142,7 @@ class MainActivity : AppCompatActivity() {
             btnLinkMpa.setOnClickListener { openUrl("https://multipostapp.co.uk") }
             btnLinkEmail.setOnClickListener {
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = "mailto:alex@bryantdigitalsolutions.com".toUri()
+                    data = Uri.parse("mailto:alex@bryantdigitalsolutions.com")
                 }
                 startActivity(intent)
             }
@@ -159,7 +157,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
             Log.e("MainActivity", "Error opening URL", e)
         }
@@ -199,8 +197,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun signOut() {
         auth.signOut()
-        updateHeaderUi()
-        Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+        GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
+            updateHeaderUi()
+            Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -220,10 +221,19 @@ class MainActivity : AppCompatActivity() {
             javaScriptCanOpenWindowsAutomatically = true
             @Suppress("DEPRECATION")
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
-        webView.addJavascriptInterface(WebAppInterface(), "AndroidInterface")
+        webView.addJavascriptInterface(object {
+            @JavascriptInterface
+            fun processBlob(base64Data: String) {
+                lastCapturedBase64 = base64Data
+                runOnUiThread {
+                    fabSave.visibility = View.VISIBLE
+                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }, "AndroidInterface")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -264,37 +274,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        webView.setDownloadListener { url, _, _, mimetype, _ ->
-            when {
-                url.startsWith("data:image") -> {
-                    lastCapturedBase64 = url
-                    runOnUiThread { fabSave.visibility = View.VISIBLE }
-                    Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
-                }
-                url.startsWith("blob:") -> {
-                    val js = """
-                        (function() {
-                            var xhr = new XMLHttpRequest();
-                            xhr.open('GET', '$url', true);
-                            xhr.responseType = 'blob';
-                            xhr.onload = function() {
-                                if (xhr.response) {
-                                    var reader = new FileReader();
-                                    reader.onloadend = function() {
-                                        if (reader.result && reader.result.indexOf('data:image') === 0) {
-                                            AndroidInterface.processBlob(reader.result);
-                                        }
-                                    };
-                                    reader.readAsDataURL(xhr.response);
-                                }
-                            };
-                            xhr.send();
-                        })();
-                    """.trimIndent()
-                    webView.evaluateJavascript(js, null)
-                }
-                mimetype?.startsWith("image/") == true -> {
-                    Toast.makeText(this, "Image download started...", Toast.LENGTH_SHORT).show()
+        webView.setDownloadListener { url, _, _, _, _ ->
+            if (url.startsWith("data:")) {
+                lastCapturedBase64 = url
+                runOnUiThread {
+                    fabSave.visibility = View.VISIBLE
+                    Toast.makeText(this@MainActivity, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -305,77 +290,30 @@ class MainActivity : AppCompatActivity() {
             javascript:(function() {
               if (window.__AI_BG_BRIDGE_INSTALLED__) return;
               window.__AI_BG_BRIDGE_INSTALLED__ = true;
-              
-              function isDataURLImage(url) {
-                return url && typeof url === 'string' && url.indexOf('data:image') === 0;
-              }
-              
               function sendBlobToAndroid(blob) {
                 if (!blob) return;
                 var reader = new FileReader();
                 reader.onloadend = function() {
-                  if (isDataURLImage(reader.result)) {
+                  if (typeof reader.result === 'string' && reader.result.indexOf('data:image') === 0) {
                     AndroidInterface.processBlob(reader.result);
                   }
                 };
                 reader.readAsDataURL(blob);
               }
-              
-              function sendDataURLToAndroid(dataUrl) {
-                if (isDataURLImage(dataUrl)) {
-                  AndroidInterface.processBlob(dataUrl);
-                }
-              }
-              
               var originalCreateObjectURL = URL.createObjectURL;
               URL.createObjectURL = function(blob) {
                 if (blob && blob.size > 2000) sendBlobToAndroid(blob);
                 return originalCreateObjectURL.call(URL, blob);
               };
-              
-              if (HTMLCanvasElement.prototype.toBlob) {
-                var originalToBlob = HTMLCanvasElement.prototype.toBlob;
-                HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
-                  var wrappedCallback = function(blob) {
-                    if (blob && blob.size > 2000) sendBlobToAndroid(blob);
-                    if (callback) callback(blob);
-                  };
-                  return originalToBlob.call(this, wrappedCallback, type, quality);
-                };
-              }
-              
-              if (HTMLCanvasElement.prototype.toDataURL) {
-                var originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
-                HTMLCanvasElement.prototype.toDataURL = function(type, quality) {
-                  var dataUrl = originalToDataURL.call(this, type, quality);
-                  if (isDataURLImage(dataUrl)) {
-                    sendDataURLToAndroid(dataUrl);
-                  }
-                  return dataUrl;
-                };
-              }
-              
               window.addEventListener('click', function(e) {
-                var element = e.target.closest('a, button');
-                if (!element) return;
-                
-                var url = element.href || element.getAttribute('href');
-                if (!url) return;
-                
-                if (url.indexOf('blob:') === 0) {
+                var link = e.target.closest('a');
+                if (link && link.href && link.href.indexOf('blob:') === 0) {
                   e.preventDefault();
                   var xhr = new XMLHttpRequest();
-                  xhr.open('GET', url, true);
+                  xhr.open('GET', link.href, true);
                   xhr.responseType = 'blob';
                   xhr.onload = function() { sendBlobToAndroid(xhr.response); };
                   xhr.send();
-                  return;
-                }
-                
-                if (isDataURLImage(url)) {
-                  e.preventDefault();
-                  sendDataURLToAndroid(url);
-                  return;
                 }
               }, true);
             })();
@@ -405,10 +343,7 @@ class MainActivity : AppCompatActivity() {
                 FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
-            runOnUiThread { 
-                Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
-                fabSave.visibility = View.GONE
-            }
+            runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
             lastCapturedBase64 = null
         } catch (e: Exception) {
             runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
