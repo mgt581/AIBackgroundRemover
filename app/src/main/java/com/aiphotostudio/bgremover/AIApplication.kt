@@ -21,7 +21,12 @@ class AIApplication : Application() {
             val appCheck = Firebase.appCheck
 
             if (BuildConfig.DEBUG) {
+                Log.d("AIApplication", "=".repeat(80))
                 Log.d("AIApplication", "App Check: Installing DebugAppCheckProviderFactory")
+                Log.d("AIApplication", "IMPORTANT: Look for DebugAppCheckProvider log message below")
+                Log.d("AIApplication", "You MUST register the debug token in Firebase Console!")
+                Log.d("AIApplication", "Firebase Console > Project Settings > App Check > Manage debug tokens")
+                Log.d("AIApplication", "=".repeat(80))
                 // IMPORTANT: Find the debug secret in Logcat and add it to Firebase Console
                 appCheck.installAppCheckProviderFactory(
                     DebugAppCheckProviderFactory.getInstance()
