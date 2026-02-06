@@ -261,10 +261,38 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        webView.setDownloadListener { url, _, _, _, _ ->
-            if (url.startsWith("data:")) {
-                lastCapturedBase64 = url
-                Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
+        webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+            when {
+                url.startsWith("data:image") -> {
+                    lastCapturedBase64 = url
+                    Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
+                }
+                url.startsWith("blob:") -> {
+                    // For blob URLs, we need to fetch the content via JavaScript
+                    val js = """
+                        (function() {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('GET', '$url', true);
+                            xhr.responseType = 'blob';
+                            xhr.onload = function() {
+                                if (xhr.response) {
+                                    var reader = new FileReader();
+                                    reader.onloadend = function() {
+                                        if (reader.result && reader.result.indexOf('data:image') === 0) {
+                                            AndroidInterface.processBlob(reader.result);
+                                        }
+                                    };
+                                    reader.readAsDataURL(xhr.response);
+                                }
+                            };
+                            xhr.send();
+                        })();
+                    """.trimIndent()
+                    webView.evaluateJavascript(js, null)
+                }
+                mimetype?.startsWith("image/") == true -> {
+                    Toast.makeText(this, "Image download started...", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -274,6 +302,7 @@ class MainActivity : AppCompatActivity() {
             javascript:(function() {
               if (window.__AI_BG_BRIDGE_INSTALLED__) return;
               window.__AI_BG_BRIDGE_INSTALLED__ = true;
+              
               function sendBlobToAndroid(blob) {
                 if (!blob) return;
                 var reader = new FileReader();
@@ -284,20 +313,80 @@ class MainActivity : AppCompatActivity() {
                 };
                 reader.readAsDataURL(blob);
               }
+              
+              function sendDataURLToAndroid(dataUrl) {
+                if (dataUrl && typeof dataUrl === 'string' && dataUrl.indexOf('data:image') === 0) {
+                  AndroidInterface.processBlob(dataUrl);
+                }
+              }
+              
+              // Intercept URL.createObjectURL
               var originalCreateObjectURL = URL.createObjectURL;
               URL.createObjectURL = function(blob) {
                 if (blob && blob.size > 2000) sendBlobToAndroid(blob);
                 return originalCreateObjectURL.call(URL, blob);
               };
+              
+              // Intercept canvas toBlob
+              if (HTMLCanvasElement.prototype.toBlob) {
+                var originalToBlob = HTMLCanvasElement.prototype.toBlob;
+                HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
+                  var wrappedCallback = function(blob) {
+                    if (blob && blob.size > 2000) sendBlobToAndroid(blob);
+                    if (callback) callback(blob);
+                  };
+                  return originalToBlob.call(this, wrappedCallback, type, quality);
+                };
+              }
+              
+              // Intercept canvas toDataURL
+              if (HTMLCanvasElement.prototype.toDataURL) {
+                var originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+                HTMLCanvasElement.prototype.toDataURL = function(type, quality) {
+                  var dataUrl = originalToDataURL.call(this, type, quality);
+                  if (dataUrl && dataUrl.indexOf('data:image') === 0) {
+                    sendDataURLToAndroid(dataUrl);
+                  }
+                  return dataUrl;
+                };
+              }
+              
+              // Intercept link clicks (both blob: and data: URLs)
               window.addEventListener('click', function(e) {
-                var link = e.target.closest('a');
-                if (link && link.href && link.href.indexOf('blob:') === 0) {
-                  e.preventDefault();
-                  var xhr = new XMLHttpRequest();
-                  xhr.open('GET', link.href, true);
-                  xhr.responseType = 'blob';
-                  xhr.onload = function() { sendBlobToAndroid(xhr.response); };
-                  xhr.send();
+                var link = e.target.closest('a, button');
+                if (link) {
+                  // Handle blob: URLs
+                  if (link.href && link.href.indexOf('blob:') === 0) {
+                    e.preventDefault();
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', link.href, true);
+                    xhr.responseType = 'blob';
+                    xhr.onload = function() { sendBlobToAndroid(xhr.response); };
+                    xhr.send();
+                    return;
+                  }
+                  
+                  // Handle data: URLs
+                  if (link.href && link.href.indexOf('data:image') === 0) {
+                    e.preventDefault();
+                    sendDataURLToAndroid(link.href);
+                    return;
+                  }
+                  
+                  // Handle download attribute
+                  if (link.hasAttribute('download') && link.href) {
+                    if (link.href.indexOf('blob:') === 0) {
+                      e.preventDefault();
+                      var xhr = new XMLHttpRequest();
+                      xhr.open('GET', link.href, true);
+                      xhr.responseType = 'blob';
+                      xhr.onload = function() { sendBlobToAndroid(xhr.response); };
+                      xhr.send();
+                    } else if (link.href.indexOf('data:image') === 0) {
+                      e.preventDefault();
+                      sendDataURLToAndroid(link.href);
+                    }
+                  }
                 }
               }, true);
             })();
