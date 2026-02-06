@@ -354,9 +354,9 @@ class MainActivity : AppCompatActivity() {
               // Intercept link clicks (both blob: and data: URLs)
               window.addEventListener('click', function(e) {
                 var link = e.target.closest('a, button');
-                if (link) {
+                if (link && link.href) {
                   // Handle blob: URLs
-                  if (link.href && link.href.indexOf('blob:') === 0) {
+                  if (link.href.indexOf('blob:') === 0) {
                     e.preventDefault();
                     var xhr = new XMLHttpRequest();
                     xhr.open('GET', link.href, true);
@@ -367,25 +367,10 @@ class MainActivity : AppCompatActivity() {
                   }
                   
                   // Handle data: URLs
-                  if (link.href && link.href.indexOf('data:image') === 0) {
+                  if (link.href.indexOf('data:image') === 0) {
                     e.preventDefault();
                     sendDataURLToAndroid(link.href);
                     return;
-                  }
-                  
-                  // Handle download attribute
-                  if (link.hasAttribute('download') && link.href) {
-                    if (link.href.indexOf('blob:') === 0) {
-                      e.preventDefault();
-                      var xhr = new XMLHttpRequest();
-                      xhr.open('GET', link.href, true);
-                      xhr.responseType = 'blob';
-                      xhr.onload = function() { sendBlobToAndroid(xhr.response); };
-                      xhr.send();
-                    } else if (link.href.indexOf('data:image') === 0) {
-                      e.preventDefault();
-                      sendDataURLToAndroid(link.href);
-                    }
                   }
                 }
               }, true);
