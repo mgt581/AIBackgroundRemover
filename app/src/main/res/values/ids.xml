@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="sign_in_button" type="id" />
+    <item name="btn_footer_privacy" type="id">Privacy</item>
 </resources>
