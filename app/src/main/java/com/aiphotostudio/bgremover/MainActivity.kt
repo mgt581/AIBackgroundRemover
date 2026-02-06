@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.aiphotostudio.bgremover
 
 import android.Manifest
@@ -26,8 +27,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import androidx.core.net.toUri
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
@@ -39,11 +40,21 @@ class MainActivity : AppCompatActivity() {
     private var cameraImageUri: Uri? = null
     private lateinit var auth: FirebaseAuth
 
-    private lateinit var btnHeaderGallery: Button
+    private lateinit var btnAuthAction: Button
     private lateinit var btnHeaderSettings: Button
-    private lateinit var btnAuthSignin: Button
-    private lateinit var btnAuthSignup: Button
     private lateinit var tvSignedInStatus: TextView
+    private lateinit var fabSave: ExtendedFloatingActionButton
+
+    private lateinit var btnFooterTerms: Button
+
+    private lateinit var btnLinkBds: Button
+    private lateinit var btnLinkBgh: Button
+    private lateinit var btnLinkMpa: Button
+    private lateinit var btnLinkEmail: Button
+
+    private var bridgeInjectedForUrl: String? = null
+    private var lastBridgeInjectionMs: Long = 0L
+    private var lastCapturedBase64: String? = null
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
@@ -67,8 +78,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private var lastCapturedBase64: String? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
@@ -77,31 +86,32 @@ class MainActivity : AppCompatActivity() {
             setContentView(R.layout.activity_main)
 
             webView = findViewById(R.id.webView)
-            btnHeaderGallery = findViewById(R.id.btn_header_gallery)
+            btnAuthAction = findViewById(R.id.btn_auth_action)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
-            btnAuthSignin = findViewById(R.id.btn_auth_signin)
-            btnAuthSignup = findViewById(R.id.btn_auth_signup)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+            fabSave = findViewById(R.id.fab_save)
+
+            btnFooterTerms = findViewById(R.id.btn_footer_terms)
+
+            btnLinkBds = findViewById(R.id.btn_link_bds)
+            btnLinkBgh = findViewById(R.id.btn_link_bgh)
+            btnLinkMpa = findViewById(R.id.btn_link_mpa)
+            btnLinkEmail = findViewById(R.id.btn_link_email)
+
+            updateHeaderUi()
 
             setupWebView()
-            updateHeaderUi()
             checkAndRequestPermissions()
 
-            findViewById<View>(R.id.fab_save).setOnClickListener {
-                lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
+            fabSave.setOnClickListener {
+                lastCapturedBase64?.let {
+                    saveImageToGallery(it)
+                } ?: run {
                     Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            btnHeaderGallery.setOnClickListener {
-                startActivity(Intent(this, GalleryActivity::class.java))
-            }
-
-            btnHeaderSettings.setOnClickListener {
-                startActivity(Intent(this, SettingsActivity::class.java))
-            }
-
-            btnAuthSignin.setOnClickListener {
+            btnAuthAction.setOnClickListener {
                 if (auth.currentUser != null) {
                     signOut()
                 } else {
@@ -109,19 +119,23 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            btnAuthSignup.setOnClickListener {
-                if (auth.currentUser == null) {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                }
+            btnHeaderSettings.setOnClickListener {
+                startActivity(Intent(this, SettingsActivity::class.java))
             }
 
-            findViewById<Button>(R.id.btn_plan_day).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
-            findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/pricing") }
+            btnFooterTerms.setOnClickListener {
+                webView.loadUrl("https://aiphotostudio.co/terms")
+            }
 
-            findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
-            findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
-            findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { webView.loadUrl("https://aiphotostudio.co.uk/terms") }
+            btnLinkBds.setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
+            btnLinkBgh.setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
+            btnLinkMpa.setOnClickListener { openUrl("https://multipostapp.co.uk") }
+            btnLinkEmail.setOnClickListener {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = "mailto:alex@bryantdigitalsolutions.com".toUri()
+                }
+                startActivity(intent)
+            }
 
             if (savedInstanceState == null) {
                 handleIntent(intent)
@@ -133,18 +147,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (e: Exception) {
             Log.e("MainActivity", "Error opening URL", e)
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
     private fun handleIntent(intent: Intent?) {
         val data = intent?.data
-        if (data != null && data.path?.contains("/auth") == true) {
+        val path = data?.path
+        if (data != null && (path == "/auth/callback" || path == "/auth/callback/")) {
             webView.loadUrl(data.toString())
         } else {
-            webView.loadUrl("https://aiphotostudio.co.uk")
+            webView.loadUrl("https://aiphotostudio.co")
         }
     }
 
@@ -156,43 +176,48 @@ class MainActivity : AppCompatActivity() {
     private fun updateHeaderUi() {
         val user = auth.currentUser
         if (user != null) {
-            btnAuthSignin.text = getString(R.string.sign_out)
-            btnAuthSignup.visibility = View.GONE
-            tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(20) ?: "User")
+            btnAuthAction.text = getString(R.string.sign_out)
+            tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(15) ?: "User")
             tvSignedInStatus.visibility = View.VISIBLE
         } else {
-            btnAuthSignin.text = getString(R.string.sign_in)
-            btnAuthSignup.visibility = View.VISIBLE
+            btnAuthAction.text = getString(R.string.sign_in)
             tvSignedInStatus.visibility = View.GONE
         }
     }
 
     private fun signOut() {
         auth.signOut()
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-        GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
-            updateHeaderUi()
-            Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
-        }
+        updateHeaderUi()
+        Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptCookie(true)
+        cookieManager.setAcceptThirdPartyCookies(webView, true)
+
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+            setSupportMultipleWindows(true)
+            javaScriptCanOpenWindowsAutomatically = true
+            @Suppress("DEPRECATION")
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.addJavascriptInterface(object {
             @JavascriptInterface
-            fun processBlob(base64Data: String) {
+            fun processImage(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Image ready to save!", Toast.LENGTH_SHORT).show()
+                    fabSave.visibility = View.VISIBLE
+                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
                 }
             }
         }, "AndroidInterface")
@@ -200,12 +225,26 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co.uk") || url.contains("accounts.google") || url.contains("firebase")) {
+                return if (url.contains("aiphotostudio.co") ||
+                    url.contains("accounts.google") ||
+                    url.contains("facebook.com") ||
+                    url.contains("firebase")
+                ) {
                     false
                 } else {
                     openUrl(url)
                     true
                 }
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                val now = System.currentTimeMillis()
+                if (url != null && bridgeInjectedForUrl == url && (now - lastBridgeInjectionMs) < 2500L) return
+                bridgeInjectedForUrl = url
+                lastBridgeInjectionMs = now
+                injectBlobBridge()
+                webView.postDelayed({ injectBlobBridge() }, 1200)
             }
         }
 
@@ -215,45 +254,161 @@ class MainActivity : AppCompatActivity() {
                 filePathCallback: ValueCallback<Array<Uri>>?,
                 fileChooserParams: FileChooserParams?
             ): Boolean {
+                this@MainActivity.filePathCallback?.onReceiveValue(null)
                 this@MainActivity.filePathCallback = filePathCallback
                 showSourceDialog()
                 return true
             }
         }
-
-        webView.setDownloadListener { url, _, _, _, _ ->
-            if (url.startsWith("data:")) {
-                lastCapturedBase64 = url
-                Toast.makeText(this, "Image captured!", Toast.LENGTH_SHORT).show()
+        
+        webView.setDownloadListener { url, _, _, mimetype, _ ->
+            when {
+                url.startsWith("data:image") -> {
+                    lastCapturedBase64 = url
+                    runOnUiThread { fabSave.visibility = View.VISIBLE }
+                    Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
+                }
+                url.startsWith("blob:") -> {
+                    val js = """
+                        (function() {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('GET', '$url', true);
+                            xhr.responseType = 'blob';
+                            xhr.onload = function() {
+                                if (xhr.response) {
+                                    var reader = new FileReader();
+                                    reader.onloadend = function() {
+                                        if (reader.result && reader.result.indexOf('data:image') === 0) {
+                                            AndroidInterface.processImage(reader.result);
+                                        }
+                                    };
+                                    reader.readAsDataURL(xhr.response);
+                                }
+                            };
+                            xhr.send();
+                        })();
+                    """.trimIndent()
+                    webView.evaluateJavascript(js, null)
+                }
+                mimetype?.startsWith("image/") == true -> {
+                    Toast.makeText(this, "Image download started...", Toast.LENGTH_SHORT).show()
+                }
             }
         }
+    }
+
+    private fun injectBlobBridge() {
+        val js = """
+            javascript:(function() {
+              if (window.__AI_BG_BRIDGE_INSTALLED__) return;
+              window.__AI_BG_BRIDGE_INSTALLED__ = true;
+              
+              function isDataURLImage(url) {
+                return url && typeof url === 'string' && url.indexOf('data:image') === 0;
+              }
+              
+              function sendBlobToAndroid(blob) {
+                if (!blob) return;
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                  if (isDataURLImage(reader.result)) {
+                    AndroidInterface.processImage(reader.result);
+                  }
+                };
+                reader.readAsDataURL(blob);
+              }
+              
+              function sendDataURLToAndroid(dataUrl) {
+                if (isDataURLImage(dataUrl)) {
+                  AndroidInterface.processImage(dataUrl);
+                }
+              }
+              
+              var originalCreateObjectURL = URL.createObjectURL;
+              URL.createObjectURL = function(blob) {
+                if (blob && blob.size > 2000) sendBlobToAndroid(blob);
+                return originalCreateObjectURL.call(URL, blob);
+              };
+              
+              if (HTMLCanvasElement.prototype.toBlob) {
+                var originalToBlob = HTMLCanvasElement.prototype.toBlob;
+                HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
+                  var wrappedCallback = function(blob) {
+                    if (blob && blob.size > 2000) sendBlobToAndroid(blob);
+                    if (callback) callback(blob);
+                  };
+                  return originalToBlob.call(this, wrappedCallback, type, quality);
+                };
+              }
+              
+              if (HTMLCanvasElement.prototype.toDataURL) {
+                var originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+                HTMLCanvasElement.prototype.toDataURL = function(type, quality) {
+                  var dataUrl = originalToDataURL.call(this, type, quality);
+                  if (isDataURLImage(dataUrl)) {
+                    sendDataURLToAndroid(dataUrl);
+                  }
+                  return dataUrl;
+                };
+              }
+              
+              window.addEventListener('click', function(e) {
+                var element = e.target.closest('a, button');
+                if (!element) return;
+                
+                var url = element.href || element.getAttribute('href');
+                if (!url) return;
+                
+                if (url.indexOf('blob:') === 0) {
+                  e.preventDefault();
+                  var xhr = new XMLHttpRequest();
+                  xhr.open('GET', url, true);
+                  xhr.responseType = 'blob';
+                  xhr.onload = function() { sendBlobToAndroid(xhr.response); };
+                  xhr.send();
+                  return;
+                }
+                
+                if (isDataURLImage(url)) {
+                  e.preventDefault();
+                  sendDataURLToAndroid(url);
+                  return;
+                }
+              }, true);
+            })();
+        """.trimIndent()
+        webView.evaluateJavascript(js, null)
     }
 
     private fun saveImageToGallery(base64Data: String) {
         try {
             val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: throw Exception("Decode error")
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val values = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Photo Studio")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
                 }
-                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return
+                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw Exception("Insert error")
                 contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
             } else {
-                val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Photo Studio")
+                val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
                 if (!directory.exists()) directory.mkdirs()
                 val file = File(directory, fileName)
                 FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
-            runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+            runOnUiThread { 
+                Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
+                fabSave.visibility = View.GONE
+            }
+            lastCapturedBase64 = null
         } catch (e: Exception) {
-            runOnUiThread { Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show() }
+            runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
         }
     }
 
@@ -262,7 +417,7 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.select_image_source))
             .setItems(options) { _, which -> if (which == 0) launchCamera() else launchGallery() }
-            .setOnCancelListener { filePathCallback?.onReceiveValue(null) }
+            .setOnCancelListener { filePathCallback?.onReceiveValue(null); filePathCallback = null }
             .show()
     }
 
@@ -289,4 +444,5 @@ class MainActivity : AppCompatActivity() {
         val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         if (toRequest.isNotEmpty()) requestPermissionsLauncher.launch(toRequest.toTypedArray())
     }
+
 }
