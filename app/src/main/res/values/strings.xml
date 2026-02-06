@@ -27,4 +27,13 @@
     <string name="owner_email">alex@bryantdigitalsolutions.com</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_of_service">Terms of Service</string>
+    <string name="continue_as_guest">Continue as Guest</string>
+    <string name="cancel">Cancel</string>
+    <string name="login_with_email">Login with Email</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="or">OR</string>
+    <string name="ai_photo_studio">Ai Photo Studio</string>
+    <string name="ai_photo_studio_background_remover">Ai Photo Studio Background remover</string>
+    <string name="logo">Logo</string>
 </resources>

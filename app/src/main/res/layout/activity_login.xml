@@ -29,16 +29,16 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/btn_header_sign_in"
+                app:layout_constraintEnd_toStartOf="@+id/btn_close_login"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/btn_header_sign_in"
+                android:id="@+id/btn_close_login"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sign In"
+                android:text="@string/cancel"
                 android:textColor="@android:color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -49,11 +49,14 @@
 
     <!-- Center Content -->
     <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/footer_links"
-        app:layout_constraintTop_toBottomOf="@id/header_card">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_card"
+        app:layout_constraintWidth_max="380dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -67,8 +70,9 @@
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:contentDescription="Logo"
+                android:scaleType="fitCenter"
                 android:src="@mipmap/ic_launcher"
-                android:scaleType="fitCenter" />
+                tools:ignore="ImageContrastCheck" />
 
             <TextView
                 android:id="@+id/tv_title"
@@ -76,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:gravity="center"
-                android:text="Ai Photo Studio"
+                android:text="@string/ai_photo_studio"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -88,13 +92,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:hint="Email">
+                android:hint="@string/email">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    android:textColorHint="#757575" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -103,14 +108,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Password"
+                android:hint="@string/password"
                 app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    tools:ignore="TextContrastCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
@@ -118,15 +124,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Login with Email" />
+                android:text="@string/login_with_email" />
 
             <TextView
                 android:id="@+id/tv_or"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="OR"
-                android:textColor="@android:color/darker_gray" />
+                android:text="@string/or"
+                android:textColor="#757575" />
 
             <com.google.android.gms.common.SignInButton
                 android:id="@+id/btn_google_sign_in"
@@ -140,7 +146,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Continue as Guest" />
+                android:text="@string/continue_as_guest" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

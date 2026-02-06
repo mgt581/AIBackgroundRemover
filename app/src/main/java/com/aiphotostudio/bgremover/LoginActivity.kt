@@ -60,7 +60,7 @@ class LoginActivity : AppCompatActivity() {
             signInWithGoogle()
         }
 
-        findViewById<View>(R.id.btn_header_sign_in).setOnClickListener {
+        findViewById<View>(R.id.btn_close_login).setOnClickListener {
             finish()
         }
 

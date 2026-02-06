@@ -78,6 +78,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Named class to avoid "unused" warning on JS interface
+    inner class WebAppInterface {
+        @JavascriptInterface
+        fun processBlob(base64Data: String) {
+            lastCapturedBase64 = base64Data
+            runOnUiThread {
+                fabSave.visibility = View.VISIBLE
+                Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
@@ -211,16 +223,7 @@ class MainActivity : AppCompatActivity() {
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
-        webView.addJavascriptInterface(object {
-            @JavascriptInterface
-            fun processImage(base64Data: String) {
-                lastCapturedBase64 = base64Data
-                runOnUiThread {
-                    fabSave.visibility = View.VISIBLE
-                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
-                }
-            }
-        }, "AndroidInterface")
+        webView.addJavascriptInterface(WebAppInterface(), "AndroidInterface")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -279,7 +282,7 @@ class MainActivity : AppCompatActivity() {
                                     var reader = new FileReader();
                                     reader.onloadend = function() {
                                         if (reader.result && reader.result.indexOf('data:image') === 0) {
-                                            AndroidInterface.processImage(reader.result);
+                                            AndroidInterface.processBlob(reader.result);
                                         }
                                     };
                                     reader.readAsDataURL(xhr.response);
@@ -312,7 +315,7 @@ class MainActivity : AppCompatActivity() {
                 var reader = new FileReader();
                 reader.onloadend = function() {
                   if (isDataURLImage(reader.result)) {
-                    AndroidInterface.processImage(reader.result);
+                    AndroidInterface.processBlob(reader.result);
                   }
                 };
                 reader.readAsDataURL(blob);
@@ -320,7 +323,7 @@ class MainActivity : AppCompatActivity() {
               
               function sendDataURLToAndroid(dataUrl) {
                 if (isDataURLImage(dataUrl)) {
-                  AndroidInterface.processImage(dataUrl);
+                  AndroidInterface.processBlob(dataUrl);
                 }
               }
               
