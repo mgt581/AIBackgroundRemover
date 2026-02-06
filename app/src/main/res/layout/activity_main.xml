@@ -1,474 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/brand_background">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <!-- Header Section -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/header_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/brand_background"
-        app:elevation="0dp">
+        app:cardBackgroundColor="@color/brand_surface"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp">
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/iv_app_logo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/app_name"
+                android:src="@mipmap/ic_launcher"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tv_app_logo"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/ai_photo_studio"
-                android:textColor="#111827"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="AI BACKGROUND"
+                android:textColor="@color/brand_text"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/header_buttons_container"
+                app:layout_constraintStart_toEndOf="@id/iv_app_logo"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/header_buttons_container"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/tv_signed_in_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/user_placeholder"
+                    android:textColor="@color/brand_accent"
+                    android:textSize="11sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
                 <Button
-                    android:id="@+id/btn_header_gallery"
+                    android:id="@+id/btn_auth_action"
                     style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    android:backgroundTint="#EEF2FF"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:padding="0dp"
-                    android:text="@string/gallery"
-                    android:textAllCaps="false"
-                    android:textColor="#4F46E5"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="8dp"
-                    tools:ignore="VisualLintButtonSize" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="@string/sign_in"
+                    android:backgroundTint="@color/brand_primary"
+                    android:textColor="@color/white"
+                    android:textSize="11sp" />
 
                 <Button
                     android:id="@+id/btn_header_settings"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="3dp"
-                    android:backgroundTint="#EEF2FF"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:padding="0dp"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:paddingHorizontal="8dp"
                     android:text="@string/settings"
-                    android:textAllCaps="false"
-                    android:textColor="#4F46E5"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="8dp"
-                    tools:ignore="VisualLintButtonSize" />
-
-                <Button
-                    android:id="@+id/btn_auth_signin"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="3dp"
-                    android:backgroundTint="#EEF2FF"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:padding="0dp"
-                    android:text="@string/sign_in"
-                    android:textAllCaps="false"
-                    android:textColor="#4F46E5"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="8dp"
-                    tools:ignore="VisualLintButtonSize" />
-
-                <Button
-                    android:id="@+id/btn_auth_signup"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    android:backgroundTint="#EEF2FF"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:padding="0dp"
-                    android:text="@string/sign_up"
-                    android:textAllCaps="false"
-                    android:textColor="#4F46E5"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="8dp"
-                    tools:ignore="VisualLintButtonSize" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btn_plan_day"
-                    android:layout_width="0dp"
-                    android:layout_height="32dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#71717A"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:text="@string/day_pass"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="16dp"
-                    tools:ignore="VisualLintButtonSize" />
-
-                <Button
-                    android:id="@+id/btn_plan_monthly"
-                    android:layout_width="0dp"
-                    android:layout_height="32dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#2563EB"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:text="@string/monthly_pass"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="16dp"
-                    tools:ignore="VisualLintButtonSize" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/btn_plan_yearly"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="64dp"
-                android:backgroundTint="#22C55E"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:text="@string/yearly_trial"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                app:cornerRadius="16dp"
-                tools:ignore="VisualLintButtonSize" />
-
-            <TextView
-                android:id="@+id/tv_signed_in_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/brand_text_secondary"
-                android:textSize="12sp"
-                android:visibility="gone"
-                tools:text="✓ user@example.com" />
-
-        </LinearLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <!-- Card 1: Upload and Action Buttons -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@color/brand_surface"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical"
-                        android:paddingVertical="24dp"
-                        android:paddingHorizontal="24dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="16dp"
-                            android:text="@string/upload_to_begin"
-                            android:textColor="#9CA3AF"
-                            android:textSize="14sp" />
-
-                        <Button
-                            android:id="@+id/btn_choose_photo"
-                            android:layout_width="160dp"
-                            android:layout_height="54dp"
-                            android:backgroundTint="#8B5CF6"
-                            android:text="@string/choose_photo"
-                            android:textAllCaps="false"
-                            android:textColor="@color/white"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="12dp"
-                            tools:ignore="VisualLintButtonSize" />
-
-                        <Button
-                            android:id="@+id/btn_remove_bg"
-                            android:layout_width="200dp"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="16dp"
-                            android:backgroundTint="#F3F4F6"
-                            android:text="@string/remove_background"
-                            android:textAllCaps="false"
-                            android:textColor="#4B5563"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="10dp"
-                            tools:ignore="VisualLintButtonSize" />
-
-                        <Button
-                            android:id="@+id/btn_change_bg"
-                            android:layout_width="200dp"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="12dp"
-                            android:backgroundTint="#F3F4F6"
-                            android:text="@string/change_background"
-                            android:textAllCaps="false"
-                            android:textColor="#4B5563"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="10dp"
-                            tools:ignore="VisualLintButtonSize" />
-
-                        <Button
-                            android:id="@+id/btn_choose_background"
-                            android:layout_width="200dp"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="12dp"
-                            android:backgroundTint="#F3F4F6"
-                            android:text="@string/choose_background"
-                            android:textAllCaps="false"
-                            android:textColor="#111827"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="10dp"
-                            tools:ignore="VisualLintButtonSize" />
-
-                        <FrameLayout
-                            android:layout_width="200dp"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="12dp">
-
-                            <Button
-                                android:id="@+id/btn_remove_person"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:backgroundTint="#F3F4F6"
-                                android:insetTop="0dp"
-                                android:insetBottom="0dp"
-                                android:text="@string/remove_person"
-                                android:textAllCaps="false"
-                                android:textColor="#4B5563"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                app:cornerRadius="10dp"
-                                tools:ignore="VisualLintButtonSize" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical|end"
-                                android:layout_marginEnd="12dp"
-                                android:background="@drawable/bg_beta_tag"
-                                android:paddingHorizontal="6dp"
-                                android:paddingVertical="2dp"
-                                android:text="@string/beta"
-                                android:textColor="#B45309"
-                                android:textSize="10sp"
-                                android:textStyle="bold"
-                                tools:ignore="SmallSp" />
-                        </FrameLayout>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <!-- Card 2: Preview Area -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@color/brand_surface"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="1dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="240dp"
-                        android:layout_margin="16dp"
-                        android:background="@drawable/bg_transparent_checkerboard">
-
-                        <ImageView
-                            android:id="@+id/iv_preview"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:adjustViewBounds="true"
-                            android:scaleType="fitCenter"
-                            android:contentDescription="@string/choose_photo"
-                            tools:src="@android:drawable/ic_menu_gallery" />
-
-                    </FrameLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <!-- Card 3: Save to Gallery and Info -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@color/brand_surface"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical"
-                        android:paddingVertical="32dp"
-                        android:paddingHorizontal="24dp">
-
-                        <Button
-                            android:id="@+id/btn_save_to_gallery"
-                            android:layout_width="160dp"
-                            android:layout_height="48dp"
-                            android:backgroundTint="#E5E7EB"
-                            android:text="@string/save_to_gallery"
-                            android:textAllCaps="false"
-                            android:textColor="#111827"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:cornerRadius="10dp"
-                            tools:ignore="VisualLintButtonSize" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="24dp"
-                            android:gravity="center"
-                            android:text="@string/save_info"
-                            android:textColor="#6B7280"
-                            android:textSize="12sp"
-                            android:lineSpacingExtra="4dp" />
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
+                    android:textColor="@color/brand_text_secondary"
+                    android:textSize="11sp" />
 
             </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
-            <!-- PURPLE FOOTER SECTION -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#8B5CF6"
-                android:orientation="vertical"
-                android:paddingVertical="32dp"
-                android:paddingHorizontal="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/footer_ownership"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    tools:ignore="SmallSp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <Button
-                        android:id="@+id/btn_link_bds"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/bds_url"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        tools:ignore="VisualLintButtonSize" />
-
-                    <Button
-                        android:id="@+id/btn_link_bgh"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/bgh_url"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        tools:ignore="VisualLintButtonSize" />
-
-                    <Button
-                        android:id="@+id/btn_footer_terms"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/terms_of_service"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        tools:ignore="VisualLintButtonSize" />
-
-                    <Button
-                        android:id="@+id/btn_footer_privacy"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/privacy_policy"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        tools:ignore="VisualLintButtonSize" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <!-- Hidden WebView for AI Processing -->
+    <!-- WebView Section -->
     <WebView
         android:id="@+id/webView"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:visibility="invisible" />
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/footer_layout"
+        app:layout_constraintTop_toBottomOf="@id/header_card" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- Save Button -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/save_to_gallery"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/brand_primary"
+        app:icon="@android:drawable/ic_menu_save"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/footer_layout"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Footer Section -->
+    <LinearLayout
+        android:id="@+id/footer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/brand_surface"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/footer_ownership"
+            android:textColor="@color/brand_text_secondary"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:flow_horizontalGap="8dp"
+            app:flow_horizontalStyle="packed"
+            app:flow_wrapMode="aligned"
+            app:constraint_referenced_ids="btn_link_bds,btn_link_bgh,btn_link_mpa,btn_link_email,btn_footer_terms" />
+
+        <Button
+            android:id="@+id/btn_link_bds"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:paddingHorizontal="4dp"
+            android:text="@string/bds_url"
+            android:textColor="@color/brand_accent"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <Button
+            android:id="@+id/btn_link_bgh"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:paddingHorizontal="4dp"
+            android:text="@string/bgh_url"
+            android:textColor="@color/brand_accent"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <Button
+            android:id="@+id/btn_link_mpa"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:paddingHorizontal="4dp"
+            android:text="@string/mpa_url"
+            android:textColor="@color/brand_accent"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <Button
+            android:id="@+id/btn_link_email"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:paddingHorizontal="4dp"
+            android:text="@string/owner_email"
+            android:textColor="@color/brand_accent"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <Button
+            android:id="@+id/btn_footer_terms"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:paddingHorizontal="4dp"
+            android:text="@string/terms_of_service"
+            android:textColor="@color/brand_text_secondary"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

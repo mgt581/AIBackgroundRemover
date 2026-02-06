@@ -5,8 +5,10 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,16 +19,19 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,224 +40,400 @@ class MainActivity : AppCompatActivity() {
     private var cameraImageUri: Uri? = null
     private lateinit var auth: FirebaseAuth
 
-    private lateinit var btnHeaderGallery: Button
+    private lateinit var btnAuthAction: Button
     private lateinit var btnHeaderSettings: Button
-    private lateinit var btnAuthSignin: Button
-    private lateinit var btnAuthSignup: Button
     private lateinit var tvSignedInStatus: TextView
-    private lateinit var ivPreview: ImageView
 
-    private var viewsInitialized = false
+    private lateinit var btnFooterTerms: Button
 
-    // --- PHOTO PICKER LOGIC ---
+    private lateinit var btnLinkBds: Button
+    private lateinit var btnLinkBgh: Button
+    private lateinit var btnLinkMpa: Button
+    private lateinit var btnLinkEmail: Button
+
+    private var bridgeInjectedForUrl: String? = null
+    private var lastBridgeInjectionMs: Long = 0L
+    private var lastCapturedBase64: String? = null
+
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            ivPreview.setImageURI(uri)
-            filePathCallback?.onReceiveValue(arrayOf(uri))
-            triggerWebUpload()
-        } else {
-            filePathCallback?.onReceiveValue(null)
-        }
+        filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
         filePathCallback = null
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success && cameraImageUri != null) {
-            ivPreview.setImageURI(cameraImageUri)
             filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
-            triggerWebUpload()
         } else {
             filePathCallback?.onReceiveValue(null)
         }
         filePathCallback = null
     }
 
-    private fun triggerWebUpload() {
-        webView.evaluateJavascript("javascript:if(window.handleAppPhotoUpload) window.handleAppPhotoUpload();", null)
-    }
-
     private val requestPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
-        if (!cameraGranted) {
-            Toast.makeText(this, "Camera permission is required for the studio.", Toast.LENGTH_SHORT).show()
+        if (permissions[Manifest.permission.CAMERA] != true) {
+            Toast.makeText(this, getString(R.string.camera_permission_required), Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
-        setContentView(R.layout.activity_main)
 
-        initViews()
-        setupWebView()
-        updateHeaderUi()
-        checkAndRequestPermissions()
+        try {
+            setContentView(R.layout.activity_main)
 
-        if (savedInstanceState == null) {
-            webView.loadUrl("https://aiphotostudio.co.uk/")
-            handleIntent(intent)
+            webView = findViewById(R.id.webView)
+            btnAuthAction = findViewById(R.id.btn_auth_action)
+            btnHeaderSettings = findViewById(R.id.btn_header_settings)
+            tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+
+            btnFooterTerms = findViewById(R.id.btn_footer_terms)
+
+            btnLinkBds = findViewById(R.id.btn_link_bds)
+            btnLinkBgh = findViewById(R.id.btn_link_bgh)
+            btnLinkMpa = findViewById(R.id.btn_link_mpa)
+            btnLinkEmail = findViewById(R.id.btn_link_email)
+
+            updateHeaderUi()
+
+            setupWebView()
+            checkAndRequestPermissions()
+
+            findViewById<View>(R.id.fab_save).setOnClickListener {
+                lastCapturedBase64?.let {
+                    saveImageToGallery(it)
+                } ?: run {
+                    Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            btnAuthAction.setOnClickListener {
+                if (auth.currentUser != null) {
+                    signOut()
+                } else {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                }
+            }
+
+            btnHeaderSettings.setOnClickListener {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
+
+            btnFooterTerms.setOnClickListener {
+                webView.loadUrl("https://aiphotostudio.co/terms")
+            }
+
+            btnLinkBds.setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
+            btnLinkBgh.setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
+            btnLinkMpa.setOnClickListener { openUrl("https://multipostapp.co.uk") }
+            btnLinkEmail.setOnClickListener {
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:alex@bryantdigitalsolutions.com")
+                }
+                startActivity(intent)
+            }
+
+            if (savedInstanceState == null) {
+                handleIntent(intent)
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error in onCreate", e)
         }
     }
 
-    private fun initViews() {
-        webView = findViewById(R.id.webView)
-        btnHeaderGallery = findViewById(R.id.btn_header_gallery)
-        btnHeaderSettings = findViewById(R.id.btn_header_settings)
-        btnAuthSignin = findViewById(R.id.btn_auth_signin)
-        btnAuthSignup = findViewById(R.id.btn_auth_signup)
-        tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
-        ivPreview = findViewById(R.id.iv_preview)
-
-        findViewById<Button>(R.id.btn_choose_photo).setOnClickListener {
-            // We must trigger the web file input first to set the callback
-            webView.evaluateJavascript("document.querySelector('input[type=\"file\"]')?.click();", null)
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error opening URL", e)
         }
-
-        findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
-            executeWebAction("remove background")
-            Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
-            executeWebAction("change background")
-        }
-
-        findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
-            webView.evaluateJavascript("""
-                (function(){
-                    var inputs = document.querySelectorAll('input[type="file"]');
-                    if(inputs.length > 0) inputs[inputs.length - 1].click(); 
-                })();
-            """.trimIndent(), null)
-        }
-
-        findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
-            webView.evaluateJavascript("""
-                (function() {
-                    var canvas = document.querySelector('canvas') || document.querySelector('img[src^="blob:"]');
-                    if(canvas) {
-                        var dataUrl = canvas.tagName === 'CANVAS' ? canvas.toDataURL("image/png") : canvas.src;
-                        AndroidInterface.processBlob(dataUrl);
-                    }
-                })();
-            """.trimIndent(), null)
-            Toast.makeText(this, "Processing save...", Toast.LENGTH_SHORT).show()
-        }
-
-        // --- NAVIGATION & EXTERNAL ---
-        btnHeaderGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
-        btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-        btnAuthSignin.setOnClickListener {
-            if (auth.currentUser != null) signOut() else startActivity(Intent(this, LoginActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
-        findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
-
-        viewsInitialized = true
     }
 
-    private fun executeWebAction(keyword: String) {
-        webView.evaluateJavascript("""
-            (function(){
-                var buttons = Array.from(document.querySelectorAll('button, a, span'));
-                var target = buttons.find(el => el.innerText.toLowerCase().includes('$keyword'));
-                if(target) target.click();
-            })();
-        """.trimIndent(), null)
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
     }
 
     private fun handleIntent(intent: Intent?) {
-        intent?.data?.let { if (it.path?.contains("/auth") == true) webView.loadUrl(it.toString()) }
+        val data = intent?.data
+        val path = data?.path
+        if (data != null && (path == "/auth/callback" || path == "/auth/callback/")) {
+            webView.loadUrl(data.toString())
+        } else {
+            webView.loadUrl("https://aiphotostudio.co")
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateHeaderUi()
+    }
+
+    private fun updateHeaderUi() {
+        val user = auth.currentUser
+        if (user != null) {
+            btnAuthAction.text = getString(R.string.sign_out)
+            tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(15) ?: "User")
+            tvSignedInStatus.visibility = View.VISIBLE
+        } else {
+            btnAuthAction.text = getString(R.string.sign_in)
+            tvSignedInStatus.visibility = View.GONE
+        }
+    }
+
+    private fun signOut() {
+        auth.signOut()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+        GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
+            updateHeaderUi()
+            Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        webView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co.uk") || url.contains("google.com")) false
-                else { openUrl(url); true }
-            }
-        }
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptCookie(true)
+        cookieManager.setAcceptThirdPartyCookies(webView, true)
 
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+            setSupportMultipleWindows(true)
+            javaScriptCanOpenWindowsAutomatically = true
+            @Suppress("DEPRECATION")
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.addJavascriptInterface(object {
             @JavascriptInterface
             fun processBlob(base64Data: String) {
-                runOnUiThread { saveImageToGallery(base64Data) }
+                lastCapturedBase64 = base64Data
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
+                }
             }
         }, "AndroidInterface")
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val url = request?.url?.toString() ?: return false
+                return if (url.contains("aiphotostudio.co") ||
+                    url.contains("accounts.google") ||
+                    url.contains("facebook.com") ||
+                    url.contains("firebase")
+                ) {
+                    false
+                } else {
+                    openUrl(url)
+                    true
+                }
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                val now = System.currentTimeMillis()
+                if (url != null && bridgeInjectedForUrl == url && (now - lastBridgeInjectionMs) < 2500L) return
+                bridgeInjectedForUrl = url
+                lastBridgeInjectionMs = now
+                injectBlobBridge()
+                webView.postDelayed({ injectBlobBridge() }, 1200)
+            }
+        }
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
                 webView: WebView?,
-                f: ValueCallback<Array<Uri>>?,
-                p: FileChooserParams?
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
             ): Boolean {
-                filePathCallback?.onReceiveValue(null) // Reset any existing
-                filePathCallback = f
+                this@MainActivity.filePathCallback?.onReceiveValue(null)
+                this@MainActivity.filePathCallback = filePathCallback
                 showSourceDialog()
                 return true
             }
         }
+        
+        webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+            when {
+                url.startsWith("data:image") -> {
+                    lastCapturedBase64 = url
+                    Toast.makeText(this, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
+                }
+                url.startsWith("blob:") -> {
+                    // For blob URLs, we need to fetch the content via JavaScript
+                    val js = """
+                        (function() {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('GET', '$url', true);
+                            xhr.responseType = 'blob';
+                            xhr.onload = function() {
+                                if (xhr.response) {
+                                    var reader = new FileReader();
+                                    reader.onloadend = function() {
+                                        if (reader.result && reader.result.indexOf('data:image') === 0) {
+                                            AndroidInterface.processBlob(reader.result);
+                                        }
+                                    };
+                                    reader.readAsDataURL(xhr.response);
+                                }
+                            };
+                            xhr.send();
+                        })();
+                    """.trimIndent()
+                    webView.evaluateJavascript(js, null)
+                }
+                mimetype?.startsWith("image/") == true -> {
+                    Toast.makeText(this, "Image download started...", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun injectBlobBridge() {
+        val js = """
+            javascript:(function() {
+              if (window.__AI_BG_BRIDGE_INSTALLED__) return;
+              window.__AI_BG_BRIDGE_INSTALLED__ = true;
+              
+              function isDataURLImage(url) {
+                return url && typeof url === 'string' && url.indexOf('data:image') === 0;
+              }
+              
+              function sendBlobToAndroid(blob) {
+                if (!blob) return;
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                  if (isDataURLImage(reader.result)) {
+                    AndroidInterface.processBlob(reader.result);
+                  }
+                };
+                reader.readAsDataURL(blob);
+              }
+              
+              function sendDataURLToAndroid(dataUrl) {
+                if (isDataURLImage(dataUrl)) {
+                  AndroidInterface.processBlob(dataUrl);
+                }
+              }
+              
+              // Intercept URL.createObjectURL
+              var originalCreateObjectURL = URL.createObjectURL;
+              URL.createObjectURL = function(blob) {
+                if (blob && blob.size > 2000) sendBlobToAndroid(blob);
+                return originalCreateObjectURL.call(URL, blob);
+              };
+              
+              // Intercept canvas toBlob
+              if (HTMLCanvasElement.prototype.toBlob) {
+                var originalToBlob = HTMLCanvasElement.prototype.toBlob;
+                HTMLCanvasElement.prototype.toBlob = function(callback, type, quality) {
+                  var wrappedCallback = function(blob) {
+                    if (blob && blob.size > 2000) sendBlobToAndroid(blob);
+                    if (callback) callback(blob);
+                  };
+                  return originalToBlob.call(this, wrappedCallback, type, quality);
+                };
+              }
+              
+              // Intercept canvas toDataURL
+              if (HTMLCanvasElement.prototype.toDataURL) {
+                var originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+                HTMLCanvasElement.prototype.toDataURL = function(type, quality) {
+                  var dataUrl = originalToDataURL.call(this, type, quality);
+                  if (isDataURLImage(dataUrl)) {
+                    sendDataURLToAndroid(dataUrl);
+                  }
+                  return dataUrl;
+                };
+              }
+              
+              // Intercept link and button clicks (both blob: and data: URLs)
+              window.addEventListener('click', function(e) {
+                var element = e.target.closest('a, button');
+                if (!element) return;
+                
+                var url = element.href || element.getAttribute('href');
+                if (!url) return;
+                
+                // Handle blob: URLs
+                if (url.indexOf('blob:') === 0) {
+                  e.preventDefault();
+                  var xhr = new XMLHttpRequest();
+                  xhr.open('GET', url, true);
+                  xhr.responseType = 'blob';
+                  xhr.onload = function() { sendBlobToAndroid(xhr.response); };
+                  xhr.send();
+                  return;
+                }
+                
+                // Handle data: URLs
+                if (isDataURLImage(url)) {
+                  e.preventDefault();
+                  sendDataURLToAndroid(url);
+                  return;
+                }
+              }, true);
+            })();
+        """.trimIndent()
+        webView.evaluateJavascript(js, null)
     }
 
     private fun saveImageToGallery(base64Data: String) {
         try {
             val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return
-
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: throw Exception("Decode error")
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
-            val values = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Photo Studio")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val values = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
+                }
+                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw Exception("Insert error")
+                contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            } else {
+                val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
+                if (!directory.exists()) directory.mkdirs()
+                val file = File(directory, fileName)
+                FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
-            val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            uri?.let { contentResolver.openOutputStream(it)?.use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) } }
-            Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+            runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+            lastCapturedBase64 = null
         } catch (e: Exception) {
-            Log.e("MainActivity", "Save Error: ${e.message}")
+            runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
         }
     }
 
     private fun showSourceDialog() {
-        val options = arrayOf("Take Photo", "Choose from Gallery")
+        val options = arrayOf(getString(R.string.take_photo), getString(R.string.choose_from_gallery))
         AlertDialog.Builder(this)
-            .setTitle("Select Image Source")
+            .setTitle(getString(R.string.select_image_source))
             .setItems(options) { _, which -> if (which == 0) launchCamera() else launchGallery() }
-            .setOnCancelListener {
-                filePathCallback?.onReceiveValue(null)
-                filePathCallback = null
-            }
+            .setOnCancelListener { filePathCallback?.onReceiveValue(null); filePathCallback = null }
             .show()
     }
 
     private fun launchCamera() {
-        try {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
             if (!directory.exists()) directory.mkdirs()
-            val file = File(directory, "temp_${System.currentTimeMillis()}.jpg")
-
-            // Matches the authority in your Manifest exactly
-            cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.fileprovider", file)
-            takePicture.launch(cameraImageUri!!)
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Camera Launch Error: ${e.message}")
-            filePathCallback?.onReceiveValue(null)
-            filePathCallback = null
+            val imageFile = File(directory, "temp_${System.currentTimeMillis()}.jpg")
+            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.fileprovider", imageFile)
+            cameraImageUri = uri
+            takePicture.launch(uri)
+        } else {
+            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
         }
     }
 
@@ -260,27 +441,11 @@ class MainActivity : AppCompatActivity() {
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
-    private fun openUrl(url: String) = startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-
-    private fun updateHeaderUi() {
-        val user = auth.currentUser
-        btnAuthSignin.text = if (user != null) "Sign Out" else "Sign In"
-        btnAuthSignup.visibility = if (user != null) View.GONE else View.VISIBLE
-        tvSignedInStatus.visibility = if (user != null) View.VISIBLE else View.GONE
-        user?.let { tvSignedInStatus.text = "Signed in as: ${it.email}" }
-    }
-
-    private fun signOut() {
-        auth.signOut()
-        updateHeaderUi()
-        Toast.makeText(this, "Signed out successfully", Toast.LENGTH_SHORT).show()
-    }
-
     private fun checkAndRequestPermissions() {
         val permissions = mutableListOf(Manifest.permission.CAMERA)
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-        requestPermissionsLauncher.launch(permissions.toTypedArray())
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
+        if (toRequest.isNotEmpty()) requestPermissionsLauncher.launch(toRequest.toTypedArray())
     }
+
 }

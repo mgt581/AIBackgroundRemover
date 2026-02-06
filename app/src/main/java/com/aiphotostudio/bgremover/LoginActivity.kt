@@ -1,301 +1,160 @@
 package com.aiphotostudio.bgremover
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import android.webkit.*
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import kotlinx.coroutines.launch
+import java.io.File
 
-class LoginActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private lateinit var credentialManager: CredentialManager
+    private lateinit var webView: WebView
+    private lateinit var auth: FirebaseAuth
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private var cameraImageUri: Uri? = null
+
+    // UI Elements
+    private lateinit var tvSignedInStatus: TextView
+    private lateinit var btnAuthSignin: Button
+
+    // 1. Permission Launcher (Fixed)
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.CAMERA] != true) {
+            Toast.makeText(this, "Camera permission required for photos", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 2. Gallery Launcher
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(uri))
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
+        filePathCallback = null
+    }
+
+    // 3. Camera Launcher
+    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && cameraImageUri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
+        filePathCallback = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        credentialManager = CredentialManager.create(this)
+        auth = FirebaseAuth.getInstance()
+        setContentView(R.layout.activity_main)
 
-        setContent {
-            var isSignUp by remember { mutableStateOf(false) }
-            val scope = rememberCoroutineScope()
-            
-            MaterialTheme {
-                LoginScreen(
-                    isSignUp = isSignUp,
-                    onToggleMode = { isSignUp = !isSignUp },
-                    onAuthAction = { email, password ->
-                        if (email.isBlank() || password.isBlank()) {
-                            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                        } else {
-                            if (isSignUp) {
-                                auth.createUserWithEmailAndPassword(email, password)
-                                    .addOnSuccessListener { goToMain() }
-                                    .addOnFailureListener { e ->
-                                        Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-                                    }
-                            } else {
-                                auth.signInWithEmailAndPassword(email, password)
-                                    .addOnSuccessListener { goToMain() }
-                                    .addOnFailureListener { e ->
-                                        Toast.makeText(this, "Login Failed: ${e.message}", Toast.LENGTH_LONG).show()
-                                    }
-                            }
-                        }
-                    },
-                    onForgotPassword = { email ->
-                        if (email.isBlank()) {
-                            Toast.makeText(this, "Please enter your email first", Toast.LENGTH_SHORT).show()
-                        } else {
-                            auth.sendPasswordResetEmail(email)
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "Reset email sent to $email", Toast.LENGTH_SHORT).show()
-                                }
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-                        }
-                    },
-                    onGoogleSignIn = {
-                        scope.launch {
-                            signInWithGoogle()
-                        }
-                    },
-                    onGoHome = { goToMain() }
-                )
+        initViews()
+        setupWebView()
+        updateHeaderUi()
+        checkAndRequestPermissions()
+
+        if (savedInstanceState == null) {
+            webView.loadUrl("https://aiphotostudio.co.uk/")
+        }
+    }
+
+    private fun initViews() {
+        webView = findViewById(R.id.webView)
+        tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+        btnAuthSignin = findViewById(R.id.btn_auth_signin)
+
+        // PILL BUTTON: "Choose Photo" manually opens the dialog
+        findViewById<Button>(R.id.btn_choose_photo).setOnClickListener { 
+            showSourceDialog() 
+        }
+
+        // PILL BUTTON: "Remove BG" triggers the website's button
+        findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
+            webView.evaluateJavascript("(function(){ var b=Array.from(document.querySelectorAll('button')).find(x=>x.innerText.includes('Remove Background')); if(b) b.click(); })();", null)
+        }
+
+        findViewById<Button>(R.id.btn_footer_privacy).setOnClickListener { 
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://aiphotostudio.co.uk/privacy"))) 
+        }
+
+        btnAuthSignin.setOnClickListener { 
+            if (auth.currentUser != null) signOut() else startActivity(Intent(this, LoginActivity::class.java)) 
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = true
+            allowContentAccess = true
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        }
+
+        webView.webViewClient = WebViewClient()
+
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                webView: WebView?,
+                f: ValueCallback<Array<Uri>>?,
+                p: WebChromeClient.FileChooserParams?
+            ): Boolean {
+                filePathCallback = f
+                showSourceDialog()
+                return true
             }
         }
     }
 
-    private suspend fun signInWithGoogle() {
-        try {
-            val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)
-                .setServerClientId(getString(R.string.default_web_client_id))
-                .setAutoSelectEnabled(true)
-                .build()
-
-            val request = GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build()
-
-            val result = credentialManager.getCredential(this, request)
-            val credential = result.credential
-            
-            if (credential is androidx.credentials.CustomCredential && 
-                credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                
-                val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
-                val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
-                
-                auth.signInWithCredential(firebaseCredential)
-                    .addOnSuccessListener { goToMain() }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Firebase Auth Failed: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
+    private fun showSourceDialog() {
+        val options = arrayOf("Take Photo", "Choose from Gallery")
+        AlertDialog.Builder(this)
+            .setTitle("Select Image Source")
+            .setItems(options) { _, which ->
+                if (which == 0) {
+                    val photoFile = File(externalCacheDir, "camera_photo.jpg")
+                    cameraImageUri = FileProvider.getUriForFile(this, "$packageName.provider", photoFile)
+                    takePhotoLauncher.launch(cameraImageUri)
+                } else {
+                    pickImageLauncher.launch("image/*")
+                }
             }
-        } catch (e: Exception) {
-            Log.e("LoginActivity", "Google Sign In Error", e)
-            Toast.makeText(this, "Google Sign In failed", Toast.LENGTH_SHORT).show()
-        }
+            .setOnCancelListener { 
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = null 
+            }
+            .show()
     }
 
-    private fun goToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+    private fun checkAndRequestPermissions() {
+        val permissions = mutableListOf(Manifest.permission.CAMERA)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+        requestPermissionsLauncher.launch(permissions.toTypedArray())
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LoginScreen(
-    isSignUp: Boolean,
-    onToggleMode: () -> Unit,
-    onAuthAction: (String, String) -> Unit,
-    onForgotPassword: (String) -> Unit,
-    onGoogleSignIn: () -> Unit,
-    onGoHome: () -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    
-    val bgColor = Color(0xFF0B1221)
-    val surfaceColor = Color(0xFF161E2E)
-    val primaryColor = Color(0xFF6342FF)
-    val accentColor = Color(0xFF4285F4)
-    val textSecondary = Color(0xFF94A3B8)
+    private fun updateHeaderUi() {
+        val user = auth.currentUser
+        btnAuthSignin.text = if (user != null) "Sign Out" else "Sign In"
+        tvSignedInStatus.text = user?.email ?: "Not signed in"
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(bgColor)
-            .padding(horizontal = 24.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(16.dp))
-        
-        Row(modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onGoHome) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back home",
-                    tint = textSecondary
-                )
-            }
-        }
-
-        Spacer(Modifier.height(60.dp))
-
-        val annotatedTitle = buildAnnotatedString {
-            withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-                append("AI Background ")
-            }
-            withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Normal)) {
-                append("Remover")
-            }
-        }
-        
-        Text(
-            text = annotatedTitle,
-            fontSize = 28.sp,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(Modifier.height(40.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            placeholder = { Text("Email address", color = textSecondary) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = primaryColor,
-                unfocusedBorderColor = surfaceColor,
-                focusedContainerColor = surfaceColor,
-                unfocusedContainerColor = surfaceColor
-            )
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            placeholder = { Text("Password", color = textSecondary) },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = primaryColor,
-                unfocusedBorderColor = surfaceColor,
-                focusedContainerColor = surfaceColor,
-                unfocusedContainerColor = surfaceColor
-            )
-        )
-
-        if (!isSignUp) {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                Text(
-                    text = "Forgot password?",
-                    color = accentColor,
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .padding(vertical = 12.dp)
-                        .clickable { onForgotPassword(email) }
-                )
-            }
-        } else {
-            Spacer(Modifier.height(24.dp))
-        }
-
-        Button(
-            onClick = { onAuthAction(email, password) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
-        ) {
-            Text(if (isSignUp) "Sign Up" else "Sign In", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        Text(text = "OR", color = textSecondary, fontSize = 14.sp)
-
-        Spacer(Modifier.height(24.dp))
-
-        OutlinedButton(
-            onClick = onGoogleSignIn,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, surfaceColor),
-            colors = ButtonDefaults.outlinedButtonColors(containerColor = surfaceColor, contentColor = Color.White)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "G ", 
-                    color = Color.White,
-                    fontWeight = FontWeight.Black, 
-                    fontSize = 20.sp
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Sign in with Google", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-            }
-        }
-
-        Spacer(Modifier.height(32.dp))
-
-        Row {
-            Text(
-                text = if (isSignUp) "Already have an account? " else "No account? ",
-                color = textSecondary,
-                fontSize = 15.sp
-            )
-            Text(
-                text = if (isSignUp) "Sign in" else "Sign up",
-                color = accentColor,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable { onToggleMode() }
-            )
-        }
-        
-        Spacer(Modifier.height(40.dp))
+    private fun signOut() {
+        auth.signOut()
+        updateHeaderUi()
     }
 }
