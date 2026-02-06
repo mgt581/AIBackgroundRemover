@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    // Removed Kotlin Android plugin because AGP 9+ has built-in Kotlin support
     alias(libs.plugins.google.services)
 }
 
@@ -37,8 +37,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
+    // Kotlin options are set correctly under android { }
+    kotlin {
+        jvmToolchain(8) // replaces kotlinOptions.jvmTarget for AGP 9+
     }
 
     buildFeatures {
@@ -60,7 +61,7 @@ dependencies {
     implementation(libs.firebase.appcheck)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
-    
+
     implementation(libs.play.services.auth)
 
     implementation(libs.androidx.core.ktx)
