@@ -36,4 +36,9 @@
     <string name="ai_photo_studio">Ai Photo Studio</string>
     <string name="ai_photo_studio_background_remover">Ai Photo Studio Background remover</string>
     <string name="logo">Logo</string>
+    <string name="continue_anonymously">Continue Anonymously</string>
+    <string name="back">Back</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="auth">Sign In</string>
+    <string name="forgot_password">Forgot password?</string>
 </resources>
