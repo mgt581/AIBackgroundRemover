@@ -104,6 +104,55 @@ The project includes automated workflows:
 
 The app uses Firebase for authentication and other services. The `google-services.json` file is included in the repository for the project configuration.
 
+### Setting Up Firebase Authentication
+
+To enable sign-in functionality in debug builds:
+
+1. **Firebase Console Setup**:
+   - Go to the [Firebase Console](https://console.firebase.google.com/)
+   - Select your Firebase project (this app uses: `pwa-ai-photo-studio-pro`)
+   - Enable Email/Password authentication in Authentication > Sign-in methods
+   - Enable Google Sign-In in Authentication > Sign-in methods
+
+2. **App Check Debug Token (Required for Development)**:
+   
+   When running the app in debug mode, you **must** register your debug token with Firebase:
+   
+   a. Run the app in debug mode
+   
+   b. Check Logcat for a message like:
+   ```
+   D/DebugAppCheckProvider: Enter this debug secret into the allow list in the Firebase Console: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+   ```
+   
+   c. Copy the debug token and add it to Firebase:
+   - Go to Firebase Console > Project Settings > App Check
+   - Click "Manage debug tokens"
+   - Add your debug token
+   
+   **Without this step, all authentication requests will fail in debug builds.**
+
+3. **Google Sign-In SHA-1 Certificate**:
+   
+   The SHA-1 certificate hash in `google-services.json` must match your signing keystore:
+   
+   ```bash
+   # Get your debug keystore SHA-1
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+   ```
+   
+   If it doesn't match, add your SHA-1 to Firebase Console > Project Settings > Your apps.
+
+### Troubleshooting Authentication Issues
+
+If sign-in is not working:
+
+1. **Check Logcat** for detailed error messages (search for `LoginActivity` or `AIApplication`)
+2. **Verify App Check debug token** is registered (see step 2 above)
+3. **Confirm authentication methods** are enabled in Firebase Console
+4. **Validate SHA-1 certificate** matches your keystore
+5. **Check network connectivity** - Firebase requires internet access
+
 ## Contributing
 
 1. Fork the repository
