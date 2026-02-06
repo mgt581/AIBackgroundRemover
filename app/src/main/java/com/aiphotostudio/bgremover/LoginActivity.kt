@@ -71,7 +71,6 @@ class LoginActivity : AppCompatActivity() {
             signInWithGoogle()
         }
 
-        findViewById<View>(R.id.btn_header_sign_in).setOnClickListener {
         findViewById<View>(R.id.btn_close_login).setOnClickListener {
             finish()
         }
@@ -122,7 +121,6 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     Log.d(TAG, "Email/password sign-in successful")
                     Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                    navigateToMainActivity()
                     finish()
                 } else {
                     val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
@@ -164,7 +162,7 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     Log.d(TAG, "Google Firebase authentication successful")
                     Toast.makeText(this, "Google login successful", Toast.LENGTH_SHORT).show()
-                    navigateToMainActivity()
+                    finish()
                 } else {
                     val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
                     Log.e(TAG, "Google Firebase authentication failed: ${task.exception?.message}, error code: $errorCode", task.exception)
@@ -188,25 +186,12 @@ class LoginActivity : AppCompatActivity() {
             if (task.isSuccessful) {
                 Log.d(TAG, "Anonymous sign-in successful")
                 Toast.makeText(this, "Logged in as Guest", Toast.LENGTH_SHORT).show()
-                navigateToMainActivity()
+                finish()
             } else {
                 val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
                 Log.e(TAG, "Anonymous sign-in failed: ${task.exception?.message}, error code: $errorCode", task.exception)
                 Toast.makeText(this, "Guest login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
             }
         }
-    }
-
-    /**
-     * Navigate to MainActivity and clear the back stack to prevent users from
-     * pressing back to return to the login screen after successful authentication.
-     */
-    private fun navigateToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            // Clear the entire back stack and start MainActivity as the root
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        startActivity(intent)
-        finish()
     }
 }
