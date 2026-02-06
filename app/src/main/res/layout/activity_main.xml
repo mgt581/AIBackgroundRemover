@@ -78,6 +78,16 @@
                     android:textSize="11sp" />
 
                 <Button
+                    android:id="@+id/btn_gallery"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:paddingHorizontal="8dp"
+                    android:text="@string/gallery"
+                    android:textColor="@color/brand_text_secondary"
+                    android:textSize="11sp" />
+
+                <Button
                     android:id="@+id/btn_header_settings"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"

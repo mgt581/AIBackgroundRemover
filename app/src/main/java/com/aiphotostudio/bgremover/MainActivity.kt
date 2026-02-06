@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var btnAuthAction: Button
     private lateinit var btnHeaderSettings: Button
+    private lateinit var btnGallery: Button
     private lateinit var tvSignedInStatus: TextView
     private lateinit var fabSave: ExtendedFloatingActionButton
 
@@ -99,6 +100,7 @@ class MainActivity : AppCompatActivity() {
             webView = findViewById(R.id.webView)
             btnAuthAction = findViewById(R.id.btn_auth_action)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
+            btnGallery = findViewById(R.id.btn_gallery)
             tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
             fabSave = findViewById(R.id.fab_save)
 
@@ -131,6 +133,10 @@ class MainActivity : AppCompatActivity() {
 
             btnHeaderSettings.setOnClickListener {
                 startActivity(Intent(this, SettingsActivity::class.java))
+            }
+
+            btnGallery.setOnClickListener {
+                startActivity(Intent(this, GalleryActivity::class.java))
             }
 
             btnFooterTerms.setOnClickListener {
@@ -229,8 +235,11 @@ class MainActivity : AppCompatActivity() {
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
+                    // Auto-save to gallery
+                    saveImageToGallery(base64Data, silent = true)
+                    
                     fabSave.visibility = View.VISIBLE
-                    Toast.makeText(this@MainActivity, "Image ready to save! Click the save button below.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MainActivity, "Image processed and saved to gallery!", Toast.LENGTH_LONG).show()
                 }
             }
         }, "AndroidInterface")
@@ -278,8 +287,9 @@ class MainActivity : AppCompatActivity() {
             if (url.startsWith("data:")) {
                 lastCapturedBase64 = url
                 runOnUiThread {
+                    saveImageToGallery(url, silent = true)
                     fabSave.visibility = View.VISIBLE
-                    Toast.makeText(this@MainActivity, "Image captured! Click Save to Gallery.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Image processed and saved to gallery!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -321,32 +331,43 @@ class MainActivity : AppCompatActivity() {
         webView.evaluateJavascript(js, null)
     }
 
-    private fun saveImageToGallery(base64Data: String) {
+    private fun saveImageToGallery(base64Data: String, silent: Boolean = false) {
         try {
             val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: throw Exception("Decode error")
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val values = ContentValues().apply {
-                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                    put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
+            // Save to internal app storage for the Gallery page
+            val galleryDir = File(filesDir, "saved_images")
+            if (!galleryDir.exists()) galleryDir.mkdirs()
+            val internalFile = File(galleryDir, fileName)
+            FileOutputStream(internalFile).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+
+            if (!silent) {
+                // Also save to public gallery if user clicked "Save"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val values = ContentValues().apply {
+                        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
+                    }
+                    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw Exception("Insert error")
+                    contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                } else {
+                    val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
+                    if (!directory.exists()) directory.mkdirs()
+                    val file = File(directory, fileName)
+                    FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
                 }
-                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw Exception("Insert error")
-                contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            } else {
-                val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
-                if (!directory.exists()) directory.mkdirs()
-                val file = File(directory, fileName)
-                FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
+                runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+                lastCapturedBase64 = null
             }
-            runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
-            lastCapturedBase64 = null
         } catch (e: Exception) {
-            runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
+            if (!silent) {
+                runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
+            }
         }
     }
 

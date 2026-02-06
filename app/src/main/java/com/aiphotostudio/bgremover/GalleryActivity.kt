@@ -36,7 +36,7 @@ class GalleryActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.rv_gallery)
         tvEmpty = findViewById(R.id.tv_empty)
 
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
         loadImages()
     }
 
@@ -93,7 +93,7 @@ class GalleryActivity : AppCompatActivity() {
                 val values = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AIPhotoStudio")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
                 }
 
                 val contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -105,12 +105,12 @@ class GalleryActivity : AppCompatActivity() {
                             inputStream.copyTo(outputStream!!)
                         }
                     }
-                    Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 @Suppress("DEPRECATION")
                 val publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                val studioDir = File(publicDir, "AIPhotoStudio")
+                val studioDir = File(publicDir, "AI Background Remover")
                 if (!studioDir.exists()) studioDir.mkdirs()
 
                 val destFile = File(studioDir, fileName)
@@ -123,7 +123,7 @@ class GalleryActivity : AppCompatActivity() {
                 // Refresh MediaStore
                 @Suppress("DEPRECATION")
                 sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(destFile)))
-                Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Log.e("GalleryActivity", "Error downloading image", e)
