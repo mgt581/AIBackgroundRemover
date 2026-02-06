@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -12,77 +13,127 @@
         android:orientation="vertical"
         android:padding="24dp">
 
+        <!-- Close Button -->
+        <Button
+            android:id="@+id/btn_close_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/back"
+            style="@style/Widget.Material3.Button.TextButton"
+            tools:ignore="VisualLintButtonSize" />
+
         <!-- LOGO -->
         <ImageView
             android:id="@+id/imgLogo"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:layout_marginBottom="32dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginBottom="16dp"
             android:src="@drawable/ic_logo"
-            android:contentDescription="Logo"
-            tools:ignore="HardcodedText" />
+            android:contentDescription="@string/logo" />
 
-        <EditText
-            android:id="@+id/etEmail"
+        <!-- Tabs -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autofillHints=""
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:minHeight="48dp"
-            tools:ignore="HardcodedText,VisualLintTextFieldSize" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+            <Button
+                android:id="@+id/btn_tab_signin"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sign_in"
+                style="@style/Widget.Material3.Button.TonalButton" />
+            <Button
+                android:id="@+id/btn_tab_signup"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/sign_up"
+                style="@style/Widget.Material3.Button.TonalButton" />
+        </LinearLayout>
 
-        <EditText
-            android:id="@+id/etPassword"
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/email">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:autofillHints=""
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:minHeight="48dp"
-            android:textColorHint="#757575"
-            tools:ignore="HardcodedText,VisualLintTextFieldSize" />
+            android:hint="@string/password"
+            app:passwordToggleEnabled="true">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/tvForgotPassword"
+        <ProgressBar
+            android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/forgot_password"
-            android:textColor="#0277BD" />
+            android:visibility="gone"
+            android:layout_marginTop="16dp" />
 
         <Button
-            android:id="@+id/btnLogin"
+            android:id="@+id/btn_email_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/auth"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/or"
             android:layout_marginTop="16dp"
-            tools:ignore="VisualLintButtonSize" />
+            android:layout_marginBottom="16dp" />
 
         <Button
-            android:id="@+id/btnGoogle"
+            android:id="@+id/btn_google_sign_in"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/continue_with_google"
-            android:layout_marginTop="12dp"
-            tools:ignore="VisualLintButtonSize" />
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <Button
-            android:id="@+id/btnAnonymous"
+            android:id="@+id/btn_anonymous_sign_in"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/continue_anonymously"
             android:layout_marginTop="12dp"
-            tools:ignore="VisualLintButtonSize" />
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
-        <Button
-            android:id="@+id/btnBack"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/back"
-            android:layout_marginTop="24dp"
-            tools:ignore="VisualLintButtonSize" />
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp">
+            <TextView
+                android:id="@+id/tv_privacy_policy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/privacy_policy"
+                android:textColor="?attr/colorPrimary"
+                android:padding="8dp" />
+            <TextView
+                android:id="@+id/tv_terms_of_service"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/terms_of_service"
+                android:textColor="?attr/colorPrimary"
+                android:padding="8dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
