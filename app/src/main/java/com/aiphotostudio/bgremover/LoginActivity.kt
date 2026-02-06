@@ -1,79 +1,160 @@
 package com.aiphotostudio.bgremover
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.webkit.*
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
+import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
+import java.io.File
 
-class LoginActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
+    private lateinit var webView: WebView
     private lateinit var auth: FirebaseAuth
-    private lateinit var etEmail: TextInputEditText
-    private lateinit var etPassword: TextInputEditText
-    private lateinit var btnLogin: Button
-    private lateinit var btnGuest: Button
-    private lateinit var progressBar: ProgressBar
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private var cameraImageUri: Uri? = null
+
+    // UI Elements
+    private lateinit var tvSignedInStatus: TextView
+    private lateinit var btnAuthSignin: Button
+
+    // 1. Permission Launcher (Fixed)
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.CAMERA] != true) {
+            Toast.makeText(this, "Camera permission required for photos", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 2. Gallery Launcher
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(uri))
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
+        filePathCallback = null
+    }
+
+    // 3. Camera Launcher
+    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && cameraImageUri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
+        filePathCallback = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
-        setContentView(R.layout.activity_login)
+        setContentView(R.layout.activity_main)
 
-        etEmail = findViewById(R.id.et_email)
-        etPassword = findViewById(R.id.et_password)
-        btnLogin = findViewById(R.id.btn_email_login)
-        btnGuest = findViewById(R.id.btn_anonymous_sign_in)
-        progressBar = findViewById(R.id.progressBar)
+        initViews()
+        setupWebView()
+        updateHeaderUi()
+        checkAndRequestPermissions()
 
-        btnLogin.setOnClickListener {
-            performLogin()
-        }
-
-        btnGuest.setOnClickListener {
-            signInAnonymously()
-        }
-
-        findViewById<View>(R.id.btn_google_sign_in).setOnClickListener {
-            Toast.makeText(this, "Google Sign-In is being configured", Toast.LENGTH_SHORT).show()
+        if (savedInstanceState == null) {
+            webView.loadUrl("https://aiphotostudio.co.uk/")
         }
     }
 
-    private fun performLogin() {
-        val email = etEmail.text.toString().trim()
-        val password = etPassword.text.toString().trim()
+    private fun initViews() {
+        webView = findViewById(R.id.webView)
+        tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+        btnAuthSignin = findViewById(R.id.btn_auth_signin)
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
-            return
+        // PILL BUTTON: "Choose Photo" manually opens the dialog
+        findViewById<Button>(R.id.btn_choose_photo).setOnClickListener { 
+            showSourceDialog() 
         }
 
-        progressBar.visibility = View.VISIBLE
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                progressBar.visibility = View.GONE
-                if (task.isSuccessful) {
-                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                    finish()
+        // PILL BUTTON: "Remove BG" triggers the website's button
+        findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
+            webView.evaluateJavascript("(function(){ var b=Array.from(document.querySelectorAll('button')).find(x=>x.innerText.includes('Remove Background')); if(b) b.click(); })();", null)
+        }
+
+        findViewById<Button>(R.id.btn_footer_privacy).setOnClickListener { 
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://aiphotostudio.co.uk/privacy"))) 
+        }
+
+        btnAuthSignin.setOnClickListener { 
+            if (auth.currentUser != null) signOut() else startActivity(Intent(this, LoginActivity::class.java)) 
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = true
+            allowContentAccess = true
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        }
+
+        webView.webViewClient = WebViewClient()
+
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                webView: WebView?,
+                f: ValueCallback<Array<Uri>>?,
+                p: WebChromeClient.FileChooserParams?
+            ): Boolean {
+                filePathCallback = f
+                showSourceDialog()
+                return true
+            }
+        }
+    }
+
+    private fun showSourceDialog() {
+        val options = arrayOf("Take Photo", "Choose from Gallery")
+        AlertDialog.Builder(this)
+            .setTitle("Select Image Source")
+            .setItems(options) { _, which ->
+                if (which == 0) {
+                    val photoFile = File(externalCacheDir, "camera_photo.jpg")
+                    cameraImageUri = FileProvider.getUriForFile(this, "$packageName.provider", photoFile)
+                    takePhotoLauncher.launch(cameraImageUri)
                 } else {
-                    Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    pickImageLauncher.launch("image/*")
                 }
             }
+            .setOnCancelListener { 
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = null 
+            }
+            .show()
     }
 
-    private fun signInAnonymously() {
-        progressBar.visibility = View.VISIBLE
-        auth.signInAnonymously().addOnCompleteListener(this) { task ->
-            progressBar.visibility = View.GONE
-            if (task.isSuccessful) {
-                Toast.makeText(this, "Logged in as guest", Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                Toast.makeText(this, "Guest login failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-            }
+    private fun checkAndRequestPermissions() {
+        val permissions = mutableListOf(Manifest.permission.CAMERA)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
+        requestPermissionsLauncher.launch(permissions.toTypedArray())
+    }
+
+    private fun updateHeaderUi() {
+        val user = auth.currentUser
+        btnAuthSignin.text = if (user != null) "Sign Out" else "Sign In"
+        tvSignedInStatus.text = user?.email ?: "Not signed in"
+    }
+
+    private fun signOut() {
+        auth.signOut()
+        updateHeaderUi()
     }
 }
