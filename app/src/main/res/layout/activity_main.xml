@@ -107,39 +107,44 @@
         android:layout_margin="16dp"
         android:text="@string/save_to_gallery"
         android:textColor="@color/white"
+        android:visibility="gone"
         app:backgroundTint="@color/brand_primary"
         app:icon="@android:drawable/ic_menu_save"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toTopOf="@id/footer_layout"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
 
     <!-- Footer Section -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/footer_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/brand_surface"
-        android:orientation="vertical"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
+            android:id="@+id/tv_footer_ownership"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/footer_ownership"
             android:textColor="@color/brand_text_secondary"
             android:textSize="10sp"
+            app:layout_constraintTop_toTopOf="parent"
             tools:ignore="SmallSp" />
 
         <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flow_footer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             app:flow_horizontalGap="8dp"
             app:flow_horizontalStyle="packed"
             app:flow_wrapMode="aligned"
-            app:constraint_referenced_ids="btn_link_bds,btn_link_bgh,btn_link_mpa,btn_link_email,btn_footer_terms" />
+            app:constraint_referenced_ids="btn_link_bds,btn_link_bgh,btn_link_mpa,btn_link_email,btn_footer_terms"
+            app:layout_constraintTop_toBottomOf="@id/tv_footer_ownership" />
 
         <Button
             android:id="@+id/btn_link_bds"
@@ -196,6 +201,6 @@
             android:textSize="10sp"
             tools:ignore="SmallSp" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
