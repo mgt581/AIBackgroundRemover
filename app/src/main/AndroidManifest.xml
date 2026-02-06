@@ -1,12 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.aiphotostudio.bgremover">
 
+    <!-- Permissions: Must be above the <application> tag -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
+    <!-- Storage permissions for older Android versions -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <!-- Granular media permissions for Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:ignore="PhotoAndVideoPolicy,SelectedPhotoAccess" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:ignore="PhotoAndVideoPolicy,SelectedPhotoAccess" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"
+        tools:ignore="PhotoAndVideoPolicy" />
+
+    <!-- Android 14+ Selected Photos Access -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+        tools:ignore="PhotoAndVideoPolicy" />
+
+    <!-- CRITICAL: Allows Sign-In/Up buttons to communicate with Google/Chrome -->
     <queries>
         <intent>
             <action android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN" />
@@ -27,36 +45,29 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AIBackgroundRemover">
+        android:theme="@style/Theme.AIBackgroundRemover"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="33">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
+
+            <!-- Deep Linking Support -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                
                 <data
                     android:scheme="https"
                     android:host="aiphotostudio.co.uk"
                     android:pathPrefix="/auth" />
-            </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:host="aiphotostudio.co.uk"
-                    android:path="/auth/callback"
-                    android:scheme="https" />
             </intent-filter>
         </activity>
 
@@ -65,20 +76,9 @@
             android:exported="true"
             android:theme="@style/Theme.AIBackgroundRemover.NoActionBar" />
 
-        <activity
-            android:name=".GalleryActivity"
-            android:exported="false"
-            android:label="My Gallery" />
-
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="Settings" />
-
-        <activity
-            android:name=".TermsActivity"
-            android:exported="false"
-            android:label="Terms of Service" />
+        <activity android:name=".GalleryActivity" android:exported="false" android:label="My Gallery" />
+        <activity android:name=".SettingsActivity" android:exported="false" android:label="Settings" />
+        <activity android:name=".TermsActivity" android:exported="false" android:label="Terms of Service" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

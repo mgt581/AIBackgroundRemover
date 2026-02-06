@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.aiphotostudio.bgremover
 
 import android.Manifest
@@ -27,8 +28,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
@@ -188,13 +187,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun signOut() {
         auth.signOut()
-        @Suppress("DEPRECATION")
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-        @Suppress("DEPRECATION")
-        GoogleSignIn.getClient(this, gso).signOut().addOnCompleteListener {
-            updateHeaderUi()
-            Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
-        }
+        updateHeaderUi()
+        Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -219,7 +213,7 @@ class MainActivity : AppCompatActivity() {
 
         webView.addJavascriptInterface(object {
             @JavascriptInterface
-            fun processBlob(base64Data: String) {
+            fun processImage(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
                     fabSave.visibility = View.VISIBLE
@@ -285,7 +279,7 @@ class MainActivity : AppCompatActivity() {
                                     var reader = new FileReader();
                                     reader.onloadend = function() {
                                         if (reader.result && reader.result.indexOf('data:image') === 0) {
-                                            AndroidInterface.processBlob(reader.result);
+                                            AndroidInterface.processImage(reader.result);
                                         }
                                     };
                                     reader.readAsDataURL(xhr.response);
@@ -318,7 +312,7 @@ class MainActivity : AppCompatActivity() {
                 var reader = new FileReader();
                 reader.onloadend = function() {
                   if (isDataURLImage(reader.result)) {
-                    AndroidInterface.processBlob(reader.result);
+                    AndroidInterface.processImage(reader.result);
                   }
                 };
                 reader.readAsDataURL(blob);
@@ -326,7 +320,7 @@ class MainActivity : AppCompatActivity() {
               
               function sendDataURLToAndroid(dataUrl) {
                 if (isDataURLImage(dataUrl)) {
-                  AndroidInterface.processBlob(dataUrl);
+                  AndroidInterface.processImage(dataUrl);
                 }
               }
               
