@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -47,15 +48,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAuthAction: Button
     private lateinit var btnHeaderSettings: Button
     private lateinit var btnGallery: Button
-    private lateinit var tvSignedInStatus: TextView
+    private lateinit var btnSignUp: Button
+    
+    private lateinit var btnDayPass: Button
+    private lateinit var btnMonthly: Button
+    private lateinit var btnYearly: Button
+
     private lateinit var fabSave: ExtendedFloatingActionButton
-
-    private lateinit var btnFooterTerms: Button
-
-    private lateinit var btnLinkBds: Button
-    private lateinit var btnLinkBgh: Button
-    private lateinit var btnLinkMpa: Button
-    private lateinit var btnLinkEmail: Button
 
     private var bridgeInjectedForUrl: String? = null
     private var lastBridgeInjectionMs: Long = 0L
@@ -87,7 +86,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize Firebase
         FirebaseApp.initializeApp(this)
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
         firebaseAppCheck.installAppCheckProviderFactory(DebugAppCheckProviderFactory.getInstance())
@@ -101,57 +99,18 @@ class MainActivity : AppCompatActivity() {
             btnAuthAction = findViewById(R.id.btn_auth_action)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             btnGallery = findViewById(R.id.btn_gallery)
-            tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
+            btnSignUp = findViewById(R.id.btn_sign_up)
+            
+            btnDayPass = findViewById(R.id.btn_day_pass)
+            btnMonthly = findViewById(R.id.btn_monthly)
+            btnYearly = findViewById(R.id.btn_yearly)
+
             fabSave = findViewById(R.id.fab_save)
 
-            btnFooterTerms = findViewById(R.id.btn_footer_terms)
-
-            btnLinkBds = findViewById(R.id.btn_link_bds)
-            btnLinkBgh = findViewById(R.id.btn_link_bgh)
-            btnLinkMpa = findViewById(R.id.btn_link_mpa)
-            btnLinkEmail = findViewById(R.id.btn_link_email)
-
+            setupClickListeners()
             updateHeaderUi()
             setupWebView()
             checkAndRequestPermissions()
-
-            fabSave.setOnClickListener {
-                lastCapturedBase64?.let {
-                    saveImageToGallery(it)
-                } ?: run {
-                    Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            btnAuthAction.setOnClickListener {
-                if (auth.currentUser != null) {
-                    signOut()
-                } else {
-                    startActivity(Intent(this, LoginActivity::class.java))
-                }
-            }
-
-            btnHeaderSettings.setOnClickListener {
-                startActivity(Intent(this, SettingsActivity::class.java))
-            }
-
-            btnGallery.setOnClickListener {
-                startActivity(Intent(this, GalleryActivity::class.java))
-            }
-
-            btnFooterTerms.setOnClickListener {
-                webView.loadUrl("https://aiphotostudio.co/terms")
-            }
-
-            btnLinkBds.setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
-            btnLinkBgh.setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
-            btnLinkMpa.setOnClickListener { openUrl("https://multipostapp.co.uk") }
-            btnLinkEmail.setOnClickListener {
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:alex@bryantdigitalsolutions.com")
-                }
-                startActivity(intent)
-            }
 
             if (savedInstanceState == null) {
                 handleIntent(intent)
@@ -159,6 +118,44 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate", e)
         }
+    }
+
+    private fun setupClickListeners() {
+        fabSave.setOnClickListener {
+            lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
+                Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnAuthAction.setOnClickListener {
+            if (auth.currentUser != null) signOut() else startActivity(Intent(this, LoginActivity::class.java))
+        }
+
+        btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
+        btnGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
+        btnSignUp.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
+
+        val paymentListener = View.OnClickListener {
+            Toast.makeText(this, "Payment integration coming soon!", Toast.LENGTH_SHORT).show()
+        }
+        btnDayPass.setOnClickListener(paymentListener)
+        btnMonthly.setOnClickListener(paymentListener)
+        btnYearly.setOnClickListener(paymentListener)
+
+        // Footer Listeners
+        findViewById<ImageButton>(R.id.btn_fb).setOnClickListener { openUrl(getString(R.string.facebook_url)) }
+        findViewById<ImageButton>(R.id.btn_wa).setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
+        findViewById<ImageButton>(R.id.btn_tiktok).setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
+        
+        findViewById<Button>(R.id.btn_footer_gallery).setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
+        findViewById<Button>(R.id.btn_footer_settings).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
+        findViewById<Button>(R.id.btn_footer_contact).setOnClickListener {
+            val intent = Intent(Intent.ACTION_SENDTO).apply { data = Uri.parse("mailto:" + getString(R.string.owner_email)) }
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.btn_privacy).setOnClickListener { openUrl("https://aiphotostudio.co/privacy") }
+        findViewById<Button>(R.id.btn_terms).setOnClickListener { openUrl("https://aiphotostudio.co/terms") }
     }
 
     private fun openUrl(url: String) {
@@ -191,14 +188,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateHeaderUi() {
         val user = auth.currentUser
-        if (user != null) {
-            btnAuthAction.text = getString(R.string.sign_out)
-            tvSignedInStatus.text = getString(R.string.signed_in_as, user.email?.take(15) ?: "User")
-            tvSignedInStatus.visibility = View.VISIBLE
-        } else {
-            btnAuthAction.text = getString(R.string.sign_in)
-            tvSignedInStatus.visibility = View.GONE
-        }
+        btnAuthAction.text = if (user != null) getString(R.string.sign_out) else getString(R.string.sign_in)
+        btnSignUp.visibility = if (user != null) View.GONE else View.VISIBLE
     }
 
     private fun signOut() {
@@ -235,9 +226,7 @@ class MainActivity : AppCompatActivity() {
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
-                    // Auto-save to gallery
                     saveImageToGallery(base64Data, silent = true)
-                    
                     fabSave.visibility = View.VISIBLE
                     Toast.makeText(this@MainActivity, "Image processed and saved to gallery!", Toast.LENGTH_LONG).show()
                 }
@@ -247,13 +236,9 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co") ||
-                    url.contains("accounts.google") ||
-                    url.contains("facebook.com") ||
-                    url.contains("firebase")
-                ) {
-                    false
-                } else {
+                return if (url.contains("aiphotostudio.co") || url.contains("accounts.google") ||
+                    url.contains("facebook.com") || url.contains("firebase")
+                ) false else {
                     openUrl(url)
                     true
                 }
@@ -261,10 +246,6 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                val now = System.currentTimeMillis()
-                if (url != null && bridgeInjectedForUrl == url && (now - lastBridgeInjectionMs) < 2500L) return
-                bridgeInjectedForUrl = url
-                lastBridgeInjectionMs = now
                 injectBlobBridge()
                 webView.postDelayed({ injectBlobBridge() }, 1200)
             }
@@ -338,14 +319,12 @@ class MainActivity : AppCompatActivity() {
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: throw Exception("Decode error")
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
 
-            // Save to internal app storage for the Gallery page
             val galleryDir = File(filesDir, "saved_images")
             if (!galleryDir.exists()) galleryDir.mkdirs()
             val internalFile = File(galleryDir, fileName)
             FileOutputStream(internalFile).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
 
             if (!silent) {
-                // Also save to public gallery if user clicked "Save"
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     val values = ContentValues().apply {
                         put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
@@ -362,12 +341,9 @@ class MainActivity : AppCompatActivity() {
                     MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
                 }
                 runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
-                lastCapturedBase64 = null
             }
         } catch (e: Exception) {
-            if (!silent) {
-                runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
-            }
+            if (!silent) runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
         }
     }
 
@@ -403,5 +379,4 @@ class MainActivity : AppCompatActivity() {
         val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         if (toRequest.isNotEmpty()) requestPermissionsLauncher.launch(toRequest.toTypedArray())
     }
-
 }

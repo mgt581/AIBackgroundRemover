@@ -15,90 +15,143 @@
         app:cardElevation="8dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp">
-
-            <ImageView
-                android:id="@+id/iv_app_logo"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:contentDescription="@string/app_name"
-                android:src="@mipmap/ic_launcher"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
-                android:id="@+id/tv_app_logo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:text="AI BACKGROUND"
-                android:textColor="@color/brand_text"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/header_buttons_container"
-                app:layout_constraintStart_toEndOf="@id/iv_app_logo"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <LinearLayout
-                android:id="@+id/header_buttons_container"
+                android:id="@+id/tv_header_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:text="AI Photo Studio"
+                android:textColor="@color/brand_text"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"/>
 
-                <TextView
-                    android:id="@+id/tv_signed_in_status"
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="12dp">
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gap="8dp">
+
+                    <Button
+                        android:id="@+id/btn_gallery"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/gallery"
+                        android:paddingHorizontal="16dp"
+                        android:backgroundTint="#EBEDFF"
+                        android:textColor="#5C58B1"
+                        android:textSize="12sp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"/>
+
+                    <Button
+                        android:id="@+id/btn_header_settings"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/settings"
+                        android:paddingHorizontal="16dp"
+                        android:backgroundTint="#EBEDFF"
+                        android:textColor="#5C58B1"
+                        android:textSize="12sp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"/>
+
+                    <Button
+                        android:id="@+id/btn_auth_action"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/sign_in"
+                        android:paddingHorizontal="16dp"
+                        android:backgroundTint="#EBEDFF"
+                        android:textColor="#5C58B1"
+                        android:textSize="12sp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"/>
+
+                    <Button
+                        android:id="@+id/btn_sign_up"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="@string/sign_up"
+                        android:paddingHorizontal="16dp"
+                        android:backgroundTint="#EBEDFF"
+                        android:textColor="#5C58B1"
+                        android:textSize="12sp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"/>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_day_pass"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
                     android:layout_marginEnd="8dp"
-                    android:text="@string/user_placeholder"
-                    android:textColor="@color/brand_accent"
-                    android:textSize="11sp"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <Button
-                    android:id="@+id/btn_auth_action"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:paddingHorizontal="12dp"
-                    android:text="@string/sign_in"
-                    android:backgroundTint="@color/brand_primary"
+                    android:text="@string/day_pass"
+                    android:backgroundTint="#6C757D"
                     android:textColor="@color/white"
-                    android:textSize="11sp" />
+                    android:textSize="12sp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="100dp"/>
 
                 <Button
-                    android:id="@+id/btn_gallery"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:paddingHorizontal="8dp"
-                    android:text="@string/gallery"
-                    android:textColor="@color/brand_text_secondary"
-                    android:textSize="11sp" />
-
-                <Button
-                    android:id="@+id/btn_header_settings"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:paddingHorizontal="8dp"
-                    android:text="@string/settings"
-                    android:textColor="@color/brand_text_secondary"
-                    android:textSize="11sp" />
+                    android:id="@+id/btn_monthly"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1.2"
+                    android:text="@string/monthly_pass"
+                    android:backgroundTint="#2563EB"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="100dp"/>
 
             </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <Button
+                android:id="@+id/btn_yearly"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="@string/yearly_pass"
+                android:backgroundTint="#16A34A"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="100dp"/>
+
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <!-- WebView Section -->
@@ -106,7 +159,7 @@
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/footer_layout"
+        app:layout_constraintBottom_toTopOf="@id/footer_scroll"
         app:layout_constraintTop_toBottomOf="@id/header_card" />
 
     <!-- Save Button -->
@@ -121,96 +174,154 @@
         app:backgroundTint="@color/brand_primary"
         app:icon="@android:drawable/ic_menu_save"
         app:iconTint="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/footer_layout"
+        app:layout_constraintBottom_toTopOf="@id/footer_scroll"
         app:layout_constraintEnd_toEndOf="parent"
         tools:visibility="visible" />
 
     <!-- Footer Section -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/footer_layout"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/footer_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/brand_surface"
-        android:padding="8dp"
+        android:background="#161E2E"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
-            android:id="@+id/tv_footer_ownership"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/footer_ownership"
-            android:textColor="@color/brand_text_secondary"
-            android:textSize="10sp"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="SmallSp" />
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center_horizontal">
 
-        <androidx.constraintlayout.helper.widget.Flow
-            android:id="@+id/flow_footer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:flow_horizontalGap="8dp"
-            app:flow_horizontalStyle="packed"
-            app:flow_wrapMode="aligned"
-            app:constraint_referenced_ids="btn_link_bds,btn_link_bgh,btn_link_mpa,btn_link_email,btn_footer_terms"
-            app:layout_constraintTop_toBottomOf="@id/tv_footer_ownership" />
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@mipmap/ic_launcher_round"
+                android:layout_marginBottom="8dp"/>
 
-        <Button
-            android:id="@+id/btn_link_bds"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:paddingHorizontal="4dp"
-            android:text="@string/bds_url"
-            android:textColor="@color/brand_accent"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI Background remover"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/btn_link_bgh"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:paddingHorizontal="4dp"
-            android:text="@string/bgh_url"
-            android:textColor="@color/brand_accent"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+                <ImageButton
+                    android:id="@+id/btn_fb"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_share"
+                    android:layout_marginEnd="16dp"
+                    app:tint="@color/white"/>
+                <ImageButton
+                    android:id="@+id/btn_wa"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/sym_action_chat"
+                    android:layout_marginEnd="16dp"
+                    app:tint="@color/white"/>
+                <ImageButton
+                    android:id="@+id/btn_tiktok"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_slideshow"
+                    app:tint="@color/white"/>
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_link_mpa"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:paddingHorizontal="4dp"
-            android:text="@string/mpa_url"
-            android:textColor="@color/brand_accent"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:layout_marginBottom="24dp">
 
-        <Button
-            android:id="@+id/btn_link_email"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:paddingHorizontal="4dp"
-            android:text="@string/owner_email"
-            android:textColor="@color/brand_accent"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
+                <Button
+                    android:id="@+id/btn_footer_gallery"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GALLERY"
+                    android:textColor="@color/white"
+                    android:drawableStart="@android:drawable/ic_menu_gallery"
+                    android:drawablePadding="8dp"
+                    android:layout_marginEnd="16dp"/>
 
-        <Button
-            android:id="@+id/btn_footer_terms"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:paddingHorizontal="4dp"
-            android:text="@string/terms_of_service"
-            android:textColor="@color/brand_text_secondary"
-            android:textSize="10sp"
-            tools:ignore="SmallSp" />
+                <Button
+                    android:id="@+id/btn_footer_contact"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CONTACT US"
+                    android:textColor="@color/white"
+                    android:drawableStart="@android:drawable/ic_dialog_email"
+                    android:drawablePadding="8dp"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <Button
+                    android:id="@+id/btn_footer_settings"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SETTINGS"
+                    android:textColor="@color/white"
+                    android:drawableStart="@android:drawable/ic_menu_manage"
+                    android:drawablePadding="8dp"/>
+
+            </GridLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
+
+                <Button
+                    android:id="@+id/btn_privacy"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/privacy_policy"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="|"
+                    android:textColor="@color/white"
+                    android:layout_marginHorizontal="8dp"/>
+
+                <Button
+                    android:id="@+id/btn_terms"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/terms_of_service"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/footer_ownership"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="10sp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
