@@ -2,4 +2,5 @@
 <resources>
     <item name="sign_in_button" type="id" />
     <item name="btn_footer_privacy" type="id" />
+    <item name="btn_auth_signin" type="id">button</item>
 </resources>
