@@ -33,13 +33,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     // Kotlin options are set correctly under android { }
     kotlin {
-        jvmToolchain(8) // replaces kotlinOptions.jvmTarget for AGP 9+
+        jvmToolchain(17) // replaces kotlinOptions.jvmTarget for AGP 9+
     }
 
     buildFeatures {
