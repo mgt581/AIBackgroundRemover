@@ -303,11 +303,15 @@ class MainActivity : AppCompatActivity() {
               if (window.__AI_BG_BRIDGE_INSTALLED__) return;
               window.__AI_BG_BRIDGE_INSTALLED__ = true;
               
+              function isDataURLImage(url) {
+                return url && typeof url === 'string' && url.indexOf('data:image') === 0;
+              }
+              
               function sendBlobToAndroid(blob) {
                 if (!blob) return;
                 var reader = new FileReader();
                 reader.onloadend = function() {
-                  if (typeof reader.result === 'string' && reader.result.indexOf('data:image') === 0) {
+                  if (isDataURLImage(reader.result)) {
                     AndroidInterface.processBlob(reader.result);
                   }
                 };
@@ -315,7 +319,7 @@ class MainActivity : AppCompatActivity() {
               }
               
               function sendDataURLToAndroid(dataUrl) {
-                if (dataUrl && typeof dataUrl === 'string' && dataUrl.indexOf('data:image') === 0) {
+                if (isDataURLImage(dataUrl)) {
                   AndroidInterface.processBlob(dataUrl);
                 }
               }
@@ -344,34 +348,37 @@ class MainActivity : AppCompatActivity() {
                 var originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
                 HTMLCanvasElement.prototype.toDataURL = function(type, quality) {
                   var dataUrl = originalToDataURL.call(this, type, quality);
-                  if (dataUrl && dataUrl.indexOf('data:image') === 0) {
+                  if (isDataURLImage(dataUrl)) {
                     sendDataURLToAndroid(dataUrl);
                   }
                   return dataUrl;
                 };
               }
               
-              // Intercept link clicks (both blob: and data: URLs)
+              // Intercept link and button clicks (both blob: and data: URLs)
               window.addEventListener('click', function(e) {
-                var link = e.target.closest('a, button');
-                if (link && link.href) {
-                  // Handle blob: URLs
-                  if (link.href.indexOf('blob:') === 0) {
-                    e.preventDefault();
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', link.href, true);
-                    xhr.responseType = 'blob';
-                    xhr.onload = function() { sendBlobToAndroid(xhr.response); };
-                    xhr.send();
-                    return;
-                  }
-                  
-                  // Handle data: URLs
-                  if (link.href.indexOf('data:image') === 0) {
-                    e.preventDefault();
-                    sendDataURLToAndroid(link.href);
-                    return;
-                  }
+                var element = e.target.closest('a, button');
+                if (!element) return;
+                
+                var url = element.href || element.getAttribute('href');
+                if (!url) return;
+                
+                // Handle blob: URLs
+                if (url.indexOf('blob:') === 0) {
+                  e.preventDefault();
+                  var xhr = new XMLHttpRequest();
+                  xhr.open('GET', url, true);
+                  xhr.responseType = 'blob';
+                  xhr.onload = function() { sendBlobToAndroid(xhr.response); };
+                  xhr.send();
+                  return;
+                }
+                
+                // Handle data: URLs
+                if (isDataURLImage(url)) {
+                  e.preventDefault();
+                  sendDataURLToAndroid(url);
+                  return;
                 }
               }, true);
             })();
