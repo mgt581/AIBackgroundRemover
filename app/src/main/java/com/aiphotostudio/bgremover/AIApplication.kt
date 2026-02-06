@@ -10,6 +10,8 @@ import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.initialize
 
+private val Firebase.appCheck: kotlin.Any
+
 class AIApplication : Application() {
     
     companion object {
