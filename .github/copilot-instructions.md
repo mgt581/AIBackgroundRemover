@@ -142,7 +142,7 @@ AI Background Remover is an Android mobile application that uses artificial inte
 
 ### Commit Messages
 - Use present tense ("Add feature" not "Added feature")
-- Keep first line at or under 50 characters (subject line guideline)
+- Limit subject line to 50 characters (first line)
 - Wrap body text at 72 characters
 - Be specific and descriptive
 - Reference issues when applicable (e.g., "Fix #123: Bug description")
