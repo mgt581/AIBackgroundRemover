@@ -29,8 +29,8 @@ class GalleryAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val uri = images[position]
-        
-        Glide.with(holder.ivImage.context)
+
+        Glide.with(holder.itemView.context)
             .load(uri)
             .centerCrop()
             .into(holder.ivImage)
