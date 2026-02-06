@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
 }
 
@@ -20,12 +20,6 @@ android {
 
     buildFeatures {
         compose = true
-    }
-
-    composeOptions {
-        // Note: For Kotlin 2.0+, the Compose Compiler plugin should be used instead.
-        // If kotlin version is indeed 2.x, consider adding alias(libs.plugins.kotlin.compose) to plugins.
-        kotlinCompilerExtensionVersion = "1.5.15" 
     }
 
     packaging {
