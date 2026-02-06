@@ -4,11 +4,16 @@ import android.app.Application
 import android.util.Log
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.firebase.BuildConfig
 import com.google.firebase.Firebase
+import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.initialize
+
+private var FirebaseAppCheck.isTokenAutoRefreshEnabled: Boolean
+    set(value) = Unit
 
 class AIApplication : Application() {
     
