@@ -44,13 +44,12 @@ class MainActivity : AppCompatActivity() {
 
     private var viewsInitialized = false
 
-    // Photo Picker Logic
+    // --- PHOTO PICKER LOGIC ---
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             ivPreview.setImageURI(uri)
             filePathCallback?.onReceiveValue(arrayOf(uri))
-            // Signal the web app that a photo has been provided
-            webView.evaluateJavascript("javascript:if(window.handleAppPhotoUpload) window.handleAppPhotoUpload();", null)
+            triggerWebUpload()
         } else {
             filePathCallback?.onReceiveValue(null)
         }
@@ -61,11 +60,15 @@ class MainActivity : AppCompatActivity() {
         if (success && cameraImageUri != null) {
             ivPreview.setImageURI(cameraImageUri)
             filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
-            webView.evaluateJavascript("javascript:if(window.handleAppPhotoUpload) window.handleAppPhotoUpload();", null)
+            triggerWebUpload()
         } else {
             filePathCallback?.onReceiveValue(null)
         }
         filePathCallback = null
+    }
+
+    private fun triggerWebUpload() {
+        webView.evaluateJavascript("javascript:if(window.handleAppPhotoUpload) window.handleAppPhotoUpload();", null)
     }
 
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -73,7 +76,7 @@ class MainActivity : AppCompatActivity() {
     ) { permissions ->
         val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
         if (!cameraGranted) {
-            Toast.makeText(this, getString(R.string.camera_permission_required), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Camera permission is required for the studio.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -88,7 +91,6 @@ class MainActivity : AppCompatActivity() {
         checkAndRequestPermissions()
 
         if (savedInstanceState == null) {
-            // Ensure the URL is loaded inside the WebView
             webView.loadUrl("https://aiphotostudio.co.uk/")
             handleIntent(intent)
         }
@@ -103,116 +105,76 @@ class MainActivity : AppCompatActivity() {
         tvSignedInStatus = findViewById(R.id.tv_signed_in_status)
         ivPreview = findViewById(R.id.iv_preview)
 
-        // --- STUDIO BUTTONS ---
         findViewById<Button>(R.id.btn_choose_photo).setOnClickListener {
-            showSourceDialog()
+            // We must trigger the web file input first to set the callback
+            webView.evaluateJavascript("document.querySelector('input[type=\"file\"]')?.click();", null)
         }
 
         findViewById<Button>(R.id.btn_remove_bg).setOnClickListener {
-            // More robust selector for Remove Background
-            webView.evaluateJavascript("""
-                (function(){
-                    var buttons = Array.from(document.querySelectorAll('button, a, span'));
-                    var target = buttons.find(el => 
-                        el.innerText.toLowerCase().includes('remove background') || 
-                        el.getAttribute('aria-label')?.toLowerCase()?.includes('remove background')
-                    );
-                    if(target) target.click();
-                    else if(window.removeBackground) window.removeBackground();
-                })();
-            """.trimIndent(), null)
+            executeWebAction("remove background")
             Toast.makeText(this, "Removing background...", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btn_change_bg).setOnClickListener {
-            // More robust selector for Change Background
-            webView.evaluateJavascript("""
-                (function(){
-                    var buttons = Array.from(document.querySelectorAll('button, a, span'));
-                    var target = buttons.find(el => 
-                        el.innerText.toLowerCase().includes('change background') || 
-                        el.getAttribute('aria-label')?.toLowerCase()?.includes('change background')
-                    );
-                    if(target) target.click();
-                    else if(window.changeBackground) window.changeBackground();
-                })();
-            """.trimIndent(), null)
+            executeWebAction("change background")
         }
 
         findViewById<Button>(R.id.btn_choose_background).setOnClickListener {
-            // Triggers file input for background selection
             webView.evaluateJavascript("""
                 (function(){
                     var inputs = document.querySelectorAll('input[type="file"]');
                     if(inputs.length > 0) inputs[inputs.length - 1].click(); 
-                    else if(window.chooseBackground) window.chooseBackground();
                 })();
             """.trimIndent(), null)
-        }
-
-        findViewById<View>(R.id.btn_remove_person).setOnClickListener {
-            webView.evaluateJavascript("javascript:if(window.removePerson) window.removePerson();", null)
         }
 
         findViewById<Button>(R.id.btn_save_to_gallery).setOnClickListener {
             webView.evaluateJavascript("""
                 (function() {
-                    // Try to find the processed image
                     var canvas = document.querySelector('canvas') || document.querySelector('img[src^="blob:"]');
                     if(canvas) {
                         var dataUrl = canvas.tagName === 'CANVAS' ? canvas.toDataURL("image/png") : canvas.src;
                         AndroidInterface.processBlob(dataUrl);
-                    } else if(window.downloadImage) {
-                        window.downloadImage();
                     }
                 })();
             """.trimIndent(), null)
             Toast.makeText(this, "Processing save...", Toast.LENGTH_SHORT).show()
         }
 
-        // --- PRICING PLAN BUTTONS ---
-        findViewById<Button>(R.id.btn_plan_day).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
-        findViewById<Button>(R.id.btn_plan_monthly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
-        findViewById<Button>(R.id.btn_plan_yearly).setOnClickListener { openUrl("https://aiphotostudio.co.uk/pricing") }
-
-        // --- EXTERNAL BUSINESS & FOOTER LINKS ---
-        findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
-        findViewById<Button>(R.id.btn_link_bgh).setOnClickListener { openUrl("https://bryantgroupholdings.co.uk") }
-        findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
-
-        // --- NAVIGATION ---
+        // --- NAVIGATION & EXTERNAL ---
         btnHeaderGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
         btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         btnAuthSignin.setOnClickListener {
             if (auth.currentUser != null) signOut() else startActivity(Intent(this, LoginActivity::class.java))
         }
-        btnAuthSignup.setOnClickListener {
-            if (auth.currentUser == null) startActivity(Intent(this, LoginActivity::class.java))
-        }
+
+        findViewById<Button>(R.id.btn_link_bds).setOnClickListener { openUrl("https://bryantdigitalsolutions.com") }
+        findViewById<Button>(R.id.btn_footer_terms).setOnClickListener { openUrl("https://aiphotostudio.co.uk/terms") }
 
         viewsInitialized = true
     }
 
+    private fun executeWebAction(keyword: String) {
+        webView.evaluateJavascript("""
+            (function(){
+                var buttons = Array.from(document.querySelectorAll('button, a, span'));
+                var target = buttons.find(el => el.innerText.toLowerCase().includes('$keyword'));
+                if(target) target.click();
+            })();
+        """.trimIndent(), null)
+    }
+
     private fun handleIntent(intent: Intent?) {
-        val data = intent?.data
-        if (data != null && data.path?.contains("/auth") == true) {
-            webView.loadUrl(data.toString())
-        }
+        intent?.data?.let { if (it.path?.contains("/auth") == true) webView.loadUrl(it.toString()) }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        // Crucial: Set a WebViewClient to keep navigation within the app
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                // Allow internal navigation, external links open in browser
-                return if (url.contains("aiphotostudio.co.uk") || url.contains("google.com")) {
-                    false
-                } else {
-                    openUrl(url)
-                    true
-                }
+                return if (url.contains("aiphotostudio.co.uk") || url.contains("google.com")) false
+                else { openUrl(url); true }
             }
         }
 
@@ -222,7 +184,7 @@ class MainActivity : AppCompatActivity() {
             allowFileAccess = true
             allowContentAccess = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString = "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.addJavascriptInterface(object {
@@ -238,7 +200,8 @@ class MainActivity : AppCompatActivity() {
                 f: ValueCallback<Array<Uri>>?,
                 p: FileChooserParams?
             ): Boolean {
-                this@MainActivity.filePathCallback = f
+                filePathCallback?.onReceiveValue(null) // Reset any existing
+                filePathCallback = f
                 showSourceDialog()
                 return true
             }
@@ -259,48 +222,58 @@ class MainActivity : AppCompatActivity() {
             }
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
             uri?.let { contentResolver.openOutputStream(it)?.use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) } }
-
-            runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+            Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("MainActivity", "Save Error: ${e.message}")
         }
     }
 
     private fun showSourceDialog() {
-        val options = arrayOf(getString(R.string.take_photo), getString(R.string.choose_from_gallery))
+        val options = arrayOf("Take Photo", "Choose from Gallery")
         AlertDialog.Builder(this)
-            .setTitle(getString(R.string.select_image_source))
+            .setTitle("Select Image Source")
             .setItems(options) { _, which -> if (which == 0) launchCamera() else launchGallery() }
-            .setOnCancelListener { filePathCallback?.onReceiveValue(null) }
+            .setOnCancelListener {
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = null
+            }
             .show()
     }
 
     private fun launchCamera() {
-        val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
-        if (!directory.exists()) directory.mkdirs()
-        val file = File(directory, "temp_${System.currentTimeMillis()}.jpg")
-        cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.fileprovider", file)
-        takePicture.launch(cameraImageUri!!)
+        try {
+            val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
+            if (!directory.exists()) directory.mkdirs()
+            val file = File(directory, "temp_${System.currentTimeMillis()}.jpg")
+
+            // Matches the authority in your Manifest exactly
+            cameraImageUri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.fileprovider", file)
+            takePicture.launch(cameraImageUri!!)
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Camera Launch Error: ${e.message}")
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
+        }
     }
 
-    private fun launchGallery() = pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    private fun launchGallery() {
+        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
 
     private fun openUrl(url: String) = startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
 
     private fun updateHeaderUi() {
         val user = auth.currentUser
-        btnAuthSignin.text = if (user != null) getString(R.string.sign_out) else getString(R.string.sign_in)
+        btnAuthSignin.text = if (user != null) "Sign Out" else "Sign In"
         btnAuthSignup.visibility = if (user != null) View.GONE else View.VISIBLE
         tvSignedInStatus.visibility = if (user != null) View.VISIBLE else View.GONE
-        user?.let {
-            tvSignedInStatus.text = getString(R.string.signed_in_as, it.email)
-        }
+        user?.let { tvSignedInStatus.text = "Signed in as: ${it.email}" }
     }
 
     private fun signOut() {
         auth.signOut()
         updateHeaderUi()
-        Toast.makeText(this, getString(R.string.signed_out_success), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Signed out successfully", Toast.LENGTH_SHORT).show()
     }
 
     private fun checkAndRequestPermissions() {
