@@ -299,6 +299,17 @@
                     android:drawablePadding="8dp"
                     tools:ignore="VisualLintButtonSize"/>
 
+                <Button
+                    android:id="@+id/btn_footer_mpa"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="@string/multi_post_app"
+                    android:textColor="@color/white"
+                    android:drawableStart="@android:drawable/ic_menu_send"
+                    android:drawablePadding="8dp"
+                    tools:ignore="VisualLintButtonSize"/>
+
             </GridLayout>
 
             <LinearLayout

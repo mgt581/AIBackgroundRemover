@@ -145,6 +145,8 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(Intent.ACTION_SENDTO).apply { data = ("mailto:" + getString(R.string.owner_email)).toUri() }
             startActivity(intent)
         }
+        
+        findViewById<Button>(R.id.btn_footer_mpa).setOnClickListener { openUrl(getString(R.string.mpa_url)) }
 
         findViewById<Button>(R.id.btn_privacy).setOnClickListener { openUrl("https://aiphotostudio.co/privacy") }
         findViewById<Button>(R.id.btn_terms).setOnClickListener { openUrl("https://aiphotostudio.co/terms") }
@@ -337,6 +339,23 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             if (!silent) runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
+        }
+    }
+
+    private fun saveToInternalStorage(base64Data: String): String? {
+        try {
+            val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
+            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return null
+            val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
+
+            val galleryDir = File(filesDir, "saved_images")
+            if (!galleryDir.exists()) galleryDir.mkdirs()
+            val internalFile = File(galleryDir, fileName)
+            FileOutputStream(internalFile).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            return internalFile.absolutePath
+        } catch (e: Exception) {
+            return null
         }
     }
 
