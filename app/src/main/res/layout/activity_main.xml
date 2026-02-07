@@ -185,7 +185,7 @@
             android:visibility="gone"
             app:backgroundTint="@color/brand_primary"
             app:icon="@android:drawable/ic_menu_save"
-            app:iconTint="@color/white"
+            app:iconTint="@color/brand_background"
             app:layout_constraintBottom_toTopOf="@id/footer_section"
             app:layout_constraintEnd_toEndOf="parent"
             tools:visibility="visible" />
