@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/brand_background"
+    android:background="@color/brand_surface"
     tools:ignore="ExtraText">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -32,7 +32,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/ai_photo_studio_app"
-                    android:textColor="@color/brand_text"
+                    android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"/>
@@ -164,6 +164,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="800dp"
+            android:background="@color/brand_surface"
             app:layout_constraintTop_toBottomOf="@id/header_card"
             tools:ignore="WebViewLayout" />
 
@@ -186,7 +187,7 @@
             android:id="@+id/footer_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#161E2E"
+            android:background="@color/brand_surface"
             android:orientation="vertical"
             android:padding="24dp"
             android:gravity="center_horizontal"
@@ -329,4 +330,3 @@
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
-

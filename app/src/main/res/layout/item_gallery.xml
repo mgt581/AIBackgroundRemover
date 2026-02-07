@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/brand_surface"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp">
 
@@ -17,7 +17,6 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scaleType="centerCrop"
-            android:background="@drawable/ic_checkerboard_tile"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,7 +42,7 @@
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:textSize="12sp"
-                android:textColor="@color/brand_text"
+                android:textColor="@color/white"
                 app:strokeColor="@color/brand_border" />
 
             <Button
