@@ -6,6 +6,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.initialize
 
@@ -26,20 +27,27 @@ class AIApplication : Application() {
             
             val appCheck = Firebase.appCheck
 
-            val playServicesStatus = GoogleApiAvailability.getInstance()
-                .isGooglePlayServicesAvailable(this)
-            if (shouldEnablePlayIntegrity(playServicesStatus)) {
-                Log.d("AIApplication", "App Check: Installing PlayIntegrityAppCheckProviderFactory")
+            if (BuildConfig.DEBUG) {
+                Log.d("AIApplication", "App Check: Installing DebugAppCheckProviderFactory")
                 appCheck.installAppCheckProviderFactory(
-                    PlayIntegrityAppCheckProviderFactory.getInstance()
+                    DebugAppCheckProviderFactory.getInstance()
                 )
-                appCheck.setTokenAutoRefreshEnabled(true)
             } else {
-                Log.w(
-                    "AIApplication",
-                    "App Check disabled: Play Services unavailable (${GoogleApiAvailability.getInstance().getErrorString(playServicesStatus)})"
-                )
+                val playServicesStatus = GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(this)
+                if (shouldEnablePlayIntegrity(playServicesStatus)) {
+                    Log.d("AIApplication", "App Check: Installing PlayIntegrityAppCheckProviderFactory")
+                    appCheck.installAppCheckProviderFactory(
+                        PlayIntegrityAppCheckProviderFactory.getInstance()
+                    )
+                } else {
+                    Log.w(
+                        "AIApplication",
+                        "App Check disabled: Play Services unavailable (${GoogleApiAvailability.getInstance().getErrorString(playServicesStatus)})"
+                    )
+                }
             }
+            appCheck.setTokenAutoRefreshEnabled(true)
 
             Log.d("AIApplication", "Firebase and App Check initialized successfully")
         } catch (e: Exception) {
