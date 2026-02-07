@@ -24,6 +24,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -213,6 +214,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.addJavascriptInterface(object {
+            @Keep
             @JavascriptInterface
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
