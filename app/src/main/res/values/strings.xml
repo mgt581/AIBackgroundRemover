@@ -52,4 +52,13 @@
     <string name="facebook_url">https://www.facebook.com/share/183sNAUy8H/?mibextid=wwXIfr</string>
     <string name="whatsapp_url">https://wa.me/447843969254</string>
     <string name="tiktok_url">https://www.tiktok.com/@bryantgroupholdin?_r=1&amp;_t=ZN-93hwoXqlQuk</string>
+    <string name="header_title">|</string>
+    <string name="settings_button">SETTINGS</string>
+    <string name="contact_us_button">CONTACT US</string>
+    <string name="button_gallery">GALLERY</string>
+    <string name="tiktok">TikTok</string>
+    <string name="whatsapp">WhatsApp</string>
+    <string name="facebook">Facebook</string>
+    <string name="ai_background_remover_app">AI Background remover</string>
+    <string name="ai_photo_studio_app">AI Photo Studio</string>
 </resources>
