@@ -148,13 +148,13 @@
                     style="@style/Widget.Material3.Button"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:text="@string/yearly_pass"
                     android:backgroundTint="#16A34A"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    app:cornerRadius="100dp"/>
+                    android:text="@string/yearly_pass"
+                    android:textColor="#212121"
+                    android:textSize="12sp"
+                    app:cornerRadius="100dp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
