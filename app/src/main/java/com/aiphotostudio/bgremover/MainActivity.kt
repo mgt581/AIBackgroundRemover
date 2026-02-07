@@ -21,6 +21,7 @@ import android.view.View
 import android.webkit.*
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHeaderSettings: Button
     private lateinit var btnGallery: Button
     private lateinit var btnSignUp: Button
+    private lateinit var tvAuthStatus: TextView
     
     private lateinit var btnDayPass: Button
     private lateinit var btnMonthly: Button
@@ -92,6 +94,7 @@ class MainActivity : AppCompatActivity() {
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             btnGallery = findViewById(R.id.btn_gallery)
             btnSignUp = findViewById(R.id.btn_sign_up)
+            tvAuthStatus = findViewById(R.id.tv_auth_status)
             
             btnDayPass = findViewById(R.id.btn_day_pass)
             btnMonthly = findViewById(R.id.btn_monthly)
@@ -184,6 +187,14 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         btnAuthAction.text = if (user != null) getString(R.string.sign_out) else getString(R.string.sign_in)
         btnSignUp.visibility = if (user != null) View.GONE else View.VISIBLE
+        
+        if (user != null) {
+            tvAuthStatus.text = getString(R.string.signed_in_status)
+            tvAuthStatus.setTextColor(ContextCompat.getColor(this, R.color.status_green))
+        } else {
+            tvAuthStatus.text = getString(R.string.sign_in_now)
+            tvAuthStatus.setTextColor(ContextCompat.getColor(this, R.color.status_red))
+        }
     }
 
     private fun signOut() {
@@ -339,23 +350,6 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             if (!silent) runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
-        }
-    }
-
-    private fun saveToInternalStorage(base64Data: String): String? {
-        try {
-            val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
-            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: return null
-            val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
-
-            val galleryDir = File(filesDir, "saved_images")
-            if (!galleryDir.exists()) galleryDir.mkdirs()
-            val internalFile = File(galleryDir, fileName)
-            FileOutputStream(internalFile).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            return internalFile.absolutePath
-        } catch (e: Exception) {
-            return null
         }
     }
 

@@ -67,7 +67,8 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.appcheck)
     implementation(libs.firebase.appcheck.playintegrity)
-    debugImplementation(libs.firebase.appcheck.debug)
+    // Changed to implementation to resolve reference in AIApplication.kt (src/main)
+    implementation(libs.firebase.appcheck.debug)
 
     // Testing
     testImplementation(libs.junit)
