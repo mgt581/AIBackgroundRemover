@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/brand_background"
     android:fillViewport="true">
 
     <LinearLayout
@@ -20,6 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:text="@string/back"
+            android:textColor="@color/white"
             style="@style/Widget.Material3.Button.TextButton"
             tools:ignore="VisualLintButtonSize" />
 
@@ -28,22 +30,34 @@
             android:id="@+id/imgLogo"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_logo"
+            android:src="@mipmap/ic_launcher"
             android:contentDescription="@string/logo" />
+
+        <!-- Text between logo and email box -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI Background Remover"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp" />
 
         <!-- Tabs -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="24dp">
             <Button
                 android:id="@+id/btn_tab_signin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/sign_in"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/brand_primary"
                 style="@style/Widget.Material3.Button.TonalButton" />
             <Button
                 android:id="@+id/btn_tab_signup"
@@ -51,17 +65,24 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/sign_up"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/brand_surface"
                 style="@style/Widget.Material3.Button.TonalButton" />
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/email">
+            android:hint="@string/email"
+            android:textColorHint="@color/brand_text_secondary"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/brand_primary"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -70,11 +91,17 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="@string/password"
-            app:passwordToggleEnabled="true">
+            android:textColorHint="@color/brand_text_secondary"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/brand_primary"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/white"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -90,12 +117,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/auth"
-            android:layout_marginTop="16dp" />
+            android:textColor="@color/white"
+            android:backgroundTint="@color/brand_primary"
+            android:layout_marginTop="24dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/or"
+            android:textColor="@color/brand_text_secondary"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp" />
 
@@ -104,6 +134,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/continue_with_google"
+            android:textColor="@color/white"
+            app:strokeColor="@color/brand_border"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <Button
@@ -111,6 +143,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/continue_anonymously"
+            android:textColor="@color/white"
+            app:strokeColor="@color/brand_border"
             android:layout_marginTop="12dp"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -124,14 +158,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/privacy_policy"
-                android:textColor="?attr/colorPrimary"
+                android:textColor="@color/brand_primary"
                 android:padding="8dp" />
             <TextView
                 android:id="@+id/tv_terms_of_service"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/terms_of_service"
-                android:textColor="?attr/colorPrimary"
+                android:textColor="@color/brand_primary"
                 android:padding="8dp" />
         </LinearLayout>
 
