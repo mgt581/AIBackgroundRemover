@@ -21,13 +21,13 @@ import android.view.View
 import android.webkit.*
 import android.widget.Button
 import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -53,8 +53,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fabSave: ExtendedFloatingActionButton
 
-    private var bridgeInjectedForUrl: String? = null
-    private var lastBridgeInjectionMs: Long = 0L
     private var lastCapturedBase64: String? = null
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -143,7 +141,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_footer_gallery).setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
         findViewById<Button>(R.id.btn_footer_settings).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         findViewById<Button>(R.id.btn_footer_contact).setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO).apply { data = Uri.parse("mailto:" + getString(R.string.owner_email)) }
+            val intent = Intent(Intent.ACTION_SENDTO).apply { data = ("mailto:" + getString(R.string.owner_email)).toUri() }
             startActivity(intent)
         }
 
@@ -153,7 +151,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (e: Exception) {
             Log.e("MainActivity", "Error opening URL", e)
         }
