@@ -181,7 +181,8 @@
             app:iconTint="@color/white"
             app:layout_constraintBottom_toTopOf="@id/footer_section"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible" />
+            tools:visibility="visible"
+            tools:ignore="AccessibilityClassName" />
 
         <LinearLayout
             android:id="@+id/footer_section"
