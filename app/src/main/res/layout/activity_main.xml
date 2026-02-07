@@ -331,10 +331,12 @@
 
             </LinearLayout>
 
+            <!-- Fixed: Added maxWidth to prevent lines exceeding 120 characters on wide screens -->
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:maxWidth="600dp"
                 android:text="@string/footer_ownership"
                 android:textColor="@color/brand_text_secondary"
                 android:textSize="12sp"
