@@ -308,12 +308,22 @@
                 android:gravity="center"
                 android:layout_marginBottom="16dp">
 
+                <Button
+                    android:id="@+id/btn_privacy"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="@string/privacy_policy"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    tools:ignore="VisualLintButtonSize"/>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/header_title"
                     android:textColor="@color/white"
-                    android:visibility="gone"
                     android:layout_marginHorizontal="8dp"/>
 
                 <Button
