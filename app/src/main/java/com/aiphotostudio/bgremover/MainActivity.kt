@@ -229,6 +229,7 @@ class MainActivity : AppCompatActivity() {
         webView.addJavascriptInterface(object {
             @Keep
             @JavascriptInterface
+            @Suppress("unused")
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {
@@ -276,7 +277,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     saveImageToGallery(url, silent = true)
                     fabSave.visibility = View.VISIBLE
-                    Toast.makeText(this@MainActivity, "Image processed and saved to gallery!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Image processed and saved to gallery!", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -367,7 +368,7 @@ class MainActivity : AppCompatActivity() {
             val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
             if (!directory.exists()) directory.mkdirs()
             val imageFile = File(directory, "temp_${System.currentTimeMillis()}.jpg")
-            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.file provider", imageFile)
+            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.fileprovider", imageFile)
             cameraImageUri = uri
             takePicture.launch(uri)
         } else {
