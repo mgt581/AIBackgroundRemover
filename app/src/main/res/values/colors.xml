@@ -2,8 +2,9 @@
 <resources>
     <color name="brand_background">#0B1221</color>
     <color name="brand_surface">#161E2E</color>
-    <color name="brand_primary">#6342FF</color>
+    <color name="brand_primary">#2563EB</color>
     <color name="brand_accent">#4285F4</color>
+    <color name="brand_light_blue">#7DD3FC</color>
     <color name="brand_text">#FFFFFF</color>
     <color name="brand_text_secondary">#94A3B8</color>
     <color name="brand_border">#1E293B</color>

@@ -6,19 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/brand_surface"
+    android:background="@color/brand_background"
     tools:ignore="ExtraText">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/brand_background">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/header_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/brand_surface"
-            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/brand_background"
+            app:cardElevation="0dp"
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
@@ -49,61 +50,65 @@
 
                         <Button
                             android:id="@+id/btn_gallery"
-                            style="@style/Widget.Material3.Button.TonalButton"
+                            style="@style/Widget.Material3.Button"
                             android:layout_width="wrap_content"
                             android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:text="@string/gallery"
                             android:paddingHorizontal="16dp"
-                            android:backgroundTint="#EBEDFF"
-                            android:textColor="#5C58B1"
+                            android:backgroundTint="@color/brand_primary"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:insetTop="0dp"
                             android:insetBottom="0dp"
+                            app:cornerRadius="12dp"
                             tools:ignore="VisualLintButtonSize"/>
 
                         <Button
                             android:id="@+id/btn_header_settings"
-                            style="@style/Widget.Material3.Button.TonalButton"
+                            style="@style/Widget.Material3.Button"
                             android:layout_width="wrap_content"
                             android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:text="@string/settings"
                             android:paddingHorizontal="16dp"
-                            android:backgroundTint="#EBEDFF"
-                            android:textColor="#5C58B1"
+                            android:backgroundTint="@color/brand_primary"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:insetTop="0dp"
                             android:insetBottom="0dp"
+                            app:cornerRadius="12dp"
                             tools:ignore="VisualLintButtonSize"/>
 
                         <Button
                             android:id="@+id/btn_auth_action"
-                            style="@style/Widget.Material3.Button.TonalButton"
+                            style="@style/Widget.Material3.Button"
                             android:layout_width="wrap_content"
                             android:layout_height="48dp"
                             android:layout_marginEnd="8dp"
                             android:text="@string/sign_in"
                             android:paddingHorizontal="16dp"
-                            android:backgroundTint="#EBEDFF"
-                            android:textColor="#5C58B1"
+                            android:backgroundTint="@color/brand_primary"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:insetTop="0dp"
                             android:insetBottom="0dp"
+                            app:cornerRadius="12dp"
                             tools:ignore="VisualLintButtonSize"/>
 
                         <Button
                             android:id="@+id/btn_sign_up"
-                            style="@style/Widget.Material3.Button.TonalButton"
+                            style="@style/Widget.Material3.Button"
                             android:layout_width="wrap_content"
                             android:layout_height="48dp"
                             android:text="@string/sign_up"
                             android:paddingHorizontal="16dp"
-                            android:backgroundTint="#EBEDFF"
-                            android:textColor="#5C58B1"
+                            android:backgroundTint="@color/brand_primary"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:insetTop="0dp"
                             android:insetBottom="0dp"
+                            app:cornerRadius="12dp"
                             tools:ignore="VisualLintButtonSize"/>
 
                     </LinearLayout>
@@ -120,31 +125,33 @@
                         android:id="@+id/btn_day_pass"
                         style="@style/Widget.Material3.Button"
                         android:layout_width="0dp"
-                        android:layout_height="48dp"
+                        android:layout_height="56dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         android:text="@string/day_pass"
-                        android:backgroundTint="#6C757D"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
+                        android:backgroundTint="@color/white"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        app:cornerRadius="100dp"
+                        app:cornerRadius="16dp"
                         tools:ignore="VisualLintButtonSize"/>
 
                     <Button
                         android:id="@+id/btn_monthly"
                         style="@style/Widget.Material3.Button"
                         android:layout_width="0dp"
-                        android:layout_height="48dp"
+                        android:layout_height="56dp"
                         android:layout_weight="1.2"
                         android:text="@string/monthly_pass"
-                        android:backgroundTint="#2563EB"
+                        android:backgroundTint="@color/brand_primary"
                         android:textColor="@color/white"
-                        android:textSize="14sp"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        app:cornerRadius="100dp"
+                        app:cornerRadius="16dp"
                         tools:ignore="VisualLintButtonSize"/>
 
                 </LinearLayout>
@@ -153,14 +160,15 @@
                     android:id="@+id/btn_yearly"
                     style="@style/Widget.Material3.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:backgroundTint="#16A34A"
+                    android:layout_height="56dp"
+                    android:backgroundTint="@color/brand_light_blue"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:text="@string/yearly_pass"
-                    android:textColor="#212121"
-                    android:textSize="14sp"
-                    app:cornerRadius="100dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="16dp"
                     tools:ignore="VisualLintButtonSize"/>
 
             </LinearLayout>
@@ -171,7 +179,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="800dp"
-            android:background="@color/brand_surface"
+            android:background="@color/brand_background"
             app:layout_constraintTop_toBottomOf="@id/header_card"
             tools:ignore="WebViewLayout" />
 
@@ -185,16 +193,17 @@
             android:visibility="gone"
             app:backgroundTint="@color/brand_primary"
             app:icon="@android:drawable/ic_menu_save"
-            app:iconTint="@color/brand_background"
+            app:iconTint="@color/white"
             app:layout_constraintBottom_toTopOf="@id/footer_section"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible" />
+            tools:visibility="visible"
+            tools:ignore="AccessibilityClassName" />
 
         <LinearLayout
             android:id="@+id/footer_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/brand_surface"
+            android:background="@color/brand_background"
             android:orientation="vertical"
             android:padding="24dp"
             android:gravity="center_horizontal"
@@ -299,22 +308,12 @@
                 android:gravity="center"
                 android:layout_marginBottom="16dp">
 
-                <Button
-                    android:id="@+id/btn_privacy"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="@string/privacy_policy"
-                    android:textColor="@color/white"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    tools:ignore="VisualLintButtonSize"/>
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/header_title"
                     android:textColor="@color/white"
+                    android:visibility="gone"
                     android:layout_marginHorizontal="8dp"/>
 
                 <Button
@@ -330,7 +329,6 @@
 
             </LinearLayout>
 
-            <!-- Fixed: Added maxWidth to prevent lines exceeding 120 characters on wide screens -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
