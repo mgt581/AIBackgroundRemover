@@ -22,9 +22,9 @@ android {
         create("release") {
             // Using the filename and credentials from signing-key-info.txt
             storeFile = file("${project.rootDir}/signing.keystore")
-            storePassword = "q94BZCeHPsOG"
-            keyAlias = "my-key-alias"
-            keyPassword = "q94BZCeHPsOG"
+            storePassword = "Alifa1048"
+            keyAlias = "Alifa1048"
+            keyPassword = "Alifa1048"
         }
     }
 
