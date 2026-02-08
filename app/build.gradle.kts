@@ -20,11 +20,13 @@ android {
 
     signingConfigs {
         create("release") {
-            // Update these values with your actual keystore information
+            // Updated path based on your search screenshot
             storeFile = file("/Users/alexbryantmacm12020/Desktop/backups/AI-Studio---Google-Play-package-main/upload-key.jks")
-            storePassword = "your_keystore_password"
+
+            // Check 'signing-key-info.txt' from your other screenshot for these:
+            storePassword = "your_password_here"
             keyAlias = "Alifa10"
-            keyPassword = "your_key_password"
+            keyPassword = "your_password_here"
         }
     }
 
@@ -57,10 +59,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-}
 
-kotlin {
-    jvmToolchain(11)
+    // This block fixes the "Unresolved reference" and "JvmVendorSpec" errors
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
+    }
 }
 
 dependencies {
