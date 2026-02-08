@@ -1,6 +1,7 @@
 @file:Suppress("DEPRECATION")
 package com.aiphotostudio.bgremover
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
@@ -11,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -117,10 +119,15 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun updateTabStyles(activeTab: Button, inactiveTab: Button) {
-        activeTab.setBackgroundColor(getColor(android.R.color.holo_blue_dark))
-        activeTab.setTextColor(getColor(android.R.color.white))
-        inactiveTab.setBackgroundColor(getColor(android.R.color.transparent))
-        inactiveTab.setTextColor(getColor(android.R.color.darker_gray))
+        val primaryColor = ContextCompat.getColor(this, R.color.brand_primary)
+        val surfaceColor = ContextCompat.getColor(this, R.color.brand_surface)
+        val whiteColor = ContextCompat.getColor(this, R.color.white)
+
+        activeTab.backgroundTintList = ColorStateList.valueOf(primaryColor)
+        activeTab.setTextColor(whiteColor)
+        
+        inactiveTab.backgroundTintList = ColorStateList.valueOf(surfaceColor)
+        inactiveTab.setTextColor(whiteColor)
     }
 
     private fun performLogin() {
