@@ -19,14 +19,17 @@ android {
     }
 
     signingConfigs {
+        // We create the release config
         create("release") {
-            // Updated path based on your search screenshot
+            // Using the path from your screenshot
             storeFile = file("/Users/alexbryantmacm12020/Desktop/backups/AI-Studio---Google-Play-package-main/upload-key.jks")
 
-            // Check 'signing-key-info.txt' from your other screenshot for these:
-            storePassword = "your_password_here"
+            // IMPORTANT: If 'upload-key.jks' keeps failing with tag errors,
+            // try changing the line above to point to "signing.keystore" instead.
+
+            storePassword = "your_password_from_txt_file"
             keyAlias = "Alifa10"
-            keyPassword = "your_password_here"
+            keyPassword = "your_password_from_txt_file"
         }
     }
 
@@ -44,6 +47,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            // Explicitly link the signing config
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -51,6 +55,7 @@ android {
             )
         }
         debug {
+            // Use the default debug key so the build doesn't crash
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -60,7 +65,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // This block fixes the "Unresolved reference" and "JvmVendorSpec" errors
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
