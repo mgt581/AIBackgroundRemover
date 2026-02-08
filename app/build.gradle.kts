@@ -16,15 +16,17 @@ android {
         versionName = "6.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     signingConfigs {
         create("release") {
-            // Using the filename and credentials from signing-key-info.txt
             storeFile = file("${project.rootDir}/signing.keystore")
-            storePassword = "q94BZCeHPsOG"
-            keyAlias = "my-key-alias"
-            keyPassword = "q94BZCeHPsOG"
+            storePassword = "Alifa10"
+            keyAlias = "Alifa10"
+            keyPassword = "Alifa10"
         }
     }
 
@@ -36,6 +38,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/DEPENDENCIES"
         }
     }
 
@@ -49,7 +52,7 @@ android {
             )
         }
         debug {
-            signingConfig = signingConfigs.getByName("debug")
+            // Using default debug signing
         }
     }
 
@@ -74,6 +77,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.activity.compose)
+    
+    // Additional libraries
+    implementation(libs.auth.credentials)
+    implementation(libs.auth.credentials.play)
+    implementation(libs.auth.googleid)
+    implementation(libs.android.webkit)
 
     // Glide
     implementation(libs.glide)
