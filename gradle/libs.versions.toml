@@ -39,11 +39,11 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
-# Using underscore to avoid "Unresolved reference lib" issues in Kotlin DSL
-credentials_core = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
-credentials_play = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
-google_id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
-webkit_core = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
+# Using flat names to avoid accessor issues
+credentials-core = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+credentials-play = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+googleid-auth = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+webkit-android = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
