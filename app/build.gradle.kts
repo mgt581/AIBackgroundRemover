@@ -23,7 +23,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = file("${project.rootDir}/AndroidStudioProjects/AIBackgroundRemover/new-keystore.jks")
+            val keystoreFile = file("${project.rootDir}/keystore.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
                 storePassword = "32Heaton?"
