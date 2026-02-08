@@ -32,7 +32,7 @@
         }
         .input-focus { transition: all 0.3s ease; }
         .input-focus:focus {
-            background: #f8fafc;
+            background: #f8faff;
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
         }
         .loader-dot { animation: dot-pulse 1.5s infinite ease-in-out; }
@@ -80,10 +80,10 @@
         </button>
     </div>
     <div class="space-y-6">
-        <input id="email" type="email" placeholder="Email Address"
-               class="input-focus w-full bg-white border border-slate-200 rounded-2xl p-4 text-slate-900">
-        <input id="password" type="password" placeholder="Password"
-               class="input-focus w-full bg-white border border-slate-200 rounded-2xl p-4 text-slate-900">
+        <label for="email"></label><input id="email" type="email" placeholder="Email Address"
+                                          class="input-focus w-full bg-white border border-slate-200 rounded-2xl p-4 text-slate-900">
+        <label for="password"></label><input id="password" type="password" placeholder="Password"
+                                             class="input-focus w-full bg-white border border-slate-200 rounded-2xl p-4 text-slate-900">
         <button type="button" onclick="handlePasswordReset()"
                 class="text-sm font-semibold text-blue-600 hover:text-blue-700 text-left">
             Forgot password?
@@ -100,7 +100,7 @@
     </div>
     <button onclick="handleGoogleSignIn()"
             class="mt-10 w-full bg-white text-black py-4 rounded-2xl flex justify-center gap-3 border border-slate-200 shadow-sm">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="">
         Continue with Google
     </button>
 </div>
@@ -118,8 +118,8 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 const firebaseConfig = {
-    apiKey: "AIzaSyC1DMsu_ktTXfqe42q9juEloTTrKJUqpbk",
-    authDomain: "pwa-ai-photo-studio-pro.firebaseapp.com",
+    apiKey: "AIzaSyC1DMsu_ktTXfce42q9juEloTTrKJUqpbk",
+    authDomain: "pwa-ai-photo-studio-pro.Firebase.com",
     projectId: "pwa-ai-photo-studio-pro",
     storageBucket: "pwa-ai-photo-studio-pro.firebasestorage.app",
     messagingSenderId: "495715411996",
@@ -131,7 +131,7 @@ const provider = new GoogleAuthProvider();
 
 const clearWorkspaceState = () => {
     Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('aibg_')) {
+        if (key.startsWith('airbag_')) {
             localStorage.removeItem(key);
         }
     });
@@ -139,15 +139,15 @@ const clearWorkspaceState = () => {
 
 const setActiveUserScope = (user) => {
     const scope = (user && (user.uid || user.email)) || "guest";
-    const previous = localStorage.getItem("aibg_userKey");
+    const previous = localStorage.getItem("airbag_userKey");
 
     if (previous && previous !== scope) {
         clearWorkspaceState();
     }
 
-    localStorage.setItem("aibg_userKey", scope);
+    localStorage.setItem("airbag_userKey", scope);
     if (user && user.email) {
-        localStorage.setItem("aibg_userEmail", user.email);
+        localStorage.setItem("airbag_userEmail", user.email);
     }
 };
 
@@ -229,15 +229,15 @@ window.handlePasswordReset = async () => {
 onAuthStateChanged(auth, (user) => {
     if (user) {
         setActiveUserScope(user);
-        if (window.location.pathname.includes("signin.html") || window.location.pathname === "/") {
+        if (window.location.pathname.includes("signing.html") || window.location.pathname === "/") {
             window.location.href = "index.html";
         }
     } else {
         clearWorkspaceState();
-        localStorage.removeItem("aibg_userKey");
-        localStorage.removeItem("aibg_userEmail");
-        if (!window.location.pathname.includes("signin")) {
-            window.location.href = "signin.html";
+        localStorage.removeItem("airbag_userKey");
+        localStorage.removeItem("airbag_userEmail");
+        if (!window.location.pathname.includes("signing")) {
+            window.location.href = "signing.html";
         }
     }
 });
@@ -245,9 +245,9 @@ onAuthStateChanged(auth, (user) => {
 window.signOutUser = () => {
     signOut(auth).then(() => {
         clearWorkspaceState();
-        localStorage.removeItem("aibg_userKey");
-        localStorage.removeItem("aibg_userEmail");
-        window.location.href = "signin.html";
+        localStorage.removeItem("airbag_userKey");
+        localStorage.removeItem("airbag_userEmail");
+        window.location.href = "signing.html";
     });
 };
 </script>

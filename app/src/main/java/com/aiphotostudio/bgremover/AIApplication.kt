@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.firebase.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
@@ -52,5 +53,14 @@ class AIApplication : Application() {
         } catch (e: Exception) {
             Log.e("AIApplication", "Firebase initialization failed", e)
         }
+    }
+
+    enum class BuildConfig {
+        ;
+
+        companion object {
+            val DEBUG: Boolean = false
+        }
+
     }
 }
