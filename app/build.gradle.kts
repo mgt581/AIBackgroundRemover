@@ -19,17 +19,11 @@ android {
     }
 
     signingConfigs {
-        // We create the release config
         create("release") {
-            // Using the path from your screenshot
             storeFile = file("/Users/alexbryantmacm12020/Desktop/backups/AI-Studio---Google-Play-package-main/upload-key.jks")
-
-            // IMPORTANT: If 'upload-key.jks' keeps failing with tag errors,
-            // try changing the line above to point to "signing.keystore" instead.
-
-            storePassword = "your_password_from_txt_file"
+            storePassword = "your_keystore_password"
             keyAlias = "Alifa10"
-            keyPassword = "your_password_from_txt_file"
+            keyPassword = "your_key_password"
         }
     }
 
@@ -47,7 +41,6 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            // Explicitly link the signing config
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -55,7 +48,6 @@ android {
             )
         }
         debug {
-            // Use the default debug key so the build doesn't crash
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -64,12 +56,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+}
 
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-        }
-    }
+kotlin {
+    jvmToolchain(11)
 }
 
 dependencies {
