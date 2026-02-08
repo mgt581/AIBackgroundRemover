@@ -28,7 +28,7 @@ android {
                 storeFile = keystoreFile
                 storePassword = "Alifa10"
                 keyAlias = "Alifa10"
-                keyPassword = "Alifa10?"
+                keyPassword = "Alifa10"
             }
         }
     }
