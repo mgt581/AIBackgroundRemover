@@ -20,10 +20,12 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("/Users/alexbryantmacm12020/Desktop/backups/AI-Studio---Google-Play-package-main/upload-key.jks")
-            storePassword = "your_keystore_password"
-            keyAlias = "Alifa10"
-            keyPassword = "your_key_password"
+            // Using the filename and credentials from your provided screenshot
+            // Assuming the keystore is in the same backup directory as before
+            storeFile = file("/Users/alexbryantmacm12020/Desktop/backups/AI-Studio---Google-Play-package-main/keystore/signing.keystore")
+            storePassword = "q94BZCeHPs0G"
+            keyAlias = "my-key-alias"
+            keyPassword = "q94BZCeHPs0G"
         }
     }
 
