@@ -12,8 +12,8 @@ android {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 24
         targetSdk = 36
-        versionCode = 36
-        versionName = "6.6"
+        versionCode = 37
+        versionName = "6.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
