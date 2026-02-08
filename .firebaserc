@@ -1,6 +1,7 @@
 {
   "projects": {
-    "defualt ": "pwa-ai-photo-studio-pro"
+    "defualt ": "pwa-ai-photo-studio-pro",
+    "default": "pwa-ai-photo-studio-pro"
   },
   "targets": {
     "pwa-ai-photo-studio-pro": {

@@ -3,18 +3,43 @@
     {
       "target": "studio",
       "public": "public",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
       "headers": [
         {
           "source": "/manifest.webmanifest",
-          "headers": [{ "key": "Content-Type", "value": "application/manifest+json" }]
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/manifest+json"
+            }
+          ]
         },
         {
           "source": "/.well-known/assetlinks.json",
-          "headers": [{ "key": "Content-Type", "value": "application/json" } ]
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
         }
       ],
-      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
     }
-  ]
+  ],
+  "firestore": {
+    "database": "bgremoveappuserslogin",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "y"
+  }
 }
