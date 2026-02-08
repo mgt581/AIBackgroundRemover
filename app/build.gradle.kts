@@ -23,10 +23,14 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("${project.rootDir}/signing.keystore")
-            storePassword = "Alifa10"
-            keyAlias = "Alifa10"
-            keyPassword = "Alifa10"
+            // Check if signing file exists before applying to avoid build crash
+            val keystoreFile = file("${project.rootDir}/signing.keystore")
+            if (keystoreFile.exists()) {
+                storeFile = keystoreFile
+                storePassword = "Alifa10"
+                keyAlias = "Alifa10"
+                keyPassword = "Alifa10"
+            }
         }
     }
 
@@ -39,20 +43,27 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "META-INF/DEPENDENCIES"
+            // Fix for duplicate resource error
+            pickFirsts += "META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version"
         }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true // Enabled for production
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Only apply signing if config is complete
+            val releaseSigning = signingConfigs.getByName("release")
+            if (releaseSigning.storeFile != null) {
+                signingConfig = releaseSigning
+            }
         }
         debug {
-            // Using default debug signing
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
         }
     }
 
