@@ -27,7 +27,7 @@ android {
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
                 storePassword = "32Heaton?"
-                keyAlias = "key0"
+                keyAlias = "Key0"
                 keyPassword = "32Heaton?"
                 storeType = "PKCS12"
             }
