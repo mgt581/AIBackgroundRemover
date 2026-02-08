@@ -26,9 +26,9 @@ android {
             val keystoreFile = file("${project.rootDir}/keystore.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
-                storePassword = "32Heaton?"
-                keyAlias = "key0"
-                keyPassword = "32Heaton?"
+                storePassword = "Alifa10"
+                keyAlias = "Alifa10"
+                keyPassword = "Alifa10?"
             }
         }
     }
