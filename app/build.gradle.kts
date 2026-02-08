@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.aiphotostudiobgremover"
+    namespace = "com.aiphotostudio.bgremover"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.aiphotostudiobgremover"
+        applicationId = "com.aiphotostudio.bgremover"
         minSdk = 24
         targetSdk = 36
         versionCode = 37
