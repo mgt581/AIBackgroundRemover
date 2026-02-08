@@ -2,6 +2,15 @@
   "projects": {
     "defualt ": "pwa-ai-photo-studio-pro"
   },
-  "targets": {},
+  "targets": {
+    "pwa-ai-photo-studio-pro": {
+      "hosting": {
+        "AI": [
+          "Background",
+          "Remover"
+        ]
+      }
+    }
+  },
   "etags": {}
 }
