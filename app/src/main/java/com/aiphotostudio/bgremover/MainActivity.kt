@@ -29,7 +29,6 @@ import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -145,7 +144,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_footer_gallery).setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
         findViewById<Button>(R.id.btn_footer_settings).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         findViewById<Button>(R.id.btn_footer_contact).setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO).apply { data = ("mailto:" + getString(R.string.owner_email)).toUri() }
+            val intent = Intent(Intent.ACTION_SENDTO).apply { data = Uri.parse("mailto:" + getString(R.string.owner_email)) }
             startActivity(intent)
         }
         
@@ -157,7 +156,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
             Log.e("MainActivity", "Error opening URL", e)
         }
@@ -221,7 +220,6 @@ class MainActivity : AppCompatActivity() {
             useWideViewPort = true
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
-            @Suppress("DEPRECATION")
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
@@ -229,7 +227,6 @@ class MainActivity : AppCompatActivity() {
         webView.addJavascriptInterface(object {
             @Keep
             @JavascriptInterface
-            @Suppress("unused")
             fun processBlob(base64Data: String) {
                 lastCapturedBase64 = base64Data
                 runOnUiThread {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multipost App | Access Portal</title>
+    <title>AI Background Remover | Sign In</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -59,15 +59,12 @@
 <div id="auth-container"
      class="glass-card w-full max-w-md p-10 rounded-[2.5rem] transition-all duration-500">
     <div class="text-center mb-10">
-        <div class="inline-block p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 mb-4 shadow-lg shadow-blue-500/20">
-            <img src="logo.png" alt="Multipost logo" class="w-16 h-16 rounded-2xl">
-        </div>
         <h1 class="text-4xl font-black tracking-tighter text-transparent bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 bg-clip-text">
-            Multipost
+            AI Background Remover
         </h1>
         <p id="form-hint"
            class="text-slate-500 mt-3 font-medium text-sm tracking-wide">
-            Secure access to your multi-channel dashboard
+            Sign in to access your workspace
         </p>
     </div>
     <div class="flex bg-white p-1.5 rounded-2xl mb-8 border border-slate-200 shadow-sm">
@@ -83,9 +80,9 @@
         </button>
     </div>
     <div class="space-y-6">
-        <input id="email" type="email" placeholder="name@company.com"
+        <input id="email" type="email" placeholder="Email Address"
                class="input-focus w-full bg-white border border-slate-200 rounded-2xl p-4 text-slate-900">
-        <input id="password" type="password" placeholder="••••••••"
+        <input id="password" type="password" placeholder="Password"
                class="input-focus w-full bg-white border border-slate-200 rounded-2xl p-4 text-slate-900">
         <button type="button" onclick="handlePasswordReset()"
                 class="text-sm font-semibold text-blue-600 hover:text-blue-700 text-left">
@@ -93,7 +90,7 @@
         </button>
         <button onclick="handleAuthSubmit()"
                 class="btn-grad w-full py-4 rounded-2xl flex justify-center items-center">
-            <span id="btn-text">Enter Workspace</span>
+            <span id="btn-text">Continue</span>
             <div id="btn-loader" class="hidden flex gap-1">
                 <div class="w-2 h-2 bg-white rounded-full loader-dot"></div>
                 <div class="w-2 h-2 bg-white rounded-full loader-dot"></div>
@@ -121,43 +118,36 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 const firebaseConfig = {
-    apiKey: "AIzaSyDJBCJrMwyjLiMFG7QhfG09cKZa_2Y4UGM",
-    authDomain: "multi-post-daefc.firebaseapp.com",
-    projectId: "multi-post-daefc",
-    storageBucket: "multi-post-daefc.appspot.com",
-    messagingSenderId: "1099160429576",
-    appId: "1:1099160429576:web:6c31651e46d6ad1cd35dbd",
-    measurementId: "G-NY0N8KKH0N"
+    apiKey: "AIzaSyC1DMsu_ktTXfqe42q9juEloTTrKJUqpbk",
+    authDomain: "pwa-ai-photo-studio-pro.firebaseapp.com",
+    projectId: "pwa-ai-photo-studio-pro",
+    storageBucket: "pwa-ai-photo-studio-pro.firebasestorage.app",
+    messagingSenderId: "495715411996",
+    appId: "1:495715411996:web:ac9e925c00ae395b0617d9"
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const STATE_KEYS = ["folders", "activeFolder", "activeFolderId", "activeFolderName"];
-const SCOPED_PREFIXES = ["folders:", "activeFolder:", "activeFolderId:", "activeFolderName:"];
-
 const clearWorkspaceState = () => {
-    STATE_KEYS.forEach(key => localStorage.removeItem(key));
-    SCOPED_PREFIXES.forEach(prefix => {
-        Object.keys(localStorage).forEach(k => {
-            if (k.startsWith(prefix)) {
-                localStorage.removeItem(k);
-            }
-        });
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('aibg_')) {
+            localStorage.removeItem(key);
+        }
     });
 };
 
 const setActiveUserScope = (user) => {
     const scope = (user && (user.uid || user.email)) || "guest";
-    const previous = localStorage.getItem("currentUserKey");
+    const previous = localStorage.getItem("aibg_userKey");
 
     if (previous && previous !== scope) {
         clearWorkspaceState();
     }
 
-    localStorage.setItem("currentUserKey", scope);
+    localStorage.setItem("aibg_userKey", scope);
     if (user && user.email) {
-        localStorage.setItem("userEmail", user.email);
+        localStorage.setItem("aibg_userEmail", user.email);
     }
 };
 
@@ -169,8 +159,9 @@ getRedirectResult(auth)
         }
     })
     .catch((error) => {
-        alert(error.message);
+        console.error("Redirect error:", error);
     });
+
 let currentMode = "login";
 window.switchMode = (mode) => {
     currentMode = mode;
@@ -189,9 +180,10 @@ window.switchMode = (mode) => {
     }
     document.getElementById("form-hint").innerText =
         mode === "signup"
-            ? "Start your multi-posting journey today"
-            : "Secure access to your multi-channel dashboard";
+            ? "Create your account to get started"
+            : "Sign in to access your workspace";
 };
+
 window.handleAuthSubmit = async () => {
     const btnText = document.getElementById("btn-text");
     const btnLoader = document.getElementById("btn-loader");
@@ -213,9 +205,11 @@ window.handleAuthSubmit = async () => {
         btnLoader.classList.add("hidden");
     }
 };
+
 window.handleGoogleSignIn = () => {
     signInWithRedirect(auth, provider);
 };
+
 window.handlePasswordReset = async () => {
     const emailInput = document.getElementById("email");
     const email = emailInput.value.trim();
@@ -231,6 +225,7 @@ window.handlePasswordReset = async () => {
         alert(err.message);
     }
 };
+
 onAuthStateChanged(auth, (user) => {
     if (user) {
         setActiveUserScope(user);
@@ -239,19 +234,19 @@ onAuthStateChanged(auth, (user) => {
         }
     } else {
         clearWorkspaceState();
-        localStorage.removeItem("currentUserKey");
-        localStorage.removeItem("userEmail");
-        // Stay on signin if already there; otherwise redirect to signin
+        localStorage.removeItem("aibg_userKey");
+        localStorage.removeItem("aibg_userEmail");
         if (!window.location.pathname.includes("signin")) {
             window.location.href = "signin.html";
         }
     }
 });
+
 window.signOutUser = () => {
     signOut(auth).then(() => {
         clearWorkspaceState();
-        localStorage.removeItem("currentUserKey");
-        localStorage.removeItem("userEmail");
+        localStorage.removeItem("aibg_userKey");
+        localStorage.removeItem("aibg_userEmail");
         window.location.href = "signin.html";
     });
 };

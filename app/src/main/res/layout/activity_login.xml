@@ -37,7 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="AI Background Remover"
+            android:text="@string/ai_background_remover_app"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -58,7 +58,8 @@
                 android:text="@string/sign_in"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/brand_primary"
-                style="@style/Widget.Material3.Button.TonalButton" />
+                style="@style/Widget.Material3.Button.TonalButton"
+                tools:ignore="VisualLintButtonSize" />
             <Button
                 android:id="@+id/btn_tab_signup"
                 android:layout_width="0dp"
@@ -67,7 +68,8 @@
                 android:text="@string/sign_up"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/brand_surface"
-                style="@style/Widget.Material3.Button.TonalButton" />
+                style="@style/Widget.Material3.Button.TonalButton"
+                tools:ignore="VisualLintButtonSize" />
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -159,14 +161,18 @@
                 android:layout_height="wrap_content"
                 android:text="@string/privacy_policy"
                 android:textColor="@color/brand_primary"
-                android:padding="8dp" />
+                android:padding="8dp"
+                android:clickable="true"
+                android:focusable="true" />
             <TextView
                 android:id="@+id/tv_terms_of_service"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/terms_of_service"
                 android:textColor="@color/brand_primary"
-                android:padding="8dp" />
+                android:padding="8dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
 
     </LinearLayout>

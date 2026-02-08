@@ -4,11 +4,10 @@ import android.app.Application
 import android.util.Log
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.firebase.Firebase
-import com.google.firebase.appcheck.appCheck
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
-import com.google.firebase.initialize
 
 class AIApplication : Application() {
     
@@ -23,9 +22,9 @@ class AIApplication : Application() {
         
         try {
             // Initialize Firebase
-            Firebase.initialize(this)
+            FirebaseApp.initializeApp(this)
             
-            val appCheck = Firebase.appCheck
+            val appCheck = FirebaseAppCheck.getInstance()
 
             if (BuildConfig.DEBUG) {
                 Log.d("AIApplication", "App Check: Installing DebugAppCheckProviderFactory")
