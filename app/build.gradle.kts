@@ -18,6 +18,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            // Update these values with your actual keystore information
+            storeFile = file("/Users/alexbryantmacm12020/Desktop/backups/AI-Studio---Google-Play-package-main/upload-key.jks")
+            storePassword = "your_keystore_password"
+            keyAlias = "Alifa10"
+            keyPassword = "your_key_password"
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -32,17 +42,25 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+}
+
+kotlin {
+    jvmToolchain(11)
 }
 
 dependencies {
@@ -67,7 +85,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.appcheck)
     implementation(libs.firebase.appcheck.playintegrity)
-    // Changed to implementation to resolve reference in AIApplication.kt (src/main)
     implementation(libs.firebase.appcheck.debug)
 
     // Testing
