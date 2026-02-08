@@ -79,7 +79,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     
     // Additional libraries
-    implementation(libs.credentials.core)
+    implementation(libs.credentials().core)
     implementation(libs.credentials.play)
     implementation(libs.googleid.auth)
     implementation(libs.webkit.android)
