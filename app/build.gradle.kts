@@ -75,11 +75,12 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.animated.vector.drawable)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.activity.compose)
     
     // Additional libraries
-    implementation(libs.credentials().core)
+    implementation(libs.credentials.core)
     implementation(libs.credentials.play)
     implementation(libs.googleid.auth)
     implementation(libs.webkit.android)

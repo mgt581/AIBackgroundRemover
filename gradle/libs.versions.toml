@@ -17,6 +17,7 @@ espressoCore = "3.7.0"
 credentials = "1.5.0"
 googleid = "1.2.0"
 webkit = "1.15.0"
+animatedVectorDrawable = "28.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +45,7 @@ credentials-core = { group = "androidx.credentials", name = "credentials", versi
 credentials-play = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 googleid-auth = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 webkit-android = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
+animated-vector-drawable = { group = "com.android.support", name = "animated-vector-drawable", version.ref = "animatedVectorDrawable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
