@@ -1,14 +1,72 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Allow users to read/write only their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    // Allow reading of general app data (if any)
-    match /{document=**} {
-      allow read: if true; // Allows the app to load even if login is still processing
-      allow write: if request.auth != null;
-    }
-  }
+# Keep Google Play Services Auth & Identity classes
+-keep class com.google.android.gms.auth.api.** { *; }
+-keep class com.google.android.gms.auth.api.signin.** { *; }
+-keep class com.google.android.gms.auth.api.identity.** { *; }
+
+# Keep all interfaces used by Google API clients
+-keep interface com.google.android.gms.common.api.** { *; }
+
+# Keep Parcelable objects
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
 }
+
+# Keep annotations used by Firebase / Play Services
+-keepattributes *Annotation*
+
+# Keep Kotlin metadata (required for Compose)
+-keep class kotlin.Metadata { *; }
+
+# Keep Glide generated API
+-keep class com.bumptech.glide.** { *; }
+-keep interface com.bumptech.glide.** { *; }
+-keep enum com.bumptech.glide.** { *; }
+-keep public class * implements com.bumptech.glide.module.GlideModule
+
+# Keep Firebase classes
+-keep class com.google.firebase.** { *; }
+
+# Keep credentials / Identity API classes
+-keep class androidx.credentials.** { *; }
+
+# Keep all data models used with Gson, Moshi, or other reflection-based libraries
+-keep class com.aiphotostudio.bgremover.model.** { *; }
+
+# Keep Compose runtime classes
+-keep class androidx.compose.** { *; }
+-dontwarn androidx.compose.**
+
+# Keep safe Parcelable for Jetpack libraries
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+# Keep enums (important for Firebase, Play Services)
+-keepclassmembers enum * { *; }
+
+# Avoid stripping methods / fields used by reflection
+-keepclassmembers class * {
+    @androidx.annotation.Keep *;
+}
+
+# Keep all your app-specific models
+-keep class com.aiphotostudio.bgremover.** { *; }
+
+# Keep annotations for Jetpack Compose previews
+-keepattributes RuntimeVisibleAnnotations
+-keepattributes RuntimeInvisibleAnnotations
+-keepattributes Signature
+
+# General Android stuff
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
+-keep class **.BuildConfig { *; }
+
+# Retain all public methods of Firebase AppCheck / Auth
+-keep class com.google.firebase.appcheck.** { *; }
+-keep class com.google.firebase.auth.** { *; }
+
+# Ignore warnings from R8 for Play Services
+-dontwarn com.google.android.gms.**
+-dontwarn com.google.firebase.**

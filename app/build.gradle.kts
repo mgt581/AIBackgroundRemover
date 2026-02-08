@@ -23,13 +23,12 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = file("${project.rootDir}/new-keystore.jks")
+            val keystoreFile = file("${project.rootDir}/AndroidStudioProjects/AIBackgroundRemover/new-keystore.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
                 storePassword = "32Heaton?"
-                keyAlias = "Key0"
+                keyAlias = "key0"
                 keyPassword = "32Heaton?"
-                storeType = "PKCS12"
             }
         }
     }
@@ -88,7 +87,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.activity.compose)
 
-    // Additional libraries
+    // Credentials & Google Auth
     implementation(libs.credentials.core)
     implementation(libs.credentials.play)
     implementation(libs.googleid.auth)
@@ -98,7 +97,7 @@ dependencies {
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
 
-    // Google Play / Firebase
+    // Firebase
     implementation(libs.play.services.auth)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
