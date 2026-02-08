@@ -79,10 +79,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     
     // Additional libraries
-    implementation(libs.auth.credentials)
-    implementation(libs.auth.credentials.play)
-    implementation(libs.auth.googleid)
-    implementation(libs.android.webkit)
+    implementation(libs.credentials_core)
+    implementation(libs.credentials_play)
+    implementation(libs.google_id)
+    implementation(libs.webkit_core)
 
     // Glide
     implementation(libs.glide)
