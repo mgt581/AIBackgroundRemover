@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">AI Background Remover</string>
-    <string name="default_web_client_id" translatable="false">495715411996-iijvtbo02cn7tgvk7tp7284kjmdhefu0.apps.googleusercontent.com</string>
+    <string name="default_web_client_id" translatable="false">411346648650-da20cb13d32139cffab0b3.apps.googleusercontent.com</string>
     <string name="ai_background_remover" translatable="false">AI Photo Studio Background remover</string>
     <string name="signed_in_status">✓ Signed in</string>
     <string name="signed_in_as">✓ %1$s</string>

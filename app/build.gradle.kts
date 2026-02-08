@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.aiphotostudio.bgremover"
+    namespace = "com.bgremoveraiphotostudio"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.aiphotostudio.bgremover"
+        applicationId = "com.bgremoveraiphotostudio"
         minSdk = 24
         targetSdk = 36
         versionCode = 36
@@ -103,6 +103,7 @@ dependencies {
     implementation(libs.firebase.appcheck)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
+    implementation("com.google.firebase:firebase-analytics")
 
     // Testing
     testImplementation(libs.junit)
