@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.aiphotostudio.bgremover">
+aiphotostudio.bgremover">
 
     <!-- Permissions: Must be above the <application> tag -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -82,7 +83,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.aiphotostudio.bgremover.fileprovider"
+            android:authorities="com.aiphotostudio.bgremover            android:authorities="com.aiphotostudio.bgremover.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
