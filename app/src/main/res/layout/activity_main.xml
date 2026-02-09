@@ -71,15 +71,37 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Authentication Status/Action -->
+            <!-- Authentication Status -->
+            <TextView
+                android:id="@+id/tv_auth_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_in_now"
+                android:textColor="@color/status_red"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Authentication Action -->
             <Button
                 android:id="@+id/btn_auth_action"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="8dp"
                 android:background="@drawable/pill_button"
                 android:backgroundTint="#2563EB"
                 android:text="@string/sign_in"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_sign_up"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/pill_button"
+                android:backgroundTint="#161E2E"
+                android:text="@string/sign_up"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
@@ -94,6 +116,18 @@
                 android:layout_marginBottom="16dp" />
 
             <!-- Bottom Action Buttons -->
+            <Button
+                android:id="@+id/btn_day_pass"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/pill_button"
+                android:backgroundTint="#3B82F6"
+                android:text="@string/day_pass"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
             <Button
                 android:id="@+id/btn_monthly"
                 android:layout_width="match_parent"
@@ -133,7 +167,79 @@
                     android:nestedScrollingEnabled="true" />
             </LinearLayout>
 
-            <!-- Footer matching Login -->
+            <!-- Social Media Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="24dp">
+
+                <ImageButton
+                    android:id="@+id/btn_share"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_share"
+                    android:contentDescription="Share" />
+
+                <ImageButton
+                    android:id="@+id/btn_whatsapp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/logo"
+                    android:contentDescription="WhatsApp" />
+
+                <ImageButton
+                    android:id="@+id/btn_tiktok"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/logo"
+                    android:contentDescription="TikTok" />
+            </LinearLayout>
+
+            <!-- Footer Links -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:id="@+id/footer_gallery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gallery"
+                    android:textColor="#3B82F6"
+                    android:textSize="14sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" | "
+                    android:textColor="@color/brand_text_secondary" />
+                <TextView
+                    android:id="@+id/footer_contact"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contact"
+                    android:textColor="#3B82F6"
+                    android:textSize="14sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" | "
+                    android:textColor="@color/brand_text_secondary" />
+                <TextView
+                    android:id="@+id/footer_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings"
+                    android:textColor="#3B82F6"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -149,12 +255,25 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  " />
+                    android:text=" | "
+                    android:textColor="@color/brand_text_secondary" />
                 <TextView
                     android:id="@+id/footer_terms"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/terms_of_service"
+                    android:textColor="#3B82F6"
+                    android:textSize="14sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" | "
+                    android:textColor="@color/brand_text_secondary" />
+                <TextView
+                    android:id="@+id/footer_mpa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MPA"
                     android:textColor="#3B82F6"
                     android:textSize="14sp" />
             </LinearLayout>
