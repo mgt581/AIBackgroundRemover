@@ -1,48 +1,24 @@
 {
-  "hosting": [
-    {
-      "target": "studio",
-      "public": "public",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "headers": [
-        {
-          "source": "/manifest.webmanifest",
-          "headers": [
-            {
-              "key": "Content-Type",
-              "value": "application/manifest+json"
-            }
-          ]
-        },
-        {
-          "source": "/.well-known/assetlinks.json",
-          "headers": [
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        }
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    }
-  ],
   "firestore": {
-    "database": "bgremoveappuserslogin",
-    "location": "nam5",
     "rules": "firestore.rules",
-    "indexes": "y"
+    "indexes": "firestore.indexes.json"
   },
-  "remoteconfig": {
-    "template": "remoteconfig.template.json"
+  "functions": {
+    "source": "functions"
+  },
+  "hosting": {
+    "public": "public",
+    "target": "default",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

@@ -13,6 +13,13 @@
           "Remover"
         ]
       }
+    },
+    "ai-photo-studio-24354": {
+      "hosting": {
+        "default": [
+          "ai-photo-studio-24354"
+        ]
+      }
     }
   },
   "etags": {}
