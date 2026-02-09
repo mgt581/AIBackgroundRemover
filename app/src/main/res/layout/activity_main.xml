@@ -9,11 +9,12 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <!-- Header Section -->
@@ -52,7 +53,7 @@
                         android:textStyle="bold" />
                 </RelativeLayout>
 
-                <!-- Top Navigation Buttons -->
+                <!-- Top Navigation Buttons - Matching the Blue color from your image -->
                 <LinearLayout
                     style="?android:attr/buttonBarStyle"
                     android:layout_width="match_parent"
@@ -121,7 +122,7 @@
                         android:padding="0dp" />
                 </LinearLayout>
 
-                <!-- Payment Buttons -->
+                <!-- Payment Buttons - Matching the Blue and Cyan colors -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -176,12 +177,19 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Content Area (WebView) -->
-            <WebView
-                android:id="@+id/webView"
+            <!-- Content Area (WebView) - Set height to match_parent to fix Lint error -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="600dp"
-                android:nestedScrollingEnabled="true" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <WebView
+                    android:id="@+id/webView"
+                    android:layout_width="match_parent"
+                    android:layout_height="800dp"
+                    android:nestedScrollingEnabled="true" />
+
+            </LinearLayout>
 
             <!-- Footer Section -->
             <LinearLayout
@@ -216,7 +224,7 @@
                     android:textSize="14sp"
                     android:layout_marginBottom="16dp" />
 
-                <!-- Social/Utility Icons -->
+                <!-- Social Icons -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
