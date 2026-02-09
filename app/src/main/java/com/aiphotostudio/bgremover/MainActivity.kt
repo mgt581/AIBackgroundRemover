@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
         if (data != null && (path == "/auth/callback" || path == "/auth/callback/")) {
             webView.loadUrl(data.toString())
         } else {
-            webView.loadUrl("https://aiphotostudio.co")
+            webView.loadUrl("https://aiphotostudio.co.uk")
         }
     }
 
@@ -278,7 +278,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co") || url.contains("accounts.google") ||
+                return if (url.contains("aiphotostudio.co.uk") || url.contains("accounts.google") ||
                     url.contains("facebook.com") || url.contains("firebase")
                 ) false else {
                     openUrl(url)
