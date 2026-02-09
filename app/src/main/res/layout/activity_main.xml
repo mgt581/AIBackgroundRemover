@@ -19,7 +19,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="16dp">
 
             <TextView
                 android:id="@+id/tv_header_title"
@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/ai_photo_studio"
                 android:textColor="@color/white"
-                android:textSize="22sp"
+                android:textSize="24sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -53,57 +53,57 @@
             <Button
                 android:id="@+id/btn_gallery"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="6dp"
                 android:background="@drawable/pill_button"
-                android:backgroundTint="@color/brand_primary"
+                android:backgroundTint="#2D3748"
                 android:text="@string/gallery"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp"
-                android:padding="0dp"
-                tools:ignore="TouchTargetSizeCheck" />
+                android:textSize="12sp"
+                android:padding="0dp" />
 
             <Button
                 android:id="@+id/btn_header_settings"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="6dp"
                 android:background="@drawable/pill_button"
-                android:backgroundTint="@color/brand_primary"
+                android:backgroundTint="#2D3748"
                 android:text="@string/settings"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp"
-                android:padding="0dp"
-                tools:ignore="TouchTargetSizeCheck" />
+                android:textSize="12sp"
+                android:padding="0dp" />
 
             <Button
                 android:id="@+id/btn_auth_action"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="6dp"
                 android:background="@drawable/pill_button"
-                android:backgroundTint="@color/brand_primary"
+                android:backgroundTint="#2D3748"
                 android:text="@string/sign_in"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp"
-                android:padding="0dp"
-                tools:ignore="TouchTargetSizeCheck" />
+                android:textSize="12sp"
+                android:padding="0dp" />
 
             <Button
                 android:id="@+id/btn_sign_up"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="@drawable/pill_button"
-                android:backgroundTint="@color/brand_primary"
+                android:backgroundTint="#2D3748"
                 android:text="@string/sign_up"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp"
-                android:padding="0dp"
-                tools:ignore="TouchTargetSizeCheck" />
+                android:textSize="12sp"
+                android:padding="0dp" />
         </LinearLayout>
 
         <!-- Payment Buttons -->
@@ -121,23 +121,25 @@
                 <Button
                     android:id="@+id/btn_day_pass"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
                     android:background="@drawable/pill_button"
-                    android:backgroundTint="#E0E0E0"
+                    android:backgroundTint="#4A5568"
                     android:text="@string/day_pass"
-                    android:textColor="@color/black"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
                     android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/btn_monthly"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1.2"
                     android:background="@drawable/pill_button"
                     android:backgroundTint="@color/brand_primary"
                     android:text="@string/monthly_pass"
+                    android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -145,11 +147,13 @@
             <Button
                 android:id="@+id/btn_yearly"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="48dp"
                 android:background="@drawable/pill_button"
-                android:backgroundTint="#4CAF50"
+                android:backgroundTint="#38A169"
                 android:text="@string/yearly_pass"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
+                android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -183,10 +187,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ai_photo_studio_background_remover"
+            android:text="AI Background Remover"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:textStyle="bold"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="made by Ai Photo Studio"
+            android:textColor="#94A3B8"
+            android:textSize="14sp"
             android:layout_marginBottom="16dp" />
 
         <!-- Social/Utility Icons -->
@@ -232,7 +243,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                android:text="@string/button_gallery"
+                android:text="GALLERY"
                 android:textColor="@color/white"
                 android:gravity="center"
                 android:padding="8dp"
@@ -243,7 +254,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                android:text="@string/contact_us_button"
+                android:text="CONTACT US"
                 android:textColor="@color/white"
                 android:gravity="center"
                 android:padding="8dp"
@@ -254,7 +265,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                android:text="@string/settings_button"
+                android:text="SETTINGS"
                 android:textColor="@color/white"
                 android:gravity="center"
                 android:padding="8dp"
@@ -265,7 +276,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                android:text="@string/multi_post_app"
+                android:text="MULTI POST APP"
                 android:textColor="@color/white"
                 android:gravity="center"
                 android:padding="8dp"
@@ -281,7 +292,7 @@
                 android:id="@+id/footer_privacy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/privacy_policy"
+                android:text="Privacy Policy"
                 android:textColor="@color/white"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -294,7 +305,7 @@
                 android:id="@+id/footer_terms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/terms_of_service"
+                android:text="Terms of Service"
                 android:textColor="@color/white"
                 android:textSize="12sp"
                 android:textStyle="bold" />
