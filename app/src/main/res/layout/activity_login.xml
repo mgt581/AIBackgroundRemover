@@ -30,7 +30,8 @@
             android:id="@+id/imgLogo"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@mipmap/ic_launcher"
+            android:src="@drawable/logo"
+            android:layout_marginBottom="16dp"
             android:contentDescription="@string/logo" />
 
         <!-- Text between logo and email box -->
@@ -41,7 +42,6 @@
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="24dp" />
 
         <!-- Tabs -->
@@ -58,7 +58,8 @@
                 android:text="@string/sign_in"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/brand_primary"
-                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/pill_button"
                 tools:ignore="VisualLintButtonSize" />
             <Button
                 android:id="@+id/btn_tab_signup"
@@ -68,7 +69,8 @@
                 android:text="@string/sign_up"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/brand_surface"
-                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/pill_button"
                 tools:ignore="VisualLintButtonSize" />
         </LinearLayout>
 
@@ -121,7 +123,8 @@
             android:text="@string/auth"
             android:textColor="@color/white"
             android:backgroundTint="@color/brand_primary"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="24dp"
+            android:background="@drawable/pill_button" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -137,8 +140,8 @@
             android:layout_height="wrap_content"
             android:text="@string/continue_with_google"
             android:textColor="@color/white"
-            app:strokeColor="@color/brand_border"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:backgroundTint="@color/brand_surface"
+            android:background="@drawable/pill_button" />
 
         <Button
             android:id="@+id/btn_anonymous_sign_in"
@@ -146,9 +149,9 @@
             android:layout_height="wrap_content"
             android:text="@string/continue_anonymously"
             android:textColor="@color/white"
-            app:strokeColor="@color/brand_border"
+            android:backgroundTint="@color/brand_surface"
             android:layout_marginTop="12dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:background="@drawable/pill_button" />
 
         <LinearLayout
             android:layout_width="wrap_content"

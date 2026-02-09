@@ -103,6 +103,7 @@ class MainActivity : AppCompatActivity() {
             fabSave = findViewById(R.id.fab_save)
 
             setupClickListeners()
+            setupFooterClickListeners()
             updateHeaderUi()
             setupWebView()
             checkAndRequestPermissions()
@@ -136,6 +137,53 @@ class MainActivity : AppCompatActivity() {
         btnDayPass.setOnClickListener(paymentListener)
         btnMonthly.setOnClickListener(paymentListener)
         btnYearly.setOnClickListener(paymentListener)
+    }
+
+    private fun setupFooterClickListeners() {
+        findViewById<ImageButton>(R.id.btn_share).setOnClickListener {
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, "Check out AI Photo Studio: https://aiphotostudio.co.uk")
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
+        }
+
+        findViewById<ImageButton>(R.id.btn_whatsapp).setOnClickListener {
+            openUrl(getString(R.string.whatsapp_url))
+        }
+
+        findViewById<ImageButton>(R.id.btn_tiktok).setOnClickListener {
+            openUrl(getString(R.string.tiktok_url))
+        }
+
+        findViewById<TextView>(R.id.footer_gallery).setOnClickListener {
+            startActivity(Intent(this, GalleryActivity::class.java))
+        }
+
+        findViewById<TextView>(R.id.footer_contact).setOnClickListener {
+            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:${getString(R.string.owner_email)}")
+            }
+            startActivity(Intent.createChooser(emailIntent, "Send Email"))
+        }
+
+        findViewById<TextView>(R.id.footer_settings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        findViewById<TextView>(R.id.footer_mpa).setOnClickListener {
+            openUrl(getString(R.string.mpa_url))
+        }
+
+        findViewById<TextView>(R.id.footer_privacy).setOnClickListener {
+            openUrl("https://aiphotostudio.co.uk/privacy")
+        }
+
+        findViewById<TextView>(R.id.footer_terms).setOnClickListener {
+            startActivity(Intent(this, TermsActivity::class.java))
+        }
     }
 
     private fun openUrl(url: String) {
@@ -176,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             tvAuthStatus.setTextColor(ContextCompat.getColor(this, R.color.status_green))
         } else {
             tvAuthStatus.text = getString(R.string.sign_in_now)
-            tvAuthStatus.setTextColor(ContextCompat.getColor(this, R.color.status_red))
+            tvAuthStatus.setTextColor(Color.parseColor("#FF4444"))
         }
     }
 
@@ -195,7 +243,6 @@ class MainActivity : AppCompatActivity() {
         cookieManager.setAcceptCookie(true)
         cookieManager.setAcceptThirdPartyCookies(webView, true)
 
-        // Ensure WebView background is transparent
         webView.setBackgroundColor(Color.TRANSPARENT)
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
@@ -239,7 +286,6 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 injectBlobBridge()
-                webView.postDelayed({ injectBlobBridge() }, 1200)
             }
         }
 
@@ -253,17 +299,6 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.filePathCallback = filePathCallback
                 showSourceDialog()
                 return true
-            }
-        }
-        
-        webView.setDownloadListener { url, _, _, _, _ ->
-            if (url.startsWith("data:")) {
-                lastCapturedBase64 = url
-                runOnUiThread {
-                    saveImageToGallery(url, silent = true)
-                    fabSave.visibility = View.VISIBLE
-                    Toast.makeText(this@MainActivity, "Image processed and saved to gallery!", Toast.LENGTH_LONG).show()
-                }
             }
         }
     }
@@ -288,17 +323,6 @@ class MainActivity : AppCompatActivity() {
                 if (blob && blob.size > 2000) sendBlobToAndroid(blob);
                 return originalCreateObjectURL.call(URL, blob);
               };
-              window.addEventListener('click', function(e) {
-                var link = e.target.closest('a');
-                if (link && link.href && link.href.indexOf('blob:') === 0) {
-                  e.preventDefault();
-                  var xhr = new XMLHttpRequest();
-                  xhr.open('GET', link.href, true);
-                  xhr.responseType = 'blob';
-                  xhr.onload = function() { sendBlobToAndroid(xhr.response); };
-                  xhr.send();
-                }
-              }, true);
             })();
         """.trimIndent()
         webView.evaluateJavascript(js, null)
