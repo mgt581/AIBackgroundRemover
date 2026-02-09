@@ -20,7 +20,7 @@
             android:padding="20dp"
             android:gravity="center_horizontal">
 
-            <!-- Logo and Title -->
+            <!-- Logo and Title matching Login -->
             <ImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
@@ -109,6 +109,15 @@
                 android:textColor="@color/white"
                 android:textStyle="bold" />
 
+            <!-- Divider Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/or"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="12sp"
+                android:layout_marginBottom="16dp" />
+
             <!-- WebView Container -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -124,41 +133,22 @@
                     android:nestedScrollingEnabled="true" />
             </LinearLayout>
 
-            <!-- Action Buttons for Image -->
-            <LinearLayout
-                android:id="@+id/ll_image_actions"
+            <!-- Fixed Save Button (required by MainActivity.kt) -->
+            <Button
+                android:id="@+id/btn_save_fixed"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_height="56dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/pill_button"
+                android:backgroundTint="#2563EB"
+                android:text="@string/save_to_gallery"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textStyle="bold"
                 android:visibility="gone"
-                tools:visibility="visible">
+                tools:visibility="visible" />
 
-                <Button
-                    android:id="@+id/btn_save_fixed"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/pill_button"
-                    android:backgroundTint="#2563EB"
-                    android:text="@string/save_to_gallery"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/btn_download_device"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginBottom="24dp"
-                    android:background="@drawable/pill_button"
-                    android:backgroundTint="#161E2E"
-                    android:text="Download to Device"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Footer logo -->
+            <!-- Footer logo (top center) -->
             <ImageView
                 android:id="@+id/footer_logo"
                 android:layout_width="72dp"
@@ -167,7 +157,7 @@
                 android:src="@drawable/logo"
                 android:contentDescription="@string/logo" />
 
-            <!-- Social Media Buttons -->
+            <!-- Social Media Buttons (brand icons) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -180,9 +170,10 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_whatsapp"
+                    android:src="@drawable/ic_whatsapp_brand"
                     android:contentDescription="@string/whatsapp"
-                    android:scaleType="fitCenter" />
+                    android:scaleType="fitCenter"
+                    app:tint="@null" />
 
                 <ImageButton
                     android:id="@+id/btn_tiktok"
@@ -190,9 +181,10 @@
                     android:layout_height="48dp"
                     android:layout_marginHorizontal="18dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_tiktok"
+                    android:src="@drawable/ic_tiktok_brand"
                     android:contentDescription="@string/tiktok"
-                    android:scaleType="fitCenter" />
+                    android:scaleType="fitCenter"
+                    app:tint="@null" />
 
                 <ImageButton
                     android:id="@+id/btn_facebook"
@@ -200,9 +192,10 @@
                     android:layout_height="48dp"
                     android:layout_marginEnd="18dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_facebook"
+                    android:src="@drawable/ic_facebook_brand"
                     android:contentDescription="@string/facebook"
-                    android:scaleType="fitCenter" />
+                    android:scaleType="fitCenter"
+                    app:tint="@null" />
 
                 <ImageButton
                     android:id="@+id/btn_share"
@@ -210,10 +203,11 @@
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_menu_share"
-                    android:contentDescription="@string/share" />
+                    android:contentDescription="@string/share"
+                    app:tint="@null" />
             </LinearLayout>
 
-            <!-- Footer Links -->
+            <!-- Footer Links (removed MPA) -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -232,8 +226,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/value"
-                    android:textColor="@color/brand_text_secondary"
-                    android:layout_marginHorizontal="8dp" />
+                    android:textColor="@color/brand_text_secondary" />
 
                 <TextView
                     android:id="@+id/footer_contact"
@@ -247,8 +240,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/use"
-                    android:textColor="@color/brand_text_secondary"
-                    android:layout_marginHorizontal="8dp" />
+                    android:textColor="@color/brand_text_secondary" />
 
                 <TextView
                     android:id="@+id/footer_settings"
@@ -277,8 +269,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/user"
-                    android:textColor="@color/brand_text_secondary"
-                    android:layout_marginHorizontal="8dp" />
+                    android:textColor="@color/brand_text_secondary" />
 
                 <TextView
                     android:id="@+id/footer_terms"
@@ -300,5 +291,19 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/save_to_gallery"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:backgroundTint="#2563EB"
+        app:icon="@android:drawable/ic_menu_save"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
