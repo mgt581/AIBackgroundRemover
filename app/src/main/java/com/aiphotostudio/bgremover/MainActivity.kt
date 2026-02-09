@@ -44,15 +44,15 @@ class MainActivity : AppCompatActivity() {
     private var cameraImageUri: Uri? = null
     private lateinit var auth: FirebaseAuth
 
-    private lateinit var btnAuthAction: Button
-    private lateinit var btnHeaderSettings: Button
-    private lateinit var btnGallery: Button
-    private lateinit var btnSignUp: Button
-    private lateinit var tvAuthStatus: TextView
+    private var btnAuthAction: Button? = null
+    private var btnHeaderSettings: Button? = null
+    private var btnGallery: Button? = null
+    private var btnSignUp: Button? = null
+    private var tvAuthStatus: TextView? = null
     
-    private lateinit var btnDayPass: Button
-    private lateinit var btnMonthly: Button
-    private lateinit var btnYearly: Button
+    private var btnDayPass: Button? = null
+    private var btnMonthly: Button? = null
+    private var btnYearly: Button? = null
 
     private lateinit var fabSave: ExtendedFloatingActionButton
 
@@ -112,7 +112,10 @@ class MainActivity : AppCompatActivity() {
                 handleIntent(intent)
             }
         } catch (e: Exception) {
-            Log.e("MainActivity", "Error in onCreate", e)
+            Log.e("MainActivity", "Error in onCreate: ${e.message}")
+            // Fallback content view if standard inflation fails (e.g. missing drawable)
+            setContentView(android.R.layout.simple_list_item_1)
+            Toast.makeText(this, "Logo file is missing from drawable folder", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -123,24 +126,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        btnAuthAction.setOnClickListener {
+        btnAuthAction?.setOnClickListener {
             if (auth.currentUser != null) signOut() else startActivity(Intent(this, LoginActivity::class.java))
         }
 
-        btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-        btnGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
-        btnSignUp.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
+        btnHeaderSettings?.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
+        btnGallery?.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
+        btnSignUp?.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
 
         val paymentListener = View.OnClickListener {
             Toast.makeText(this, "Payment integration coming soon!", Toast.LENGTH_SHORT).show()
         }
-        btnDayPass.setOnClickListener(paymentListener)
-        btnMonthly.setOnClickListener(paymentListener)
-        btnYearly.setOnClickListener(paymentListener)
+        btnDayPass?.setOnClickListener(paymentListener)
+        btnMonthly?.setOnClickListener(paymentListener)
+        btnYearly?.setOnClickListener(paymentListener)
     }
 
     private fun setupFooterClickListeners() {
-        findViewById<ImageButton>(R.id.btn_share).setOnClickListener {
+        findViewById<ImageButton>(R.id.btn_share)?.setOnClickListener {
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TEXT, "Check out AI Photo Studio: https://aiphotostudio.co.uk")
@@ -150,38 +153,38 @@ class MainActivity : AppCompatActivity() {
             startActivity(shareIntent)
         }
 
-        findViewById<ImageButton>(R.id.btn_whatsapp).setOnClickListener {
+        findViewById<ImageButton>(R.id.btn_whatsapp)?.setOnClickListener {
             openUrl(getString(R.string.whatsapp_url))
         }
 
-        findViewById<ImageButton>(R.id.btn_tiktok).setOnClickListener {
+        findViewById<ImageButton>(R.id.btn_tiktok)?.setOnClickListener {
             openUrl(getString(R.string.tiktok_url))
         }
 
-        findViewById<TextView>(R.id.footer_gallery).setOnClickListener {
+        findViewById<TextView>(R.id.footer_gallery)?.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
         }
 
-        findViewById<TextView>(R.id.footer_contact).setOnClickListener {
+        findViewById<TextView>(R.id.footer_contact)?.setOnClickListener {
             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:${getString(R.string.owner_email)}")
             }
             startActivity(Intent.createChooser(emailIntent, "Send Email"))
         }
 
-        findViewById<TextView>(R.id.footer_settings).setOnClickListener {
+        findViewById<TextView>(R.id.footer_settings)?.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        findViewById<TextView>(R.id.footer_mpa).setOnClickListener {
+        findViewById<TextView>(R.id.footer_mpa)?.setOnClickListener {
             openUrl(getString(R.string.mpa_url))
         }
 
-        findViewById<TextView>(R.id.footer_privacy).setOnClickListener {
+        findViewById<TextView>(R.id.footer_privacy)?.setOnClickListener {
             openUrl("https://aiphotostudio.co.uk/privacy")
         }
 
-        findViewById<TextView>(R.id.footer_terms).setOnClickListener {
+        findViewById<TextView>(R.id.footer_terms)?.setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
         }
     }
@@ -216,15 +219,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateHeaderUi() {
         val user = auth.currentUser
-        btnAuthAction.text = if (user != null) getString(R.string.sign_out) else getString(R.string.sign_in)
-        btnSignUp.visibility = if (user != null) View.GONE else View.VISIBLE
+        btnAuthAction?.text = if (user != null) getString(R.string.sign_out) else getString(R.string.sign_in)
+        btnSignUp?.visibility = if (user != null) View.GONE else View.VISIBLE
         
         if (user != null) {
-            tvAuthStatus.text = getString(R.string.signed_in_status)
-            tvAuthStatus.setTextColor(ContextCompat.getColor(this, R.color.status_green))
+            tvAuthStatus?.text = getString(R.string.signed_in_status)
+            tvAuthStatus?.setTextColor(ContextCompat.getColor(this, R.color.status_green))
         } else {
-            tvAuthStatus.text = getString(R.string.sign_in_now)
-            tvAuthStatus.setTextColor(Color.parseColor("#FF4444"))
+            tvAuthStatus?.text = getString(R.string.sign_in_now)
+            tvAuthStatus?.setTextColor(Color.parseColor("#FF4444"))
         }
     }
 
