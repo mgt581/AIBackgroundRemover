@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "495715411996",
-    "firebase_url": "https://pwa-ai-photo-studio-pro-default-rtdb.firebaseio.com",
-    "project_id": "pwa-ai-photo-studio-pro",
-    "storage_bucket": "pwa-ai-photo-studio-pro.firebasestorage.app"
+    "project_number": "411346648650",
+    "firebase_url": "https://ai-photo-studio-24354-default-rtdb.firebaseio.com",
+    "project_id": "ai-photo-studio-24354",
+    "storage_bucket": "gs://ai-photo-studio-24354.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:495715411996:android:ac9e925c00ae395b0617d9",
+        "mobilesdk_app_id": "1:411346648650:android:ac9e925c00ae395b0617d9",
         "android_client_info": {
           "package_name": "com.aiphotostudio.bgremover"
         }
       },
       "oauth_client": [
         {
-          "client_id": "495715411996-hlru6g459h2s8lut08c8575n06b7on18.apps.googleusercontent.com",
+          "client_id": "411346648650-cf36olvr71uef34jbuhke86ufdaa0ga0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.aiphotostudio.bgremover",
@@ -23,7 +23,7 @@
           }
         },
         {
-          "client_id": "495715411996-mtuffr8b46u5ghkeua8gqk5vj6mgnh4o.apps.googleusercontent.com",
+          "client_id": "411346648650-mtuffr8b46u5ghkeua8gqk5vj6mgnh4o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.aiphotostudio.bgremover",
