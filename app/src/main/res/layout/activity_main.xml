@@ -1,383 +1,237 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/brand_background"
-    tools:ignore="ExtraText">
+    android:background="@color/brand_background">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Header Section (Fixed at top) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/header_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/brand_background">
+        app:cardBackgroundColor="@color/brand_background"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/header_card"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/brand_background"
-            app:cardElevation="0dp"
-            app:layout_constraintTop_toTopOf="parent">
+            android:orientation="vertical"
+            android:padding="12dp">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginBottom="8dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tv_header_title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp">
+                    android:layout_alignParentStart="true"
+                    android:text="@string/ai_photo_studio_app"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/tv_header_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/ai_photo_studio_app"
-                        android:textColor="@color/white"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_auth_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:text="@string/sign_in_now"
-                        android:textColor="@color/status_red"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tv_auth_status"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:layout_marginBottom="12dp"
-                    android:importantForAccessibility="no">
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/sign_in_now"
+                    android:textColor="@color/status_red"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
 
-                        <Button
-                            android:id="@+id/btn_gallery"
-                            style="@style/Widget.Material3.Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="48dp"
-                            android:layout_marginEnd="8dp"
-                            android:text="@string/gallery"
-                            android:paddingHorizontal="16dp"
-                            android:backgroundTint="@color/brand_primary"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            app:cornerRadius="12dp"
-                            tools:ignore="VisualLintButtonSize"/>
-
-                        <Button
-                            android:id="@+id/btn_header_settings"
-                            style="@style/Widget.Material3.Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="48dp"
-                            android:layout_marginEnd="8dp"
-                            android:text="@string/settings"
-                            android:paddingHorizontal="16dp"
-                            android:backgroundTint="@color/brand_primary"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            app:cornerRadius="12dp"
-                            tools:ignore="VisualLintButtonSize"/>
-
-                        <Button
-                            android:id="@+id/btn_auth_action"
-                            style="@style/Widget.Material3.Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="48dp"
-                            android:layout_marginEnd="8dp"
-                            android:text="@string/sign_in"
-                            android:paddingHorizontal="16dp"
-                            android:backgroundTint="@color/brand_primary"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            app:cornerRadius="12dp"
-                            tools:ignore="VisualLintButtonSize"/>
-
-                        <Button
-                            android:id="@+id/btn_sign_up"
-                            style="@style/Widget.Material3.Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="48dp"
-                            android:text="@string/sign_up"
-                            android:paddingHorizontal="16dp"
-                            android:backgroundTint="@color/brand_primary"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            app:cornerRadius="12dp"
-                            tools:ignore="VisualLintButtonSize"/>
-
-                    </LinearLayout>
-                </HorizontalScrollView>
-
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:importantForAccessibility="no">
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp">
+                    android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/btn_day_pass"
+                        android:id="@+id/btn_gallery"
                         style="@style/Widget.Material3.Button"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:text="@string/day_pass"
-                        android:backgroundTint="@color/white"
-                        android:textColor="@color/black"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="6dp"
+                        android:text="@string/gallery"
+                        android:backgroundTint="@color/brand_primary"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        app:cornerRadius="16dp"
+                        app:cornerRadius="8dp"
                         tools:ignore="VisualLintButtonSize"/>
 
                     <Button
-                        android:id="@+id/btn_monthly"
+                        android:id="@+id/btn_header_settings"
                         style="@style/Widget.Material3.Button"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_weight="1.2"
-                        android:text="@string/monthly_pass"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="6dp"
+                        android:text="@string/settings"
                         android:backgroundTint="@color/brand_primary"
                         android:textColor="@color/white"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
+                        android:textSize="12sp"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        app:cornerRadius="16dp"
+                        app:cornerRadius="8dp"
+                        tools:ignore="VisualLintButtonSize"/>
+
+                    <Button
+                        android:id="@+id/btn_auth_action"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="6dp"
+                        android:text="@string/sign_in"
+                        android:backgroundTint="@color/brand_primary"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:cornerRadius="8dp"
+                        tools:ignore="VisualLintButtonSize"/>
+
+                    <Button
+                        android:id="@+id/btn_sign_up"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="@string/sign_up"
+                        android:backgroundTint="@color/brand_primary"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:cornerRadius="8dp"
                         tools:ignore="VisualLintButtonSize"/>
 
                 </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-                <Button
-                    android:id="@+id/btn_yearly"
-                    style="@style/Widget.Material3.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:backgroundTint="@color/brand_light_blue"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:text="@string/yearly_pass"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="16dp"
-                    tools:ignore="VisualLintButtonSize"/>
+    <!-- WebView fills the middle -->
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/header_card"
+        app:layout_constraintBottom_toTopOf="@id/footer_scroll"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <WebView
-            android:id="@+id/webView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="800dp"
-            android:background="@color/brand_background"
-            app:layout_constraintTop_toBottomOf="@id/header_card"
-            tools:ignore="WebViewLayout" />
-
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/save_to_gallery"
-            android:textColor="@color/white"
-            android:visibility="gone"
-            app:backgroundTint="@color/brand_primary"
-            app:icon="@android:drawable/ic_menu_save"
-            app:iconTint="@color/white"
-            app:layout_constraintBottom_toTopOf="@id/footer_section"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible"
-            tools:ignore="AccessibilityClassName" />
+    <!-- Footer Section (Scrollable if needed, at the bottom) -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/footer_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="150dp"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:id="@+id/footer_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/brand_background"
+            android:background="@color/brand_surface"
             android:orientation="vertical"
-            android:padding="24dp"
-            android:gravity="center_horizontal"
-            app:layout_constraintTop_toBottomOf="@id/webView"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:src="@mipmap/ic_launcher_round"
-                android:layout_marginBottom="8dp"
-                android:contentDescription="@string/app_name"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ai_background_remover_app"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
-                <ImageButton
-                    android:id="@+id/btn_fb"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/ic_menu_share"
-                    android:layout_marginEnd="16dp"
-                    app:tint="@color/white"
-                    android:contentDescription="@string/facebook"/>
-                <ImageButton
-                    android:id="@+id/btn_wa"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/sym_action_chat"
-                    android:layout_marginEnd="16dp"
-                    app:tint="@color/white"
-                    android:contentDescription="@string/whatsapp"/>
-                <ImageButton
-                    android:id="@+id/btn_tiktok"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/ic_menu_slideshow"
-                    app:tint="@color/white"
-                    android:contentDescription="@string/tiktok"/>
-            </LinearLayout>
-
-            <GridLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:layout_marginBottom="24dp">
-
-                <Button
-                    android:id="@+id/btn_footer_gallery"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="@string/button_gallery"
-                    android:textColor="@color/white"
-                    android:drawableStart="@android:drawable/ic_menu_gallery"
-                    android:drawablePadding="8dp"
-                    android:layout_marginEnd="16dp"
-                    tools:ignore="VisualLintButtonSize"/>
-
-                <Button
-                    android:id="@+id/btn_footer_contact"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="@string/contact_us_button"
-                    android:textColor="@color/white"
-                    android:drawableStart="@android:drawable/ic_dialog_email"
-                    android:drawablePadding="8dp"
-                    tools:ignore="VisualLintButtonSize"/>
-
-                <Button
-                    android:id="@+id/btn_footer_settings"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="@string/settings_button"
-                    android:textColor="@color/white"
-                    android:drawableStart="@android:drawable/ic_menu_manage"
-                    android:drawablePadding="8dp"
-                    tools:ignore="VisualLintButtonSize"/>
-
-                <Button
-                    android:id="@+id/btn_footer_mpa"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="@string/multi_post_app"
-                    android:textColor="@color/white"
-                    android:drawableStart="@android:drawable/ic_menu_send"
-                    android:drawablePadding="8dp"
-                    tools:ignore="VisualLintButtonSize"/>
-
-            </GridLayout>
+            android:padding="16dp"
+            android:gravity="center_horizontal">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="8dp">
 
                 <Button
-                    android:id="@+id/btn_privacy"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="@string/privacy_policy"
-                    android:textColor="@color/white"
+                    android:id="@+id/btn_day_pass"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="@string/day_pass"
+                    android:backgroundTint="@color/white"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
                     android:textStyle="bold"
-                    android:textSize="14sp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="8dp"
                     tools:ignore="VisualLintButtonSize"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/separator"
-                    android:textColor="@color/white"
-                    android:layout_marginHorizontal="8dp"/>
 
                 <Button
-                    android:id="@+id/btn_terms"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="@string/terms_of_service"
+                    android:id="@+id/btn_monthly"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1.2"
+                    android:text="@string/monthly_pass"
+                    android:backgroundTint="@color/brand_primary"
                     android:textColor="@color/white"
+                    android:textSize="12sp"
                     android:textStyle="bold"
-                    android:textSize="14sp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="8dp"
                     tools:ignore="VisualLintButtonSize"/>
-
             </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_yearly"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:backgroundTint="@color/brand_light_blue"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/yearly_pass"
+                android:textColor="@color/black"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:cornerRadius="8dp"
+                tools:ignore="VisualLintButtonSize"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:maxWidth="600dp"
                 android:text="@string/footer_ownership"
                 android:textColor="@color/brand_text_secondary"
-                android:textSize="12sp"
-                tools:ignore="SmallSp"/>
-
+                android:textSize="10sp"
+                android:gravity="center"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/save_to_gallery"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:backgroundTint="@color/brand_primary"
+        app:icon="@android:drawable/ic_menu_save"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/footer_scroll"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible"
+        tools:ignore="AccessibilityClassName" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

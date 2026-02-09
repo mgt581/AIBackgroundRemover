@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -135,23 +136,6 @@ class MainActivity : AppCompatActivity() {
         btnDayPass.setOnClickListener(paymentListener)
         btnMonthly.setOnClickListener(paymentListener)
         btnYearly.setOnClickListener(paymentListener)
-
-        // Footer Listeners
-        findViewById<ImageButton>(R.id.btn_fb).setOnClickListener { openUrl(getString(R.string.facebook_url)) }
-        findViewById<ImageButton>(R.id.btn_wa).setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
-        findViewById<ImageButton>(R.id.btn_tiktok).setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
-        
-        findViewById<Button>(R.id.btn_footer_gallery).setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
-        findViewById<Button>(R.id.btn_footer_settings).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-        findViewById<Button>(R.id.btn_footer_contact).setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO).apply { data = Uri.parse("mailto:" + getString(R.string.owner_email)) }
-            startActivity(intent)
-        }
-        
-        findViewById<Button>(R.id.btn_footer_mpa).setOnClickListener { openUrl(getString(R.string.mpa_url)) }
-
-        findViewById<Button>(R.id.btn_privacy).setOnClickListener { openUrl("https://aiphotostudio.co/privacy") }
-        findViewById<Button>(R.id.btn_terms).setOnClickListener { openUrl("https://aiphotostudio.co/terms") }
     }
 
     private fun openUrl(url: String) {
@@ -210,6 +194,10 @@ class MainActivity : AppCompatActivity() {
         val cookieManager = CookieManager.getInstance()
         cookieManager.setAcceptCookie(true)
         cookieManager.setAcceptThirdPartyCookies(webView, true)
+
+        // Ensure WebView background is transparent
+        webView.setBackgroundColor(Color.TRANSPARENT)
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
         webView.settings.apply {
             javaScriptEnabled = true
