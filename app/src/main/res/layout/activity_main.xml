@@ -14,7 +14,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <!-- Header Section -->
@@ -23,12 +23,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="20dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="20dp">
 
                     <TextView
                         android:id="@+id/tv_header_title"
@@ -53,7 +53,7 @@
                         android:textStyle="bold" />
                 </RelativeLayout>
 
-                <!-- Top Navigation Buttons - Matching the Blue color from your image -->
+                <!-- Top Navigation Buttons - Color 1 (Primary Blue) -->
                 <LinearLayout
                     style="?android:attr/buttonBarStyle"
                     android:layout_width="match_parent"
@@ -70,7 +70,7 @@
                         android:layout_weight="1"
                         android:layout_marginEnd="6dp"
                         android:background="@drawable/pill_button"
-                        android:backgroundTint="@color/brand_primary"
+                        android:backgroundTint="#2563EB"
                         android:text="@string/gallery"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
@@ -85,7 +85,7 @@
                         android:layout_weight="1"
                         android:layout_marginEnd="6dp"
                         android:background="@drawable/pill_button"
-                        android:backgroundTint="@color/brand_primary"
+                        android:backgroundTint="#2563EB"
                         android:text="@string/settings"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
@@ -100,7 +100,7 @@
                         android:layout_weight="1"
                         android:layout_marginEnd="6dp"
                         android:background="@drawable/pill_button"
-                        android:backgroundTint="@color/brand_primary"
+                        android:backgroundTint="#2563EB"
                         android:text="@string/sign_in"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
@@ -114,7 +114,7 @@
                         android:layout_height="48dp"
                         android:layout_weight="1"
                         android:background="@drawable/pill_button"
-                        android:backgroundTint="@color/brand_primary"
+                        android:backgroundTint="#2563EB"
                         android:text="@string/sign_up"
                         android:textAllCaps="false"
                         android:textColor="@color/white"
@@ -122,7 +122,7 @@
                         android:padding="0dp" />
                 </LinearLayout>
 
-                <!-- Payment Buttons - Matching the Blue and Cyan colors -->
+                <!-- Middle Payment Buttons - Color 2 (Medium Blue) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -143,7 +143,7 @@
                             android:layout_weight="1"
                             android:layout_marginEnd="8dp"
                             android:background="@drawable/pill_button"
-                            android:backgroundTint="@color/brand_primary"
+                            android:backgroundTint="#3B82F6"
                             android:text="@string/day_pass"
                             android:textAllCaps="false"
                             android:textColor="@color/white"
@@ -156,20 +156,22 @@
                             android:layout_height="48dp"
                             android:layout_weight="1.2"
                             android:background="@drawable/pill_button"
-                            android:backgroundTint="@color/brand_primary"
+                            android:backgroundTint="#3B82F6"
                             android:text="@string/monthly_pass"
                             android:textAllCaps="false"
                             android:textColor="@color/white"
                             android:textStyle="bold" />
                     </LinearLayout>
 
+                    <!-- Bottom Trial Button - Color 3 (Cyan) -->
                     <Button
                         android:id="@+id/btn_yearly"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
+                        android:layout_marginHorizontal="0dp"
                         android:background="@drawable/pill_button"
-                        android:backgroundTint="@color/brand_light_blue"
-                        android:text="Start FREE Trial →"
+                        android:backgroundTint="#22D3EE"
+                        android:text="@string/yearly_pass"
                         android:textAllCaps="false"
                         android:textColor="@color/black"
                         android:textSize="16sp"
@@ -177,16 +179,17 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Content Area (WebView) - Set height to match_parent to fix Lint error -->
+            <!-- Content Area (WebView) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp">
 
                 <WebView
                     android:id="@+id/webView"
                     android:layout_width="match_parent"
-                    android:layout_height="800dp"
+                    android:layout_height="match_parent"
                     android:nestedScrollingEnabled="true" />
 
             </LinearLayout>
@@ -198,7 +201,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@color/brand_background"
-                android:padding="16dp"
+                android:padding="20dp"
                 android:gravity="center_horizontal">
 
                 <ImageView
@@ -357,7 +360,7 @@
         android:text="@string/save_to_gallery"
         android:textColor="@color/white"
         android:visibility="gone"
-        app:backgroundTint="@color/brand_primary"
+        app:backgroundTint="#2563EB"
         app:icon="@android:drawable/ic_menu_save"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
