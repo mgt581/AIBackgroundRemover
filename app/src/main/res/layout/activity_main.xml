@@ -167,10 +167,11 @@
                         android:id="@+id/btn_yearly"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:background="@drawable/btn_primary"
+                        android:background="@drawable/pill_button"
+                        android:backgroundTint="@color/brand_light_blue"
                         android:text="Start FREE Trial →"
                         android:textAllCaps="false"
-                        android:textColor="@color/white"
+                        android:textColor="@color/black"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
