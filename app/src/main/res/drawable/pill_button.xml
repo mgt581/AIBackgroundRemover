@@ -3,7 +3,4 @@
     <corners android:radius="100dp" />
     <solid android:color="@color/brand_light_blue" />
     <padding android:left="16dp" android:right="16dp" android:top="8dp" android:bottom="8dp" />
-    <item name="ic_whatsapp_brand" type="drawable">@drawable/logo</item>
-    <item name="ic_tiktok_brand" type="drawable">@drawable/logo</item>
-    <item name="ic_facebook_brand" type="drawable">@drawable/logo</item>
 </shape>
