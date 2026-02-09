@@ -164,15 +164,32 @@ class MainActivity : AppCompatActivity() {
             openUrl(getString(R.string.facebook_url))
         }
 
-        findViewById<Button>(R.id.btn_gallery_footer)?.setOnClickListener {
+        findViewById<ImageButton>(R.id.btn_share)?.setOnClickListener {
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, "Check out AI Photo Studio: https://aiphotostudio.co")
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
+        }
+
+        findViewById<TextView>(R.id.footer_gallery)?.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btn_settings_footer)?.setOnClickListener {
+        findViewById<TextView>(R.id.footer_contact)?.setOnClickListener {
+            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                data = "mailto:${getString(R.string.owner_email)}".toUri()
+            }
+            startActivity(Intent.createChooser(emailIntent, "Send Email"))
+        }
+
+        findViewById<TextView>(R.id.footer_settings)?.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btn_privacy_footer)?.setOnClickListener {
+        findViewById<TextView>(R.id.footer_privacy)?.setOnClickListener {
             startActivity(
                 Intent(this, WebPageActivity::class.java)
                     .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.privacy_policy))
@@ -180,7 +197,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        findViewById<Button>(R.id.btn_terms_footer)?.setOnClickListener {
+        findViewById<TextView>(R.id.footer_terms)?.setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
         }
     }
