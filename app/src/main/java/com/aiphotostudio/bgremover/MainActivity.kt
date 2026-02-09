@@ -20,6 +20,7 @@ import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -28,6 +29,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -58,7 +60,9 @@ class MainActivity : AppCompatActivity() {
     private var btnSignUp: Button? = null
     private var tvAuthStatus: TextView? = null
 
+    private var llImageActions: LinearLayout? = null
     private var btnSaveFixed: Button? = null
+    private var btnDownloadDevice: Button? = null
 
     private var lastCapturedBase64: String? = null
 
@@ -100,7 +104,9 @@ class MainActivity : AppCompatActivity() {
             btnSignUp = findViewById(R.id.btn_sign_up)
             tvAuthStatus = findViewById(R.id.tv_auth_status)
 
+            llImageActions = findViewById(R.id.ll_image_actions)
             btnSaveFixed = findViewById(R.id.btn_save_fixed)
+            btnDownloadDevice = findViewById(R.id.btn_download_device)
 
             setupClickListeners()
             setupFooterClickListeners()
@@ -119,15 +125,20 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate: ${e.message}")
-            setContentView(android.R.layout.simple_list_item_1)
-            Toast.makeText(this, "Logo file is missing from drawable folder", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Initialization error", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun setupClickListeners() {
         btnSaveFixed?.setOnClickListener {
-            lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
-                Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
+            lastCapturedBase64?.let { saveToInternalGallery(it) } ?: run {
+                Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnDownloadDevice?.setOnClickListener {
+            lastCapturedBase64?.let { downloadToDevice(it) } ?: run {
+                Toast.makeText(this, "No image to download", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -266,6 +277,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.addJavascriptInterface(object {
+            @JavascriptInterface
+            fun processBlob(base64Data: String) {
+                runOnUiThread {
+                    lastCapturedBase64 = base64Data
+                    llImageActions?.visibility = View.VISIBLE
+                }
+            }
         }, "AndroidInterface")
 
         webView.webViewClient = object : WebViewClient() {
@@ -325,7 +343,7 @@ class MainActivity : AppCompatActivity() {
         webView.evaluateJavascript(js, null)
     }
 
-    private fun saveImageToGallery(base64Data: String, silent: Boolean = false) {
+    private fun saveToInternalGallery(base64Data: String) {
         try {
             val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
@@ -333,58 +351,50 @@ class MainActivity : AppCompatActivity() {
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
 
             val galleryDir = File(filesDir, "saved_images")
-            if (!galleryDir.exists() && !galleryDir.mkdirs()) {
-                throw IOException("Failed to create internal directory: ${galleryDir.absolutePath}")
-            }
+            if (!galleryDir.exists()) galleryDir.mkdirs()
+            
             val internalFile = File(galleryDir, fileName)
             FileOutputStream(internalFile).use { out ->
-                val ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                if (!ok) throw IOException("Failed to compress bitmap")
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
 
-            if (!silent) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val values = ContentValues().apply {
-                        put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                        put(
-                            MediaStore.Images.Media.RELATIVE_PATH,
-                            Environment.DIRECTORY_PICTURES + "/AI Background Remover"
-                        )
-                    }
-                    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-                        ?: throw IOException("MediaStore insert failed")
-                    contentResolver.openOutputStream(uri)?.use { out ->
-                        val ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                        if (!ok) throw IOException("Failed to compress bitmap")
-                    } ?: throw IOException("Failed to open output stream")
-                } else {
-                    @Suppress("DEPRECATION")
-                    val directory = File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                        "AI Background Remover"
-                    )
-                    if (!directory.exists() && !directory.mkdirs()) {
-                        throw IOException("Failed to create pictures directory: ${directory.absolutePath}")
-                    }
-                    val file = File(directory, fileName)
-                    FileOutputStream(file).use { out ->
-                        val ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                        if (!ok) throw IOException("Failed to compress bitmap")
-                    }
-                    MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
-                }
-
-                runOnUiThread {
-                    Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
-                }
-            }
+            Toast.makeText(this, "Saved to App Gallery", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            if (!silent) {
-                runOnUiThread {
-                    Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Save failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun downloadToDevice(base64Data: String) {
+        try {
+            val base64String = if (base64Data.contains(",")) base64Data.substringAfter(",") else base64Data
+            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size) ?: throw Exception("Decode error")
+            val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val values = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
                 }
+                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                    ?: throw IOException("MediaStore insert failed")
+                contentResolver.openOutputStream(uri)?.use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
+            } else {
+                val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
+                if (!directory.exists()) directory.mkdirs()
+                val file = File(directory, fileName)
+                FileOutputStream(file).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
+                MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
+
+            Toast.makeText(this, "Downloaded to Device", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -402,7 +412,7 @@ class MainActivity : AppCompatActivity() {
             val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
             if (!directory.exists()) directory.mkdirs()
             val imageFile = File(directory, "temp_${System.currentTimeMillis()}.jpg")
-            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.file provider", imageFile)
+            val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", imageFile)
             cameraImageUri = uri
             takePicture.launch(uri)
         } else {
