@@ -28,6 +28,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+google-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }

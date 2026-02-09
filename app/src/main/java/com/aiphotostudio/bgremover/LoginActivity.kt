@@ -265,6 +265,30 @@ class LoginActivity : AppCompatActivity() {
                 val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
                 Log.e(TAG, "Anonymous sign-in failed: ${task.exception?.message}, error code: $errorCode", task.exception)
                 Toast.makeText(this, "Guest login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+
+                fun validateAndFinishLogin() {
+                    val user = FirebaseAuth.getInstance().currentUser
+
+                    if (user == null) {
+                        Log.e(TAG, "User is null after login")
+                        Toast.makeText(this, "Authentication failed. Please try again.", Toast.LENGTH_LONG).show()
+                        return
+                    }
+
+                    user.getIdToken(true)
+                        .addOnSuccessListener { result ->
+                            Log.d(TAG, "Token (first 20 chars): ${result.token?.take(20)}...")
+
+                            setResult(RESULT_OK)
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Token refresh failed", e)
+                            Toast.makeText(this, "Session error. Please log in again.", Toast.LENGTH_LONG).show()
+                        }
+                }
+
+
             }
         }
     }

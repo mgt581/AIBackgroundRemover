@@ -103,7 +103,7 @@ dependencies {
     implementation(libs.firebase.appcheck)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.google.firebase.analytics)
 
     // Testing
     testImplementation(libs.junit)
