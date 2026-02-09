@@ -1,6 +1,7 @@
 @file:Suppress("DEPRECATION")
 package com.aiphotostudio.bgremover
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -93,15 +95,23 @@ class LoginActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
-            Toast.makeText(this, "Privacy Policy", Toast.LENGTH_SHORT).show()
+            openUrl("https://aiphotostudio.co/privacy")
         }
 
         findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
-            Toast.makeText(this, "Terms of Service", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, TermsActivity::class.java))
         }
 
         // Initialize in sign-in mode
         switchToSignInMode()
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening URL", e)
+        }
     }
 
     private fun switchToSignInMode() {

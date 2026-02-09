@@ -30,6 +30,7 @@ import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -167,7 +168,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.footer_contact)?.setOnClickListener {
             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:${getString(R.string.owner_email)}")
+                data = "mailto:${getString(R.string.owner_email)}".toUri()
             }
             startActivity(Intent.createChooser(emailIntent, "Send Email"))
         }
@@ -191,7 +192,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (e: Exception) {
             Log.e("MainActivity", "Error opening URL", e)
         }

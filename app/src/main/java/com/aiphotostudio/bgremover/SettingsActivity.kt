@@ -1,11 +1,14 @@
 package com.aiphotostudio.bgremover
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 
 class SettingsActivity : AppCompatActivity() {
@@ -27,10 +30,10 @@ class SettingsActivity : AppCompatActivity() {
 
         val tvUserEmail = findViewById<TextView>(R.id.tv_user_email)
         val user = auth.currentUser
-        tvUserEmail.text = user?.email ?: "Not signed in"
+        tvUserEmail.text = user?.email ?: getString(R.string.not_signed_in)
 
         findViewById<Button>(R.id.btn_about_terms).setOnClickListener {
-            openUrl("https://aiphotostudio.co/terms")
+            startActivity(Intent(this, TermsActivity::class.java))
         }
 
         findViewById<Button>(R.id.btn_about_privacy).setOnClickListener {
@@ -49,4 +52,11 @@ class SettingsActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+        } catch (e: Exception) {
+            Log.e("SettingsActivity", "Error opening URL", e)
+        }
+    }
 }
