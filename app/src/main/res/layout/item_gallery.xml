@@ -43,7 +43,7 @@
                 android:insetBottom="0dp"
                 android:textSize="12sp"
                 android:textColor="@color/white"
-                app:strokeColor="@color/brand_border" />
+                app:strokeColor="@color/brand_primary" />
 
             <Button
                 android:id="@+id/btn_delete"
@@ -56,7 +56,7 @@
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                android:backgroundTint="#EF5350"
+                android:backgroundTint="@color/brand_accent"
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 
