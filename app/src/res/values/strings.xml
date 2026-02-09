@@ -62,4 +62,10 @@
     <string name="facebook">Facebook</string>
     <string name="ai_background_remover_app">AI Background remover</string>
     <string name="ai_photo_studio_app">AI Photo Studio</string>
+
+    <!-- New Strings to fix errors -->
+    <string name="share">Share</string>
+    <string name="contact">Contact</string>
+    <string name="divider"> | </string>
+    <string name="sign_in_now">Please sign in to save images</string>
 </resources>

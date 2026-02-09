@@ -95,7 +95,11 @@ class LoginActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy")
+            startActivity(
+                Intent(this, WebPageActivity::class.java)
+                    .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.privacy_policy))
+                    .putExtra(WebPageActivity.EXTRA_URL, "https://aiphotostudio.co/privacy")
+            )
         }
 
         findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
@@ -104,14 +108,6 @@ class LoginActivity : AppCompatActivity() {
 
         // Initialize in sign-in mode
         switchToSignInMode()
-    }
-
-    private fun openUrl(url: String) {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-        } catch (e: Exception) {
-            Log.e(TAG, "Error opening URL", e)
-        }
     }
 
     private fun switchToSignInMode() {
@@ -275,30 +271,6 @@ class LoginActivity : AppCompatActivity() {
                 val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
                 Log.e(TAG, "Anonymous sign-in failed: ${task.exception?.message}, error code: $errorCode", task.exception)
                 Toast.makeText(this, "Guest login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-
-                fun validateAndFinishLogin() {
-                    val user = FirebaseAuth.getInstance().currentUser
-
-                    if (user == null) {
-                        Log.e(TAG, "User is null after login")
-                        Toast.makeText(this, "Authentication failed. Please try again.", Toast.LENGTH_LONG).show()
-                        return
-                    }
-
-                    user.getIdToken(true)
-                        .addOnSuccessListener { result ->
-                            Log.d(TAG, "Token (first 20 chars): ${result.token?.take(20)}...")
-
-                            setResult(RESULT_OK)
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e(TAG, "Token refresh failed", e)
-                            Toast.makeText(this, "Session error. Please log in again.", Toast.LENGTH_LONG).show()
-                        }
-                }
-
-
             }
         }
     }

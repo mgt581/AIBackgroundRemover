@@ -19,24 +19,31 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
-import android.webkit.*
+import android.webkit.CookieManager
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
+import androidx.core.graphics.toColorInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,12 +57,8 @@ class MainActivity : AppCompatActivity() {
     private var btnGallery: Button? = null
     private var btnSignUp: Button? = null
     private var tvAuthStatus: TextView? = null
-    
-    private var btnDayPass: Button? = null
-    private var btnMonthly: Button? = null
-    private var btnYearly: Button? = null
 
-    private lateinit var fabSave: ExtendedFloatingActionButton
+    private var btnSaveFixed: Button? = null
 
     private var lastCapturedBase64: String? = null
 
@@ -96,12 +99,8 @@ class MainActivity : AppCompatActivity() {
             btnGallery = findViewById(R.id.btn_gallery)
             btnSignUp = findViewById(R.id.btn_sign_up)
             tvAuthStatus = findViewById(R.id.tv_auth_status)
-            
-            btnDayPass = findViewById(R.id.btn_day_pass)
-            btnMonthly = findViewById(R.id.btn_monthly)
-            btnYearly = findViewById(R.id.btn_yearly)
 
-            fabSave = findViewById(R.id.fab_save)
+            btnSaveFixed = findViewById(R.id.btn_save_fixed)
 
             setupClickListeners()
             setupFooterClickListeners()
@@ -109,19 +108,24 @@ class MainActivity : AppCompatActivity() {
             setupWebView()
             checkAndRequestPermissions()
 
+            onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (webView.canGoBack()) webView.goBack() else finish()
+                }
+            })
+
             if (savedInstanceState == null) {
                 handleIntent(intent)
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate: ${e.message}")
-            // Fallback content view if standard inflation fails (e.g. missing drawable)
             setContentView(android.R.layout.simple_list_item_1)
             Toast.makeText(this, "Logo file is missing from drawable folder", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun setupClickListeners() {
-        fabSave.setOnClickListener {
+        btnSaveFixed?.setOnClickListener {
             lastCapturedBase64?.let { saveImageToGallery(it) } ?: run {
                 Toast.makeText(this, "No image to save yet", Toast.LENGTH_SHORT).show()
             }
@@ -134,13 +138,6 @@ class MainActivity : AppCompatActivity() {
         btnHeaderSettings?.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         btnGallery?.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
         btnSignUp?.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
-
-        val paymentListener = View.OnClickListener {
-            Toast.makeText(this, "Payment integration coming soon!", Toast.LENGTH_SHORT).show()
-        }
-        btnDayPass?.setOnClickListener(paymentListener)
-        btnMonthly?.setOnClickListener(paymentListener)
-        btnYearly?.setOnClickListener(paymentListener)
     }
 
     private fun setupFooterClickListeners() {
@@ -162,6 +159,10 @@ class MainActivity : AppCompatActivity() {
             openUrl(getString(R.string.tiktok_url))
         }
 
+        findViewById<ImageButton>(R.id.btn_facebook)?.setOnClickListener {
+            openUrl(getString(R.string.facebook_url))
+        }
+
         findViewById<TextView>(R.id.footer_gallery)?.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
         }
@@ -177,12 +178,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        findViewById<TextView>(R.id.footer_mpa)?.setOnClickListener {
-            openUrl(getString(R.string.mpa_url))
-        }
-
         findViewById<TextView>(R.id.footer_privacy)?.setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy")
+            startActivity(
+                Intent(this, WebPageActivity::class.java)
+                    .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.privacy_policy))
+                    .putExtra(WebPageActivity.EXTRA_URL, "https://aiphotostudio.co/privacy")
+            )
         }
 
         findViewById<TextView>(R.id.footer_terms)?.setOnClickListener {
@@ -222,13 +223,13 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         btnAuthAction?.text = if (user != null) getString(R.string.sign_out) else getString(R.string.sign_in)
         btnSignUp?.visibility = if (user != null) View.GONE else View.VISIBLE
-        
+
         if (user != null) {
             tvAuthStatus?.text = getString(R.string.signed_in_status)
             tvAuthStatus?.setTextColor(ContextCompat.getColor(this, R.color.status_green))
         } else {
             tvAuthStatus?.text = getString(R.string.sign_in_now)
-            tvAuthStatus?.setTextColor(Color.parseColor("#FF4444"))
+            tvAuthStatus?.setTextColor("#FF4444".toColorInt())
         }
     }
 
@@ -241,7 +242,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     private fun setupWebView() {
         val cookieManager = CookieManager.getInstance()
         cookieManager.setAcceptCookie(true)
@@ -260,26 +261,18 @@ class MainActivity : AppCompatActivity() {
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            userAgentString =
+                "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (HTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
         }
 
         webView.addJavascriptInterface(object {
-            @Keep
-            @JavascriptInterface
-            fun processBlob(base64Data: String) {
-                lastCapturedBase64 = base64Data
-                runOnUiThread {
-                    saveImageToGallery(base64Data, silent = true)
-                    fabSave.visibility = View.VISIBLE
-                    Toast.makeText(this@MainActivity, "Image processed and saved to gallery!", Toast.LENGTH_LONG).show()
-                }
-            }
         }, "AndroidInterface")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                return if (url.contains("aiphotostudio.co") || url.contains("accounts.google") ||
+                return if (
+                    url.contains("aiphotostudio.co") || url.contains("accounts.google") ||
                     url.contains("facebook.com") || url.contains("firebase")
                 ) false else {
                     openUrl(url)
@@ -340,30 +333,58 @@ class MainActivity : AppCompatActivity() {
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
 
             val galleryDir = File(filesDir, "saved_images")
-            if (!galleryDir.exists()) galleryDir.mkdirs()
+            if (!galleryDir.exists() && !galleryDir.mkdirs()) {
+                throw IOException("Failed to create internal directory: ${galleryDir.absolutePath}")
+            }
             val internalFile = File(galleryDir, fileName)
-            FileOutputStream(internalFile).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            FileOutputStream(internalFile).use { out ->
+                val ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                if (!ok) throw IOException("Failed to compress bitmap")
+            }
 
             if (!silent) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     val values = ContentValues().apply {
                         put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                         put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
+                        put(
+                            MediaStore.Images.Media.RELATIVE_PATH,
+                            Environment.DIRECTORY_PICTURES + "/AI Background Remover"
+                        )
                     }
-                    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: throw Exception("Insert error")
-                    contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                        ?: throw IOException("MediaStore insert failed")
+                    contentResolver.openOutputStream(uri)?.use { out ->
+                        val ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                        if (!ok) throw IOException("Failed to compress bitmap")
+                    } ?: throw IOException("Failed to open output stream")
                 } else {
-                    val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Background Remover")
-                    if (!directory.exists()) directory.mkdirs()
+                    @Suppress("DEPRECATION")
+                    val directory = File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                        "AI Background Remover"
+                    )
+                    if (!directory.exists() && !directory.mkdirs()) {
+                        throw IOException("Failed to create pictures directory: ${directory.absolutePath}")
+                    }
                     val file = File(directory, fileName)
-                    FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    FileOutputStream(file).use { out ->
+                        val ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                        if (!ok) throw IOException("Failed to compress bitmap")
+                    }
                     MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
                 }
-                runOnUiThread { Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show() }
+
+                runOnUiThread {
+                    Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
+                }
             }
         } catch (e: Exception) {
-            if (!silent) runOnUiThread { Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show() }
+            if (!silent) {
+                runOnUiThread {
+                    Toast.makeText(this, getString(R.string.save_failed, e.message), Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -381,7 +402,7 @@ class MainActivity : AppCompatActivity() {
             val directory = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "AIPhotoStudio")
             if (!directory.exists()) directory.mkdirs()
             val imageFile = File(directory, "temp_${System.currentTimeMillis()}.jpg")
-            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.fileprovider", imageFile)
+            val uri = FileProvider.getUriForFile(this, "com.aiphotostudio.bgremover.file provider", imageFile)
             cameraImageUri = uri
             takePicture.launch(uri)
         } else {

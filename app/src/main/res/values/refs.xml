@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <drawable name="ic_whatsapp_brand">whatsapp</drawable>
+    <drawable name="ic_tiktok_brand">TikTok</drawable>
+    <drawable name="ic_facebook_brand">facebook</drawable>
 </resources>

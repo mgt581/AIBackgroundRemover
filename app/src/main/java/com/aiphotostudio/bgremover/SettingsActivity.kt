@@ -37,7 +37,11 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_about_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy")
+            startActivity(
+                Intent(this, WebPageActivity::class.java)
+                    .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.privacy_policy))
+                    .putExtra(WebPageActivity.EXTRA_URL, "https://aiphotostudio.co/privacy")
+            )
         }
 
         findViewById<Button>(R.id.btn_back_home).setOnClickListener {
@@ -50,13 +54,5 @@ class SettingsActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         startActivity(intent)
         finish()
-    }
-
-    private fun openUrl(url: String) {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-        } catch (e: Exception) {
-            Log.e("SettingsActivity", "Error opening URL", e)
-        }
     }
 }
