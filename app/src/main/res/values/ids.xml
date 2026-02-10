@@ -6,5 +6,5 @@
     <item name="btn_choose_photo" type="id" />
     <item name="btn_auth_signin" type="id" />
     <item name="ll_image_actions" type="id" />
-    <item name="btn_sign_up" type="id">sign out</item>
+    <item name="btn_sign_up" type="id" />
 </resources>
