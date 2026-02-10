@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "pwa-ai-photo-studio-pro",
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
