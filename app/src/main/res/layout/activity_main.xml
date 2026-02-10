@@ -261,7 +261,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/value"
+                    android:text="@string/separator"
                     android:textColor="@color/brand_text_secondary"
                     android:layout_marginHorizontal="8dp" />
 
@@ -276,7 +276,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/use"
+                    android:text="@string/separator"
                     android:textColor="@color/brand_text_secondary"
                     android:layout_marginHorizontal="8dp" />
 
@@ -306,7 +306,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/user"
+                    android:text="@string/separator"
                     android:textColor="@color/brand_text_secondary"
                     android:layout_marginHorizontal="8dp" />
 

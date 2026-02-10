@@ -42,6 +42,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import androidx.core.graphics.toColorInt
+import androidx.core.graphics.createBitmap
 
 class MainActivity : AppCompatActivity() {
 
@@ -197,7 +198,7 @@ class MainActivity : AppCompatActivity() {
                 llImageActions.visibility = View.GONE
                 processedBitmap = null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
         }
     }
@@ -237,7 +238,7 @@ class MainActivity : AppCompatActivity() {
     private fun createBitmapWithMask(original: Bitmap, maskBuffer: ByteBuffer, maskWidth: Int, maskHeight: Int): Bitmap {
         val width = original.width
         val height = original.height
-        val result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val result = createBitmap(width, height)
         
         val pixels = IntArray(width * height)
         original.getPixels(pixels, 0, width, 0, 0, width, height)
@@ -272,7 +273,7 @@ class MainActivity : AppCompatActivity() {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
             Toast.makeText(this, "Saved to App Gallery", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
         }
     }
@@ -299,7 +300,7 @@ class MainActivity : AppCompatActivity() {
                 MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/png"), null)
             }
             Toast.makeText(this, "Downloaded to Device", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(this, "Download failed", Toast.LENGTH_SHORT).show()
         }
     }
@@ -315,7 +316,7 @@ class MainActivity : AppCompatActivity() {
     private fun launchCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             val file = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_${System.currentTimeMillis()}.jpg")
-            cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
+            cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.file provider", file)
             takePicture.launch(cameraImageUri!!)
         } else {
             requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
