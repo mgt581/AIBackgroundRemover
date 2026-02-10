@@ -113,9 +113,8 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error in onCreate: ${e.message}")
-            // Fallback content view if standard inflation fails (e.g. missing drawable)
             setContentView(android.R.layout.simple_list_item_1)
-            Toast.makeText(this, "Logo file is missing from drawable folder", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Initialization error", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -146,7 +145,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<ImageButton>(R.id.btn_share)?.setOnClickListener {
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, "Check out AI Photo Studio: https://aiphotostudio.co.uk")
+                putExtra(Intent.EXTRA_TEXT, "Check out AI Photo Studio: https://aiphotostudio.co")
                 type = "text/plain"
             }
             val shareIntent = Intent.createChooser(sendIntent, null)
@@ -181,7 +180,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.footer_privacy)?.setOnClickListener {
-            openUrl("https://aiphotostudio.co.uk/privacy")
+            openUrl("https://aiphotostudio.co/privacy")
         }
 
         findViewById<TextView>(R.id.footer_terms)?.setOnClickListener {
@@ -208,7 +207,7 @@ class MainActivity : AppCompatActivity() {
         if (data != null && (path == "/auth/callback" || path == "/auth/callback/")) {
             webView.loadUrl(data.toString())
         } else {
-            webView.loadUrl("https://aiphotostudio.co")
+            webView.loadUrl("https://aiphotostudio.co/background-remover")
         }
     }
 
