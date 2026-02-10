@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
             btnDownloadDevice = findViewById(R.id.btn_download_device)
 
             setupClickListeners()
-            setupFooterClickListeners()
+            this.setupFooterClickListeners()
             updateHeaderUi()
             setupWebView()
             checkAndRequestPermissions()

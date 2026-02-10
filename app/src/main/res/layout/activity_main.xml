@@ -97,31 +97,61 @@
                 android:textColor="@color/white"
                 android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btn_sign_up"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginBottom="24dp"
-                android:background="@drawable/pill_button"
-                android:backgroundTint="#161E2E"
-                android:text="@string/sign_up"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textStyle="bold" />
-
-            <!-- WebView Container -->
+            <!-- Removal Tool UI -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="600dp"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/input_background"
+                android:padding="16dp"
+                android:gravity="center"
                 android:layout_marginBottom="12dp">
 
-                <WebView
-                    android:id="@+id/webView"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:nestedScrollingEnabled="true" />
+                    android:layout_height="350dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#22FFFFFF">
+
+                    <ImageView
+                        android:id="@+id/iv_main_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="Image preview" />
+
+                    <ProgressBar
+                        android:id="@+id/pb_processing"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <Button
+                    android:id="@+id/btn_choose_photo"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/pill_button"
+                    android:backgroundTint="#2563EB"
+                    android:text="Choose Photo"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_remove_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="@drawable/pill_button"
+                    android:backgroundTint="#161E2E"
+                    android:text="Remove Background"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
             <!-- Action Buttons for Image -->

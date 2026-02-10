@@ -105,6 +105,9 @@ dependencies {
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.google.firebase.analytics)
 
+    // ML Kit
+    implementation(libs.mlkit.segmentation)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
