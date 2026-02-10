@@ -316,7 +316,7 @@ class MainActivity : AppCompatActivity() {
     private fun launchCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             val file = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_${System.currentTimeMillis()}.jpg")
-            cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.file provider", file)
+            cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
             takePicture.launch(cameraImageUri!!)
         } else {
             requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
