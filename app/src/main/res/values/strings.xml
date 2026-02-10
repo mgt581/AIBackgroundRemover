@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">AI Background Remover</string>
-    <string name="default_web_client_id" translatable="false">411346648650-iijvtbo02cn7tgvk6tp7284kjmdhefu0.apps.googleusercontent.com</string>
+    <string name="default_web_client_id" translatable="false">411346648650-ggktvc8l6qldmoh8sdgeb6r1o7rn0d77.apps.googleusercontent.com</string>
     <string name="ai_background_remover" translatable="false">AI Photo Studio Background remover</string>
     <string name="signed_in_status">✓ Signed in</string>
     <string name="signed_in_as">✓ %1$s</string>
@@ -45,7 +45,7 @@
     <!-- Redesign Strings -->
     <string name="day_pass">Day Pass £1</string>
     <string name="monthly_pass">Monthly £4.99</string>
-    <string name="yearly_pass">Start Free Trial (Yearly)</string>
+    <string name="yearly_pass">Start FREE Trial →</string>
     <string name="contact_us">CONTACT US</string>
 
     <!-- URLs -->
@@ -74,4 +74,12 @@
     <string name="about_label">About</string>
     <string name="app_version">Version 6.7</string>
     <string name="back_to_home">Back to Home</string>
+    <string name="share">share</string>
+    <string name="contact">contact</string>
+
+    <!-- Renamed to fix build errors -->
+    <string name="footer_divider_1"> | </string>
+    <string name="footer_divider_2"> | </string>
+    <string name="footer_divider_3"> | </string>
+
 </resources>

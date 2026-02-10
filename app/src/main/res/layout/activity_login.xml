@@ -124,7 +124,9 @@
             android:textColor="@color/white"
             android:backgroundTint="@color/brand_primary"
             android:layout_marginTop="24dp"
-            android:background="@drawable/pill_button" />
+            android:padding="16dp"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -140,8 +142,10 @@
             android:layout_height="wrap_content"
             android:text="@string/continue_with_google"
             android:textColor="@color/white"
-            android:backgroundTint="@color/brand_surface"
-            android:background="@drawable/pill_button" />
+            android:backgroundTint="@color/brand_accent"
+            android:layout_marginTop="12dp"
+            android:padding="16dp"
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/btn_anonymous_sign_in"
@@ -151,7 +155,10 @@
             android:textColor="@color/white"
             android:backgroundTint="@color/brand_surface"
             android:layout_marginTop="12dp"
-            android:background="@drawable/pill_button" />
+            android:padding="16dp"
+            android:textSize="14sp"
+            android:strokeWidth="2"
+            android:strokeColor="@color/brand_light_blue" />
 
         <LinearLayout
             android:layout_width="wrap_content"

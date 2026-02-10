@@ -79,6 +79,7 @@
         <activity android:name=".GalleryActivity" android:exported="false" android:label="My Gallery" />
         <activity android:name=".SettingsActivity" android:exported="false" android:label="Settings" />
         <activity android:name=".TermsActivity" android:exported="false" android:label="Terms of Service" />
+        <activity android:name=".WebPageActivity" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

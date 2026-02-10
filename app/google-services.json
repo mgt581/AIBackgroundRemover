@@ -1,47 +1,48 @@
 {
-  "project_info": {
-    "project_number": "411346648650",
-    "firebase_url": "https://ai-photo-studio-24354-default-rtdb.firebaseio.com",
-    "project_id": "ai-photo-studio-24354",
-    "storage_bucket": "gs://ai-photo-studio-24354.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:411346648650:android:ac9e925c00ae395b0617d9",
-        "android_client_info": {
-          "package_name": "com.aiphotostudio.bgremover"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "411346648650-cf36olvr71uef34jbuhke86ufdaa0ga0.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.aiphotostudio.bgremover",
-            "certificate_hash": "ed1769cc68887992668fe15a93b9a65cd1aaa7d1"
-          }
-        },
-        {
-          "client_id": "411346648650-mtuffr8b46u5ghkeua8gqk5vj6mgnh4o.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.aiphotostudio.bgremover",
-            "certificate_hash": "b07c47d06f719d6812194a82b8f61955fd996fb1"
-          }
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyC1DMsu_ktTXfqe42q9juEloTTrKJUqpbk"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
+"project_info" :{
+"project_number": "411346648650",
+"firebase_url": "https://ai-photo-studio-24354-default-rtdb.firebaseio.com",
+"project_id": "ai-photo-studio-24354",
+"storage_bucket": "ai-photo-studio-24354.firebasestorage.app"
+},
+"client": [
+{
+"client_info": {
+"mobilesdk_app_id": "1:411346648650:android:3762e8d057b4c3b5fab0b3",
+"android_client_info": {
+"package_name": "com.aiphotostudio.bgremover"
+}
+},
+"oauth_client": [
+{
+"client_id": "411346648650-ggktvc8l6qldmoh8sdgeb6r1o7rn0d77.apps.googleusercontent.com",
+"client_type": 1,
+"android_info": {
+"package_name": "com.aiphotostudio.bgremover",
+"certificate_hash": "ed1769cc68887992668fe15a93b9a65cd1aaa7d1"
+}
+},
+{
+"client_id": "411346648650-614s08k3rp9f9er43unjo4djefmht63t.apps.googleusercontent.com",
+"client_type": 3
+}
+],
+"api_key": [
+{
+"current_key": "AIzaSyASztdBkzVKyQ1Z_qW1o1slqIwOeVkN14E"
+}
+],
+"services": {
+"appinvite_service": {
+"other_platform_oauth_client": [
+{
+"client_id": "411346648650-614s08k3rp9f9er43unjo4djefmht63t.apps.googleusercontent.com",
+"client_type": 3
+}
+]
+}
+}
+}
+],
+"configuration_version": "1"
 }

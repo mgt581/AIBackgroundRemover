@@ -1,11 +1,14 @@
 package com.aiphotostudio.bgremover
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 
 class SettingsActivity : AppCompatActivity() {
@@ -27,14 +30,18 @@ class SettingsActivity : AppCompatActivity() {
 
         val tvUserEmail = findViewById<TextView>(R.id.tv_user_email)
         val user = auth.currentUser
-        tvUserEmail.text = user?.email ?: "Not signed in"
+        tvUserEmail.text = user?.email ?: getString(R.string.not_signed_in)
 
         findViewById<Button>(R.id.btn_about_terms).setOnClickListener {
-            openUrl("https://aiphotostudio.co/terms")
+            startActivity(Intent(this, TermsActivity::class.java))
         }
 
         findViewById<Button>(R.id.btn_about_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy")
+            startActivity(
+                Intent(this, WebPageActivity::class.java)
+                    .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.privacy_policy))
+                    .putExtra(WebPageActivity.EXTRA_URL, "https://aiphotostudio.co/privacy")
+            )
         }
 
         findViewById<Button>(R.id.btn_back_home).setOnClickListener {
@@ -48,5 +55,4 @@ class SettingsActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
 }
