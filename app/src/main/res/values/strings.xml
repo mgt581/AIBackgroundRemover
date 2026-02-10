@@ -76,7 +76,10 @@
     <string name="back_to_home">Back to Home</string>
     <string name="share">share</string>
     <string name="contact">contact</string>
-    <string name="value">|</string>
-    <string name="use">|</string>
-    <string name="user">|</string>
+
+    <!-- Renamed to fix build errors -->
+    <string name="footer_divider_1"> | </string>
+    <string name="footer_divider_2"> | </string>
+    <string name="footer_divider_3"> | </string>
+
 </resources>
