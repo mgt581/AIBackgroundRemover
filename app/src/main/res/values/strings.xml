@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">AI Background Remover</string>
     <string name="ai_background_remover">AI Background Remover</string>
+    <string name="ai_background_remover_app">AI Background Remover App</string>
     <string name="logo">Logo</string>
     <string name="gallery">Gallery</string>
     <string name="settings">Settings</string>
@@ -32,4 +33,21 @@
     <string name="whatsapp_url">https://wa.me/message/YOUR_ID</string>
     <string name="tiktok_url">https://www.tiktok.com/@your_profile</string>
     <string name="not_signed_in">Not Signed In</string>
+
+    <!-- Missing strings identified from build errors -->
+    <string name="your_gallery">Your Gallery</string>
+    <string name="back_to_studio">Back to Studio</string>
+    <string name="no_saved_images">No saved images found</string>
+    <string name="back">Back</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="auth">Authenticate</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_anonymously">Continue Anonymously</string>
+    <string name="account_label">Account</string>
+    <string name="about_label">About</string>
+    <string name="app_version">App Version</string>
+    <string name="back_to_home">Back to Home</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
 </resources>

@@ -2,7 +2,6 @@
 package com.aiphotostudio.bgremover
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
@@ -13,11 +12,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
@@ -29,8 +27,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var etEmail: TextInputEditText
     private lateinit var etPassword: TextInputEditText
     private lateinit var btnLogin: Button
-    private lateinit var btnTabSignIn: Button
-    private lateinit var btnTabSignUp: Button
+    private lateinit var toggleGroup: MaterialButtonToggleGroup
     private lateinit var progressBar: ProgressBar
     
     private var isSignUpMode = false
@@ -65,17 +62,17 @@ class LoginActivity : AppCompatActivity() {
         etEmail = findViewById(R.id.et_email)
         etPassword = findViewById(R.id.et_password)
         btnLogin = findViewById(R.id.btn_email_login)
-        btnTabSignIn = findViewById(R.id.btn_tab_signin)
-        btnTabSignUp = findViewById(R.id.btn_tab_signup)
+        toggleGroup = findViewById(R.id.toggle_group)
         progressBar = findViewById(R.id.progressBar)
 
-        // Set up tab listeners
-        btnTabSignIn.setOnClickListener {
-            switchToSignInMode()
-        }
-
-        btnTabSignUp.setOnClickListener {
-            switchToSignUpMode()
+        // Set up toggle group listener
+        toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.btn_tab_signin -> switchToSignInMode()
+                    R.id.btn_tab_signup -> switchToSignUpMode()
+                }
+            }
         }
 
         btnLogin.setOnClickListener {
@@ -103,44 +100,43 @@ class LoginActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
-            startActivity(Intent(this, TermsActivity::class.java))
+            // Re-using same logic as Privacy Policy but for Terms if activity exists, 
+            // otherwise using specific TermsActivity if it handles its own URL
+            try {
+                startActivity(Intent(this, TermsActivity::class.java))
+            } catch (e: Exception) {
+                startActivity(
+                    Intent(this, WebPageActivity::class.java)
+                        .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.terms_of_service))
+                        .putExtra(WebPageActivity.EXTRA_URL, "https://aiphotostudio.co/terms")
+                )
+            }
         }
 
-        // Initialize in sign-in mode
-        switchToSignInMode()
+        // Initialize state
+        if (toggleGroup.checkedButtonId == R.id.btn_tab_signup) {
+            switchToSignUpMode()
+        } else {
+            switchToSignInMode()
+        }
     }
 
     private fun switchToSignInMode() {
         isSignUpMode = false
-        updateTabStyles(btnTabSignIn, btnTabSignUp)
         btnLogin.text = getString(R.string.sign_in)
         Log.d(TAG, "Switched to Sign In mode")
     }
 
     private fun switchToSignUpMode() {
         isSignUpMode = true
-        updateTabStyles(btnTabSignUp, btnTabSignIn)
         btnLogin.text = getString(R.string.sign_up)
         Log.d(TAG, "Switched to Sign Up mode")
-    }
-
-    private fun updateTabStyles(activeTab: Button, inactiveTab: Button) {
-        val primaryColor = ContextCompat.getColor(this, R.color.brand_primary)
-        val surfaceColor = ContextCompat.getColor(this, R.color.brand_surface)
-        val whiteColor = ContextCompat.getColor(this, R.color.white)
-
-        activeTab.backgroundTintList = ColorStateList.valueOf(primaryColor)
-        activeTab.setTextColor(whiteColor)
-        
-        inactiveTab.backgroundTintList = ColorStateList.valueOf(surfaceColor)
-        inactiveTab.setTextColor(whiteColor)
     }
 
     private fun performLogin() {
         val email = etEmail.text.toString().trim()
         val password = etPassword.text.toString().trim()
 
-        // Validate email format
         if (email.isEmpty()) {
             Toast.makeText(this, "Please enter your email", Toast.LENGTH_SHORT).show()
             etEmail.requestFocus()
@@ -166,59 +162,54 @@ class LoginActivity : AppCompatActivity() {
         }
 
         progressBar.visibility = View.VISIBLE
+        btnLogin.isEnabled = false
         
         if (isSignUpMode) {
-            // Sign up mode: create new account
             Log.d(TAG, "Attempting to create account with email: $email")
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     progressBar.visibility = View.GONE
+                    btnLogin.isEnabled = true
                     if (task.isSuccessful) {
                         Log.d(TAG, "Account creation successful")
                         Toast.makeText(this, "Account created successfully", Toast.LENGTH_SHORT).show()
                         finish()
                     } else {
-                        val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
-                        Log.e(TAG, "Account creation failed: ${task.exception?.message}, error code: $errorCode", task.exception)
-                        
-                        val errorMessage = when (errorCode) {
-                            "ERROR_EMAIL_ALREADY_IN_USE" -> "An account with this email already exists"
-                            "ERROR_WEAK_PASSWORD" -> "Password is too weak. Please use a stronger password"
-                            "ERROR_INVALID_EMAIL" -> "Invalid email address format"
-                            else -> "Sign up failed: ${task.exception?.message}"
-                        }
-                        
-                        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                        handleAuthError(task.exception)
                     }
                 }
         } else {
-            // Sign in mode: authenticate with existing account
             Log.d(TAG, "Attempting to sign in with email: $email")
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     progressBar.visibility = View.GONE
+                    btnLogin.isEnabled = true
                     if (task.isSuccessful) {
                         Log.d(TAG, "Email/password sign-in successful")
                         Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
                         finish()
                     } else {
-                        val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
-                        Log.e(TAG, "Email/password sign-in failed: ${task.exception?.message}, error code: $errorCode", task.exception)
-                        
-                        val errorMessage = when (errorCode) {
-                            "ERROR_INVALID_EMAIL" -> "Invalid email address format"
-                            "ERROR_WRONG_PASSWORD" -> "Incorrect password"
-                            "ERROR_USER_NOT_FOUND" -> "No account found with this email"
-                            "ERROR_USER_DISABLED" -> "This account has been disabled"
-                            "ERROR_TOO_MANY_REQUESTS" -> "Too many failed attempts. Please try again later"
-                            "ERROR_INVALID_CREDENTIAL" -> "Invalid credentials. Please check your email and password"
-                            else -> "Authentication failed: ${task.exception?.message}"
-                        }
-                        
-                        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                        handleAuthError(task.exception)
                     }
                 }
         }
+    }
+
+    private fun handleAuthError(exception: Exception?) {
+        val errorCode = (exception as? FirebaseAuthException)?.errorCode
+        Log.e(TAG, "Auth failed: ${exception?.message}, error code: $errorCode", exception)
+        
+        val errorMessage = when (errorCode) {
+            "ERROR_EMAIL_ALREADY_IN_USE" -> "An account with this email already exists"
+            "ERROR_WEAK_PASSWORD" -> "Password is too weak"
+            "ERROR_WRONG_PASSWORD" -> "Incorrect password"
+            "ERROR_USER_NOT_FOUND" -> "No account found with this email"
+            "ERROR_INVALID_CREDENTIAL" -> "Invalid email or password"
+            "ERROR_TOO_MANY_REQUESTS" -> "Too many attempts. Please try again later"
+            else -> exception?.localizedMessage ?: "Authentication failed"
+        }
+        
+        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
     }
 
     private fun signInWithGoogle() {
@@ -244,16 +235,7 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this, "Google login successful", Toast.LENGTH_SHORT).show()
                     finish()
                 } else {
-                    val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
-                    Log.e(TAG, "Google Firebase authentication failed: ${task.exception?.message}, error code: $errorCode", task.exception)
-                    
-                    val errorMessage = when (errorCode) {
-                        "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" -> "An account already exists with this email using a different sign-in method"
-                        "ERROR_INVALID_CREDENTIAL" -> "Invalid Google credentials. Please try again"
-                        else -> "Google authentication failed: ${task.exception?.message}"
-                    }
-                    
-                    Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                    handleAuthError(task.exception)
                 }
             }
     }
@@ -268,9 +250,7 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Logged in as Guest", Toast.LENGTH_SHORT).show()
                 finish()
             } else {
-                val errorCode = (task.exception as? FirebaseAuthException)?.errorCode
-                Log.e(TAG, "Anonymous sign-in failed: ${task.exception?.message}, error code: $errorCode", task.exception)
-                Toast.makeText(this, "Guest login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                handleAuthError(task.exception)
             }
         }
     }
