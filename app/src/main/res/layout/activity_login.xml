@@ -10,184 +10,173 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Close Button -->
         <Button
             android:id="@+id/btn_close_login"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:text="@string/back"
-            android:textColor="@color/white"
-            style="@style/Widget.Material3.Button.TextButton"
-            tools:ignore="VisualLintButtonSize" />
+            android:textColor="@color/white" />
 
-        <!-- LOGO -->
         <ImageView
             android:id="@+id/imgLogo"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/logo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_marginBottom="16dp"
-            android:contentDescription="@string/logo" />
+            android:contentDescription="@string/logo"
+            android:src="@drawable/logo" />
 
-        <!-- Text between logo and email box -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
             android:text="@string/ai_background_remover_app"
             android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-        <!-- Tabs -->
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/toggle_group"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginBottom="24dp"
-            app:singleSelection="true"
-            app:checkedButton="@+id/btn_tab_signin">
+            app:checkedButton="@+id/btn_tab_signin"
+            app:singleSelection="true">
+
             <Button
                 android:id="@+id/btn_tab_signin"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/sign_in"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/brand_primary"
-                android:layout_marginEnd="4dp"
-                android:background="@drawable/pill_button"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                tools:ignore="VisualLintButtonSize" />
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_in"
+                android:textColor="@color/white" />
+
             <Button
                 android:id="@+id/btn_tab_signup"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/sign_up"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/brand_surface"
-                android:layout_marginStart="4dp"
-                android:background="@drawable/pill_button"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                tools:ignore="VisualLintButtonSize" />
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_up"
+                android:textColor="@color/white" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/email"
             android:textColorHint="@color/brand_text_secondary"
-            app:hintTextColor="@color/white"
             app:boxStrokeColor="@color/brand_primary"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            app:hintTextColor="@color/white">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="@string/password"
             android:textColorHint="@color/brand_text_secondary"
-            app:hintTextColor="@color/white"
             app:boxStrokeColor="@color/brand_primary"
+            app:hintTextColor="@color/white"
             app:passwordToggleEnabled="true"
-            app:passwordToggleTint="@color/white"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            app:passwordToggleTint="@color/white">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_email_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/brand_primary"
+            android:padding="12dp"
             android:text="@string/auth"
             android:textColor="@color/white"
-            android:backgroundTint="@color/brand_primary"
-            android:layout_marginTop="24dp"
-            android:padding="16dp"
-            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/or"
-            android:textColor="@color/brand_text_secondary"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            android:text="@string/or"
+            android:textColor="@color/brand_text_secondary" />
 
         <Button
             android:id="@+id/btn_google_sign_in"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/continue_with_google"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/brand_accent"
             android:layout_marginTop="12dp"
-            android:padding="16dp"
-            android:textSize="14sp" />
+            android:backgroundTint="@color/brand_accent"
+            android:padding="12dp"
+            android:text="@string/continue_with_google"
+            android:textColor="@color/white" />
 
         <Button
             android:id="@+id/btn_anonymous_sign_in"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/brand_surface"
+            android:padding="12dp"
             android:text="@string/continue_anonymously"
             android:textColor="@color/white"
-            android:backgroundTint="@color/brand_surface"
-            android:layout_marginTop="12dp"
-            android:padding="16dp"
-            android:textSize="14sp"
-            android:strokeWidth="2"
-            android:strokeColor="@color/brand_light_blue" />
+            app:strokeColor="@color/brand_light_blue"
+            app:strokeWidth="1dp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
             <TextView
                 android:id="@+id/tv_privacy_policy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="8dp"
                 android:text="@string/privacy_policy"
                 android:textColor="@color/brand_primary"
-                android:padding="8dp"
-                android:clickable="true"
-                android:focusable="true" />
+                android:textSize="12sp" />
+
             <TextView
                 android:id="@+id/tv_terms_of_service"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="8dp"
                 android:text="@string/terms_of_service"
                 android:textColor="@color/brand_primary"
-                android:padding="8dp"
-                android:clickable="true"
-                android:focusable="true" />
+                android:textSize="12sp" />
         </LinearLayout>
 
     </LinearLayout>

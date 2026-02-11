@@ -50,4 +50,6 @@
     <string name="back_to_home">Back to Home</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
+    <string name="privacy">Privacy</string>
+    <string name="terms">Terms</string>
 </resources>
