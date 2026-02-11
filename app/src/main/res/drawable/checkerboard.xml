@@ -5,9 +5,8 @@
             <solid android:color="#E0E0E0" />
         </shape>
     </item>
-    <item>
-        <bitmap
-            android:src="@drawable/checkerboard_tile"
-            android:tileMode="repeat" />
-    </item>
+    <!-- Vector drawables cannot be used as a source for <bitmap>.
+         To fix the render error, we use the drawable directly in an <item>.
+         Note: This will not tile the vector; for tiling, a PNG should be used. -->
+    <item android:drawable="@drawable/checkerboard_tile" />
 </layer-list>
