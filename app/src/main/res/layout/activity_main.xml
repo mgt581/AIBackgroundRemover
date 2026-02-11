@@ -76,10 +76,11 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
                     <Button
                         android:id="@+id/btn_header_settings"
                         android:layout_width="match_parent"
@@ -90,16 +91,17 @@
                         android:textAllCaps="false"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/btn_sign_up"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="8dp"
                         android:text="@string/sign_up"
                         android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:padding="8dp"
-                        android:clickable="true"
-                        android:focusable="true" />
+                        android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -115,7 +117,7 @@
             <!-- Main Actions Area -->
             <Button
                 android:id="@+id/btn_choose_photo"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
                 android:background="@drawable/pill_button"
@@ -127,7 +129,7 @@
 
             <Button
                 android:id="@+id/btn_change_background"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
                 android:background="@drawable/pill_button"
@@ -139,8 +141,8 @@
 
             <Button
                 android:id="@+id/btn_remove_bg"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/pill_button"
                 android:backgroundTint="@color/btn_trial_blue"
