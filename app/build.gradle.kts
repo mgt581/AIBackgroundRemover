@@ -23,7 +23,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = file("${project.rootDir}/keystore.jks")
+            val keystoreFile = project.rootProject.file("keystore.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
                 storePassword = "Alifa10"
@@ -54,8 +54,7 @@ android {
                 "proguard-rules.pro"
             )
             val releaseSigning = signingConfigs.getByName("release")
-            signingConfig = signingConfigs.getByName("release")
-            if (releaseSigning.storeFile != null) {
+            if (releaseSigning.storeFile?.exists() == true) {
                 signingConfig = releaseSigning
             }
         }
