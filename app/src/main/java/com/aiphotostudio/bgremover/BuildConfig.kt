@@ -49,3 +49,7 @@ class AIApplication : Application() {
         }
     }
 }
+
+class BuildConfig {
+
+}
