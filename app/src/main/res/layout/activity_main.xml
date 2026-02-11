@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/brand_background">
@@ -62,18 +61,16 @@
                         android:textAllCaps="false"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/btn_auth_action"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:minHeight="48dp"
-                        android:padding="8dp"
                         android:text="@string/sign_in"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:focusable="true" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -93,18 +90,16 @@
                         android:textAllCaps="false"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/btn_sign_up"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:minHeight="48dp"
-                        android:padding="8dp"
                         android:text="@string/sign_up"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:focusable="true" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -136,7 +131,7 @@
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
                 android:background="@drawable/pill_button"
-                android:backgroundTint="@color/brand_surface"
+                android:backgroundTint="@color/btn_account_blue"
                 android:text="@string/change_background"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
@@ -178,14 +173,26 @@
                     android:visibility="gone" />
             </FrameLayout>
 
-            <!-- Always visible Save Button -->
+            <!-- Save Buttons Above Footer -->
+            <Button
+                android:id="@+id/btn_download_device"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/pill_button"
+                android:backgroundTint="@color/btn_gallery_blue"
+                android:text="@string/download_to_device"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
             <Button
                 android:id="@+id/btn_save_fixed"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="32dp"
                 android:background="@drawable/pill_button"
-                android:backgroundTint="@color/brand_primary"
+                android:backgroundTint="@color/btn_account_blue"
                 android:text="@string/save_to_gallery"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
@@ -198,7 +205,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="32dp">
+                android:layout_marginBottom="24dp">
 
                 <TextView
                     android:id="@+id/btn_whatsapp"
@@ -244,7 +251,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginBottom="32dp">
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -334,7 +341,7 @@
                 android:textColor="@color/brand_text_secondary"
                 android:textSize="16sp"
                 android:gravity="center"
-                android:paddingBottom="40dp" />
+                android:paddingBottom="20dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

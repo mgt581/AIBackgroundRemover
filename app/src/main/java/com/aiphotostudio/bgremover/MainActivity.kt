@@ -42,7 +42,6 @@ import androidx.core.graphics.set
 import androidx.core.graphics.get
 import androidx.core.graphics.createBitmap
 import com.aiphotostudio.bgremover.R.id.btn_save_fixed
-import com.aiphotostudio.bgremover.R.id.btn_share
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 class MainActivity : AppCompatActivity() {
@@ -61,17 +60,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnDownloadDevice: Button
     private lateinit var btnChangeBackground: Button
 
-    private var btnAuthAction: Button? = null
+    private var btnAuthAction: TextView? = null
     private var btnHeaderSettings: Button? = null
     private var btnGallery: Button? = null
-    private var btnSignUp: Button? = null
+    private var btnSignUp: TextView? = null
     private var tvAuthStatus: TextView? = null
     private var fabSave: ExtendedFloatingActionButton? = null
     
-    private var btnWhatsApp: ImageButton? = null
-    private var btnTikTok: ImageButton? = null
-    private var btnFacebook: ImageButton? = null
-    private var btnShare: ImageButton? = null
+    private var btnWhatsApp: TextView? = null
+    private var btnTikTok: TextView? = null
+    private var btnFacebook: TextView? = null
 
     // Bridge for WebView if you are using one for the checkerboard UI
     inner class WebAppInterface(private val mContext: Context) {
@@ -126,7 +124,8 @@ class MainActivity : AppCompatActivity() {
             pbProcessing = findViewById(R.id.pb_processing)
             btnChoosePhoto = findViewById(R.id.btn_choose_photo)
             btnRemoveBg = findViewById(R.id.btn_remove_bg)
-            llImageActions = findViewById(R.id.ll_image_actions)
+            // llImageActions is no longer used in the simplified layout but kept for safety
+            llImageActions = LinearLayout(this) 
             btnSaveFixed = findViewById(btn_save_fixed)
             btnDownloadDevice = findViewById(R.id.btn_download_device)
             btnChangeBackground = findViewById(R.id.btn_change_background)
@@ -137,11 +136,9 @@ class MainActivity : AppCompatActivity() {
             btnSignUp = findViewById(R.id.btn_sign_up)
             tvAuthStatus = findViewById(R.id.tv_auth_status)
             fabSave = findViewById(R.id.fab_save)
-            
             btnWhatsApp = findViewById(R.id.btn_whatsapp)
             btnTikTok = findViewById(R.id.btn_tiktok)
             btnFacebook = findViewById(R.id.btn_facebook)
-            btnShare = findViewById(btn_share)
 
             setupClickListeners()
             updateHeaderUi()
@@ -180,7 +177,6 @@ class MainActivity : AppCompatActivity() {
         btnWhatsApp?.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
         btnTikTok?.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
         btnFacebook?.setOnClickListener { openUrl(getString(R.string.facebook_url)) }
-        btnShare?.setOnClickListener { shareApp() }
         
         findViewById<View>(R.id.footer_gallery).setOnClickListener { 
             startActivity(Intent(this, GalleryActivity::class.java)) 
@@ -203,14 +199,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
         }
-    }
-    
-    private fun shareApp() {
-        val shareIntent = Intent(Intent.ACTION_SEND)
-        shareIntent.type = "text/plain"
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
-        shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out this AI Background Remover app!")
-        startActivity(Intent.createChooser(shareIntent, "Share via"))
     }
 
     private fun handleAuthAction() {
@@ -262,7 +250,6 @@ class MainActivity : AppCompatActivity() {
             ivMainPreview.setImageBitmap(selectedBitmap)
             ivMainPreview.background = null // Remove checkerboard for original
             btnRemoveBg.visibility = View.VISIBLE
-            llImageActions.visibility = View.GONE
             btnSaveFixed.visibility = View.GONE
             fabSave?.visibility = View.GONE
             btnChangeBackground.visibility = View.GONE
@@ -318,7 +305,6 @@ class MainActivity : AppCompatActivity() {
         
         pbProcessing.visibility = View.GONE
         btnRemoveBg.visibility = View.GONE
-        llImageActions.visibility = View.VISIBLE
         btnSaveFixed.visibility = View.VISIBLE
         btnChangeBackground.visibility = View.VISIBLE
         fabSave?.visibility = View.VISIBLE
