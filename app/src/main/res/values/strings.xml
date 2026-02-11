@@ -83,4 +83,6 @@
     <string name="choose_photo">Choose Photo</string>
     <string name="remove_background">Remove Background</string>
     <string name="preview">Preview</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
 </resources>
