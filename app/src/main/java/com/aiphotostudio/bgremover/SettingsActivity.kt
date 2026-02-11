@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
+import com.aiphotostudio.bgremover.R.string.not_signed_in
 import com.google.firebase.auth.FirebaseAuth
 
 class SettingsActivity : AppCompatActivity() {
@@ -30,7 +31,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val tvUserEmail = findViewById<TextView>(R.id.tv_user_email)
         val user = auth.currentUser
-        tvUserEmail.text = user?.email ?: getString(R.string.not_signed_in)
+        tvUserEmail.text = user?.email ?: getString(not_signed_in)
 
         findViewById<Button>(R.id.btn_about_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))

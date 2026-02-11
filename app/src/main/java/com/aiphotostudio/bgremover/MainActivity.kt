@@ -2,6 +2,7 @@
 package com.aiphotostudio.bgremover
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
@@ -19,6 +20,7 @@ import android.util.Log
 import android.view.View
 import android.webkit.JavascriptInterface
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -39,6 +41,8 @@ import java.io.FileOutputStream
 import androidx.core.graphics.set
 import androidx.core.graphics.get
 import androidx.core.graphics.createBitmap
+import com.aiphotostudio.bgremover.R.id.btn_save_fixed
+import com.aiphotostudio.bgremover.R.id.btn_share
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 class MainActivity : AppCompatActivity() {
@@ -63,6 +67,11 @@ class MainActivity : AppCompatActivity() {
     private var btnSignUp: Button? = null
     private var tvAuthStatus: TextView? = null
     private var fabSave: ExtendedFloatingActionButton? = null
+    
+    private var btnWhatsApp: ImageButton? = null
+    private var btnTikTok: ImageButton? = null
+    private var btnFacebook: ImageButton? = null
+    private var btnShare: ImageButton? = null
 
     // Bridge for WebView if you are using one for the checkerboard UI
     inner class WebAppInterface(private val mContext: Context) {
@@ -104,6 +113,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
@@ -117,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             btnChoosePhoto = findViewById(R.id.btn_choose_photo)
             btnRemoveBg = findViewById(R.id.btn_remove_bg)
             llImageActions = findViewById(R.id.ll_image_actions)
-            btnSaveFixed = findViewById(R.id.btn_save_fixed)
+            btnSaveFixed = findViewById(btn_save_fixed)
             btnDownloadDevice = findViewById(R.id.btn_download_device)
             btnChangeBackground = findViewById(R.id.btn_change_background)
 
@@ -127,6 +137,11 @@ class MainActivity : AppCompatActivity() {
             btnSignUp = findViewById(R.id.btn_sign_up)
             tvAuthStatus = findViewById(R.id.tv_auth_status)
             fabSave = findViewById(R.id.fab_save)
+            
+            btnWhatsApp = findViewById(R.id.btn_whatsapp)
+            btnTikTok = findViewById(R.id.btn_tiktok)
+            btnFacebook = findViewById(R.id.btn_facebook)
+            btnShare = findViewById(btn_share)
 
             setupClickListeners()
             updateHeaderUi()
@@ -161,6 +176,41 @@ class MainActivity : AppCompatActivity() {
         btnChangeBackground.setOnClickListener {
             Toast.makeText(this, "Change Background coming soon", Toast.LENGTH_SHORT).show()
         }
+        
+        btnWhatsApp?.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
+        btnTikTok?.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
+        btnFacebook?.setOnClickListener { openUrl(getString(R.string.facebook_url)) }
+        btnShare?.setOnClickListener { shareApp() }
+        
+        findViewById<View>(R.id.footer_gallery).setOnClickListener { 
+            startActivity(Intent(this, GalleryActivity::class.java)) 
+        }
+        findViewById<View>(R.id.footer_settings).setOnClickListener { 
+            startActivity(Intent(this, SettingsActivity::class.java)) 
+        }
+        findViewById<View>(R.id.footer_privacy).setOnClickListener {
+            openUrl("https://aiphotostudio.co/privacy")
+        }
+        findViewById<View>(R.id.footer_terms).setOnClickListener {
+            startActivity(Intent(this, TermsActivity::class.java))
+        }
+    }
+    
+    private fun openUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun shareApp() {
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "text/plain"
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out this AI Background Remover app!")
+        startActivity(Intent.createChooser(shareIntent, "Share via"))
     }
 
     private fun handleAuthAction() {

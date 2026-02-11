@@ -14,7 +14,7 @@
     <string name="download_to_device">Download to Device</string>
     <string name="save_to_gallery">Save to Gallery</string>
     <string name="change_background">Change Background</string>
-    <string name="whatsapp">WhatsApp</string>
+    <string name="whatsapp">Whats App</string>
     <string name="tiktok">TikTok</string>
     <string name="facebook">Facebook</string>
     <string name="share">Share</string>
@@ -28,4 +28,8 @@
     <string name="value">Value</string>
     <string name="use">Use</string>
     <string name="user">User</string>
+    <string name="facebook_url">https://www.facebook.com/share/183sNAUy8H/?mibextid=wwXIfr</string>
+    <string name="whatsapp_url">https://wa.me/message/YOUR_ID</string>
+    <string name="tiktok_url">https://www.tiktok.com/@your_profile</string>
+    <string name="_2025_ai_photo_studio_all_rights_reserved">© 2025 AI Photo Studio. All rights reserved.</string>
 </resources>
