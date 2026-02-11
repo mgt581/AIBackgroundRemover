@@ -5,6 +5,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -38,6 +39,7 @@ import java.io.FileOutputStream
 import androidx.core.graphics.set
 import androidx.core.graphics.get
 import androidx.core.graphics.createBitmap
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,17 +55,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var llImageActions: LinearLayout
     private lateinit var btnSaveFixed: Button
     private lateinit var btnDownloadDevice: Button
+    private lateinit var btnChangeBackground: Button
 
     private var btnAuthAction: Button? = null
     private var btnHeaderSettings: Button? = null
     private var btnGallery: Button? = null
+    private var btnSignUp: Button? = null
     private var tvAuthStatus: TextView? = null
+    private var fabSave: ExtendedFloatingActionButton? = null
 
     // Bridge for WebView if you are using one for the checkerboard UI
     inner class WebAppInterface(private val mContext: Context) {
         @JavascriptInterface
         fun openGallery() {
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            startActivity(Intent(mContext, GalleryActivity::class.java))
         }
 
         @JavascriptInterface
@@ -99,8 +104,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedState: Bundle?) {
-        super.onCreate(savedState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
 
         try {
@@ -108,18 +113,20 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize Views
             ivMainPreview = this.findViewById(R.id.iv_main_preview)
-            val also =
-                findViewById<ProgressBar>(/* id = */ R.id.pb_processing).also { pbProcessing = it }
+            pbProcessing = findViewById(R.id.pb_processing)
             btnChoosePhoto = findViewById(R.id.btn_choose_photo)
             btnRemoveBg = findViewById(R.id.btn_remove_bg)
-            llImageActions = findViewById<LinearLayout>(/* id = */ R.id.ll_image_actions)
+            llImageActions = findViewById(R.id.ll_image_actions)
             btnSaveFixed = findViewById(R.id.btn_save_fixed)
-            btnDownloadDevice = findViewById<Button>(/* id = */ R.id.btn_download_device)
+            btnDownloadDevice = findViewById(R.id.btn_download_device)
+            btnChangeBackground = findViewById(R.id.btn_change_background)
 
             btnAuthAction = findViewById(R.id.btn_auth_action)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
             btnGallery = findViewById(R.id.btn_gallery)
+            btnSignUp = findViewById(R.id.btn_sign_up)
             tvAuthStatus = findViewById(R.id.tv_auth_status)
+            fabSave = findViewById(R.id.fab_save)
 
             setupClickListeners()
             updateHeaderUi()
@@ -135,15 +142,24 @@ class MainActivity : AppCompatActivity() {
         btnChoosePhoto.setOnClickListener { showImagePickerOptions() }
         btnRemoveBg.setOnClickListener { processImage() }
         btnDownloadDevice.setOnClickListener { processedBitmap?.let { saveImageToGallery(it) } }
+        btnSaveFixed.setOnClickListener { processedBitmap?.let { saveToInternalGallery(it) } }
+        fabSave?.setOnClickListener { processedBitmap?.let { saveImageToGallery(it) } }
 
         btnGallery?.setOnClickListener {
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            startActivity(Intent(this, GalleryActivity::class.java))
         }
 
         btnAuthAction?.setOnClickListener { handleAuthAction() }
+        btnSignUp?.setOnClickListener { 
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
 
         btnHeaderSettings?.setOnClickListener {
-            Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        
+        btnChangeBackground.setOnClickListener {
+            Toast.makeText(this, "Change Background coming soon", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -153,19 +169,20 @@ class MainActivity : AppCompatActivity() {
             updateHeaderUi()
             Toast.makeText(this, "Signed out", Toast.LENGTH_SHORT).show()
         } else {
-            // Trigger your login flow here
-            Toast.makeText(this, "Opening Login...", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 
     private fun updateHeaderUi() {
         val user = auth.currentUser
         if (user != null) {
-            tvAuthStatus?.text = "Account: ${user.email}"
+            tvAuthStatus?.text = "Account: ${user.email ?: "Guest"}"
             btnAuthAction?.text = "Logout"
+            btnSignUp?.visibility = View.GONE
         } else {
             tvAuthStatus?.text = "Not Signed In"
             btnAuthAction?.text = "Login"
+            btnSignUp?.visibility = View.VISIBLE
         }
     }
 
@@ -193,8 +210,12 @@ class MainActivity : AppCompatActivity() {
             val inputStream = contentResolver.openInputStream(uri)
             selectedBitmap = BitmapFactory.decodeStream(inputStream)
             ivMainPreview.setImageBitmap(selectedBitmap)
+            ivMainPreview.background = null // Remove checkerboard for original
             btnRemoveBg.visibility = View.VISIBLE
             llImageActions.visibility = View.GONE
+            btnSaveFixed.visibility = View.GONE
+            fabSave?.visibility = View.GONE
+            btnChangeBackground.visibility = View.GONE
         } catch (e: Exception) {
             Log.e("MainActivity", "Error loading image", e)
         }
@@ -227,12 +248,13 @@ class MainActivity : AppCompatActivity() {
         val height = mask.height
         val buffer = mask.buffer
 
-        val resultBitmap = createBitmap(original.width, original.height)
+        val resultBitmap = createBitmap(original.width, original.height, Bitmap.Config.ARGB_8888)
 
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val confidence = buffer.float
-                if (confidence > 0.5) {
+                // Using a slightly higher threshold or different processing for better results
+                if (confidence > 0.4) {
                     resultBitmap[x, y] = original[x, y]
                 } else {
                     resultBitmap[x, y] = Color.TRANSPARENT
@@ -242,9 +264,32 @@ class MainActivity : AppCompatActivity() {
 
         processedBitmap = resultBitmap
         ivMainPreview.setImageBitmap(processedBitmap)
+        ivMainPreview.setBackgroundResource(R.drawable.checkerboard_background)
+        
         pbProcessing.visibility = View.GONE
         btnRemoveBg.visibility = View.GONE
         llImageActions.visibility = View.VISIBLE
+        btnSaveFixed.visibility = View.VISIBLE
+        btnChangeBackground.visibility = View.VISIBLE
+        fabSave?.visibility = View.VISIBLE
+        btnRemoveBg.isEnabled = true
+    }
+
+    private fun saveToInternalGallery(bitmap: Bitmap) {
+        val directory = File(filesDir, "saved_images")
+        if (!directory.exists()) directory.mkdirs()
+        
+        val filename = "BG_Remover_${System.currentTimeMillis()}.png"
+        val file = File(directory, filename)
+        
+        try {
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                Toast.makeText(this, "Saved to App Gallery", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error saving internally", e)
+        }
     }
 
     private fun saveImageToGallery(bitmap: Bitmap) {
@@ -268,9 +313,10 @@ class MainActivity : AppCompatActivity() {
 
             outputStream?.use {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-                Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error saving to device", e)
             Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
         }
     }
