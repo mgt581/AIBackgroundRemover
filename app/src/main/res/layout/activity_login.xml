@@ -45,11 +45,14 @@
             android:layout_marginBottom="24dp" />
 
         <!-- Tabs -->
-        <LinearLayout
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggle_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="24dp"
+            app:singleSelection="true"
+            app:checkedButton="@+id/btn_tab_signin">
             <Button
                 android:id="@+id/btn_tab_signin"
                 android:layout_width="0dp"
@@ -60,6 +63,7 @@
                 android:backgroundTint="@color/brand_primary"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/pill_button"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 tools:ignore="VisualLintButtonSize" />
             <Button
                 android:id="@+id/btn_tab_signup"
@@ -71,8 +75,9 @@
                 android:backgroundTint="@color/brand_surface"
                 android:layout_marginStart="4dp"
                 android:background="@drawable/pill_button"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 tools:ignore="VisualLintButtonSize" />
-        </LinearLayout>
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
