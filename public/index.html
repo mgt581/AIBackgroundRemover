@@ -1,238 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Photo Studio</title>
-  <meta name="theme-color" content="#4f46e5">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Photo Studio | Background Remover</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0B1221;
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3">
-  <link rel="icon" type="image/png" href="/apple-touch-icon.png?v=3">
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
 
-  <!-- Fixed duplicate script inclusion -->
-  <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@latest/dist/background-removal.min.js"></script>
-  
-  <script>
-    // --- PRO ALWAYS ENABLED ---
-    window.proEnabled = true;
-    async function ensureHdAllowed() { return true; }
-  </script>
+        .badge {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #7DD3FC;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 24px;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
 
-  <style>
-    :root{--grad:linear-gradient(90deg,#6366f1,#8b5cf6)}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f9fafb;color:#111827}
-    header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid #e5e7eb;background:#fff}
-    .brand{display:flex;align-items:center;gap:10px}
-    .brand-img{width:28px;height:28px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
-    .brand-text{font-size:20px;font-weight:800;letter-spacing:.2px}
-    .header-links{display:flex;align-items:center;gap:15px}
-    .privacy-btn{color:#4338ca;text-decoration:none;font-size:14px;font-weight:600}
-    .wrap{max-width:900px;margin:0 auto;padding:24px;display:grid;gap:16px}
-    .card{background:#fff;padding:20px;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
-    .btn{height:44px;padding:0 16px;border-radius:10px;border:0;cursor:pointer;font-size:15px;font-weight:700;background:#e5e7eb;color:#111827;display:inline-flex;align-items:center;justify-content:center}
-    .btn.primary{background:var(--grad);color:#fff}
-    .btn.warn{background:#fee2e2;color:#991b1b}
-    .btn:disabled{opacity:.65;cursor:not-allowed}
-    .stage{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;position:relative}
-    canvas#stage{width:100%;height:auto;display:block;background:#f3f4f6}
-    canvas#mask{position:absolute;left:0;top:0;width:100%;height:100%;display:none;cursor:crosshair}
-    .actions{display:grid;gap:12px}
-    .hint{font-size:13px;color:#6b7280;text-align:center}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999}
-    .toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-    .auth-status{font-size:13px;color:#6b7280}
-  </style>
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        p.description {
+            color: #94A3B8;
+            font-size: 18px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto 60px;
+        }
+
+        .btn {
+            display: block;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary {
+            background-color: #2563EB;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 40px 0 20px;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 12px;
+        }
+
+        .footer-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .footer-subtitle {
+            font-size: 14px;
+            color: #94A3B8;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        .ownership {
+            font-size: 10px;
+            color: #64748B;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <img src="/apple-touch-icon.png?v=3" alt="Logo" width="28" height="28" class="brand-img" onerror="this.remove()">
-      <span class="brand-text">AI Photo Studio</span>
-    </div>
+    <div class="container">
+        <div class="badge">Now with AI Precision</div>
 
-    <div class="header-links">
-      <span id="authStatus" class="auth-status"></span>
-      <button id="btnLogout" class="btn" style="display:none; height:32px; font-size:12px">Logout</button>
-      <a href="privacy.html" class="privacy-btn">Privacy Policy</a>
-    </div>
-  </header>
+        <h1>Create once,<br>post everywhere.</h1>
 
-  <div class="wrap" ondragover="event.preventDefault()" ondrop="Studio.handleDrop(event)">
-    <div class="card">
-      <p class="status" id="status">Upload a photo to begin.</p>
-      <div class="actions">
-        <div class="toolbar">
-          <button class="btn primary" onclick="document.getElementById('mainInput').click()">Choose Photo</button>
-          <input id="mainInput" type="file" accept="image/*" style="display:none" onchange="Studio.onUploadMain(this.files[0]); this.value=''" />
-          <input id="bgInput" type="file" accept="image/*" style="display:none" onchange="Studio.onUploadBg(this.files[0]); this.value=''" />
+        <p class="description">
+            Use our AI-powered background remover to create professional images for all your social platforms instantly.
+        </p>
 
-          <button id="btnRemove" class="btn" disabled onclick="Studio.removeBg()">Remove Background</button>
-          <button id="btnChange" class="btn" disabled onclick="Studio.changeBg()">Change Background</button>
-          <button class="btn" onclick="document.getElementById('bgInput').click()">Choose Background</button>
-
-          <button id="btnBrush" class="btn" disabled onclick="Studio.startBrush()">
-            Remove Person <span class="tag-beta" style="font-size:10px; margin-left:4px; opacity:0.7">Beta</span>
-          </button>
-
-          <button id="btnApply" class="btn warn" style="display:none" onclick="Studio.applyInpaint()">Apply Removal</button>
-          <button id="btnCancel" class="btn" style="display:none" onclick="Studio.cancelBrush()">Cancel</button>
+        <div class="btn-group">
+            <a href="app://open" class="btn btn-primary">Get Started for Free</a>
+            <a href="app://signin" class="btn btn-secondary">Sign In</a>
         </div>
-      </div>
     </div>
 
-    <div class="stage card" id="stageWrap">
-      <canvas id="stage" width="960" height="600"></canvas>
-      <canvas id="mask" width="960" height="600"></canvas>
-    </div>
+    <footer>
+        <img src="logo.png" alt="Logo" class="footer-logo">
+        <div class="footer-title">AI Background Remover</div>
+        <div class="footer-subtitle">made by Ai Photo Studio</div>
 
-    <div class="card actions">
-      <div class="toolbar">
-        <!-- Fixed function call: Studio.download() instead of Studio.downloadImage() -->
-        <button class="btn primary" id="btnSaveGallery" onclick="Studio.download('png')">Save to Device</button>
-      </div>
-      <p class="hint">Your edited photos are saved directly to your device storage.</p>
-    </div>
-  </div>
+        <div class="footer-links">
+            <a href="https://aiphotostudio.co.uk/privacy">Privacy Policy</a>
+            <span>|</span>
+            <a href="https://aiphotostudio.co.uk/terms">Terms of Service</a>
+        </div>
 
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
-  <script>
-    // 1. FIREBASE CONFIG
-    const firebaseConfig = {
-      apiKey: "AIzaSyCM6r66kW9xkBA5rgVcz4sP57N2v2BMbkg",
-      authDomain: "ai-photo-studio-24354.firebaseapp.com",
-      projectId: "ai-photo-studio-24354",
-      storageBucket: "ai-photo-studio-24354.firebasestorage.app",
-      messagingSenderId: "411346648650",
-      appId: "1:411346648650:web:5ecd86ffecd05472fab0b3"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-
-    // 2. UI ELEMENTS
-    const elStatus = document.getElementById('authStatus');
-    const btnLogout = document.getElementById('btnLogout');
-    const $status = document.getElementById('status');
-    const stage = document.getElementById('stage');
-    const ctx = stage.getContext('2d', { willReadFrequently: true });
-    const maskCanvas = document.getElementById('mask');
-    const mctx = maskCanvas.getContext('2d');
-
-    const btnRemove = document.getElementById('btnRemove');
-    const btnChange = document.getElementById('btnChange');
-    const btnBrush = document.getElementById('btnBrush');
-    const btnApply = document.getElementById('btnApply');
-    const btnCancel = document.getElementById('btnCancel');
-
-    let brushing = false, brushDown = false, brushSize = 24;
-
-    // 3. STUDIO LOGIC
-    const Studio = (() => {
-      let mainSrc = null, cutoutURL = null, bgSrc = null, busy = false;
-
-      function setBusy(b) {
-        busy = b;
-        btnRemove.disabled = b || !mainSrc;
-        btnChange.disabled = b || !cutoutURL;
-        btnBrush.disabled = b || (!mainSrc && !cutoutURL);
-      }
-
-      async function draw({img, bg=null}) {
-        ctx.clearRect(0,0,stage.width,stage.height);
-        if (bg) {
-          const b = await loadImage(bg);
-          const s = Math.max(stage.width/b.width, stage.height/b.height);
-          ctx.drawImage(b, (stage.width-b.width*s)/2, (stage.height-b.height*s)/2, b.width*s, b.height*s);
-        } else {
-          drawChecker();
-        }
-        const im = await loadImage(img);
-        const sc = Math.min(stage.width/im.width, stage.height/im.height);
-        ctx.drawImage(im, (stage.width-im.width*sc)/2, (stage.height-im.height*sc)/2, im.width*sc, im.height*sc);
-        if (!window.proEnabled) stampWatermark();
-      }
-
-      function drawChecker() {
-        const s = 20;
-        for (let y = 0; y < stage.height; y += s) {
-          for (let x = 0; x < stage.width; x += s) {
-            ctx.fillStyle = ((x / s + y / s) % 2 === 0) ? '#e5e7eb' : '#fff';
-            ctx.fillRect(x, y, s, s);
-          }
-        }
-      }
-
-      function stampWatermark() {
-        ctx.save();
-        ctx.font = "bold 24px Arial";
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
-        ctx.fillText("AI Photo Studio", 20, stage.height - 20);
-        ctx.restore();
-      }
-
-      const loadImage = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.src = src; });
-      const readFileURL = (f) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
-
-      return {
-        onUploadMain: async (file) => {
-          mainSrc = await readFileURL(file);
-          if (cutoutURL) URL.revokeObjectURL(cutoutURL); cutoutURL = null;
-          await draw({img: mainSrc});
-          setStatus("Photo loaded.");
-          setBusy(false);
-        },
-        onUploadBg: async (file) => {
-          bgSrc = await readFileURL(file);
-          if (cutoutURL) await draw({img: cutoutURL, bg: bgSrc});
-        },
-        removeBg: async () => {
-          if (!mainSrc) return;
-          setBusy(true); setStatus("Removing background...");
-          try {
-            const blob = await imglyRemoveBackground(mainSrc);
-            cutoutURL = URL.createObjectURL(blob);
-            await draw({img: cutoutURL, bg: bgSrc});
-            setStatus("Done!");
-          } catch (e) { setStatus("Error removing background."); }
-          setBusy(false);
-        },
-        download: (type) => {
-          stage.toBlob((b) => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(b);
-            a.download = `result.${type}`;
-            a.click();
-          }, `image/${type}`);
-        },
-        startBrush: () => { brushing = true; maskCanvas.style.display = 'block'; btnApply.style.display = btnCancel.style.display = 'inline-block'; },
-        cancelBrush: () => { brushing = false; maskCanvas.style.display = 'none'; btnApply.style.display = btnCancel.style.display = 'none'; },
-        handleDrop: (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) Studio.onUploadMain(f); }
-      };
-    })();
-
-    function setStatus(t) { $status.textContent = t; }
-
-    // 4. AUTH
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        elStatus.textContent = `Hi, ${user.email}`;
-        btnLogout.style.display = 'inline-block';
-      } else {
-        elStatus.textContent = '';
-        btnLogout.style.display = 'none';
-      }
-    });
-    btnLogout.onclick = () => auth.signOut();
-
-    drawChecker();
-  </script>
+        <p class="ownership">
+            AI Photo Studio Background Remover owned by Bryant Digital Solutions working under Bryant Group Holdings Services a registered limited company
+        </p>
+    </footer>
 </body>
 </html>

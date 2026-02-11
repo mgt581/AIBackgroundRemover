@@ -18,7 +18,6 @@ credentials = "1.5.0"
 googleid = "1.2.0"
 webkit = "1.15.0"
 animatedVectorDrawable = "1.2.0"
-mlkit-segmentation = "16.0.0-beta6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,7 +41,6 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-mlkit-segmentation = { group = "com.google.mlkit", name = "segmentation-selfie", version.ref = "mlkit-segmentation" }
 
 # Using flat names to avoid accessor issues
 credentials-core = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }

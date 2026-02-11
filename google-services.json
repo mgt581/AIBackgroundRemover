@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "495715411996",
+    "project_id": "pwa-ai-photo-studio-pro",
+    "storage_bucket": "pwa-ai-photo-studio-pro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495715411996:android:ac9e925c00ae395b0617d9",
+        "android_client_info": {
+          "package_name": "com.aiphotostudio.bgremover"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "495715411996-3not71nemqj26o4pem3jkj7lpqfhfl34.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudio.bgremover",
+            "certificate_hash": "80481d884a0eb6fb11f2424ae4cb82a659698d9b"
+          }
+        },
+        {
+          "client_id": "495715411996-944k3m1ncjpd4190eb4htq8caindi7fa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudio.bgremover",
+            "certificate_hash": "ed1769cc68887992668fe15a93b9a65cd1aaa7d1"
+          }
+        },
+        {
+          "client_id": "495715411996-kklekum8ltivprbbmbuvjprg36m5mjtm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudio.bgremover",
+            "certificate_hash": "b07c47d06f719d6812194a82b8f61955fd996fb1"
+          }
+        },
+        {
+          "client_id": "495715411996-iijvtbo02cn7tgvk6tp7284kjmdhefu0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1DMsu_ktTXfqe42q9juEloTTrKJUqpbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "495715411996-ap5nbldv9c65fi0oapefiso3oet1sqb1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
