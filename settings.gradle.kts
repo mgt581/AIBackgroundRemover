@@ -18,5 +18,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AIBackgroundRemoverbroken2"
+rootProject.name = "AIBackgroundRemover"
 include(":app")
