@@ -1,6 +1,3 @@
-import java.util.Properties
-import java.io.FileInputStream
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -26,15 +23,12 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePropertiesFile = project.rootProject.file("keystore.properties")
-            if (keystorePropertiesFile.exists()) {
-                val properties = Properties()
-                properties.load(FileInputStream(keystorePropertiesFile))
-                
-                storeFile = project.rootProject.file(properties.getProperty("storeFile"))
-                storePassword = properties.getProperty("storePassword")
-                keyAlias = properties.getProperty("keyAlias")
-                keyPassword = properties.getProperty("keyPassword")
+            val keystoreFile = file("${project.rootDir}/keystore.jks")
+            if (keystoreFile.exists()) {
+                storeFile = keystoreFile
+                storePassword = "Alifa10"
+                keyAlias = "Alifa10"
+                keyPassword = "Alifa10"
             }
         }
     }
@@ -60,7 +54,7 @@ android {
                 "proguard-rules.pro"
             )
             val releaseSigning = signingConfigs.getByName("release")
-            if (releaseSigning.storeFile?.exists() == true) {
+            if (releaseSigning.storeFile != null) {
                 signingConfig = releaseSigning
             }
         }
@@ -110,9 +104,6 @@ dependencies {
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.google.firebase.analytics)
-
-    // ML Kit
-    implementation(libs.mlkit.segmentation)
 
     // Testing
     testImplementation(libs.junit)
