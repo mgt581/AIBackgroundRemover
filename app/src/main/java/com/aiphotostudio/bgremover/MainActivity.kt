@@ -99,21 +99,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(savedState: Bundle?) {
+        super.onCreate(savedState)
         auth = FirebaseAuth.getInstance()
 
         try {
             setContentView(R.layout.activity_main)
 
             // Initialize Views
-            ivMainPreview = findViewById(R.id.iv_main_preview)
-            pbProcessing = findViewById(R.id.pb_processing)
+            ivMainPreview = this.findViewById(R.id.iv_main_preview)
+            val also =
+                findViewById<ProgressBar>(/* id = */ R.id.pb_processing).also { pbProcessing = it }
             btnChoosePhoto = findViewById(R.id.btn_choose_photo)
             btnRemoveBg = findViewById(R.id.btn_remove_bg)
-            llImageActions = findViewById(R.id.ll_image_actions)
+            llImageActions = findViewById<LinearLayout>(/* id = */ R.id.ll_image_actions)
             btnSaveFixed = findViewById(R.id.btn_save_fixed)
-            btnDownloadDevice = findViewById(R.id.btn_download_device)
+            btnDownloadDevice = findViewById<Button>(/* id = */ R.id.btn_download_device)
 
             btnAuthAction = findViewById(R.id.btn_auth_action)
             btnHeaderSettings = findViewById(R.id.btn_header_settings)
@@ -124,8 +125,8 @@ class MainActivity : AppCompatActivity() {
             updateHeaderUi()
             checkAndRequestPermissions()
 
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error in onCreate", e)
+        } catch (exception: Exception) {
+            Log.e("MainActivity", "Error in onCreate", exception)
             Toast.makeText(this, "Initialization error", Toast.LENGTH_LONG).show()
         }
     }

@@ -5,4 +5,5 @@
     <item name="btn_remove_bg" type="id" />
     <item name="btn_choose_photo" type="id" />
     <item name="btn_auth_signin" type="id" />
+    <item name="iv_main_preview" type="id">ids</item>
 </resources>
