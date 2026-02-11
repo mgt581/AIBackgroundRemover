@@ -12,4 +12,11 @@
     <color name="white">#FFFFFFFF</color>
     <color name="status_green">#4CAF50</color>
     <color name="status_red">#F44336</color>
+    <color name="whatsapp_green">#25D366</color>
+    <color name="tiktok_black">#000000</color>
+    <color name="facebook_blue">#1877F2</color>
+
+    <color name="btn_gallery_blue">#2563EB</color>
+    <color name="btn_account_blue">#2563EB</color>
+    <color name="btn_trial_blue">#3B82F6</color>
 </resources>

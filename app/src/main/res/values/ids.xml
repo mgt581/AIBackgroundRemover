@@ -9,4 +9,6 @@
     <item name="pb_processing" type="id" />
     <item name="ll_image_actions" type="id" />
     <item name="btn_download_device" type="id" />
+    <item name="btn_change_background" type="id">change bg</item>
+    <item name="btn_share" type="id">share</item>
 </resources>
