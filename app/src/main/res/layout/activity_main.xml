@@ -141,9 +141,9 @@
                     android:id="@+id/iv_main_preview"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
-                    android:scaleType="fitCenter"
                     android:background="@drawable/input_background"
-                    android:contentDescription="@string/preview" />
+                    android:contentDescription="@string/preview"
+                    android:scaleType="fitCenter" />
 
                 <ProgressBar
                     android:id="@+id/pb_processing"
