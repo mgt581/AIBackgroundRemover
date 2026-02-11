@@ -99,7 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Upload a photo to begin."
+                android:text="@string/upload_a_photo_to_begin"
                 android:textColor="@color/brand_text_secondary"
                 android:textSize="16sp"/>
 
@@ -112,7 +112,8 @@
                 android:padding="14dp"
                 app:cornerRadius="24dp"
                 android:text="@string/choose_photo"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                tools:ignore="VisualLintButtonSize" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_remove_bg"
@@ -127,7 +128,8 @@
                 android:text="@string/remove_background"
                 android:textColor="@color/white"
                 android:visibility="gone"
-                tools:visibility="visible" />
+                tools:visibility="visible"
+                tools:ignore="VisualLintButtonSize" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_change_background"
@@ -142,7 +144,8 @@
                 android:text="@string/change_background"
                 android:textColor="@color/white"
                 android:visibility="gone"
-                tools:visibility="visible" />
+                tools:visibility="visible"
+                tools:ignore="VisualLintButtonSize" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -177,7 +180,8 @@
                 android:text="@string/save_to_gallery"
                 android:textColor="@color/white"
                 android:visibility="gone"
-                tools:visibility="visible" />
+                tools:visibility="visible"
+                tools:ignore="VisualLintButtonSize" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_download_device"
@@ -186,17 +190,18 @@
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@color/brand_accent"
                 android:padding="14dp"
-                app:cornerRadius="24dp"
                 android:text="@string/download_to_device"
-                android:textColor="@color/white"
+                android:textColor="#212121"
                 android:visibility="gone"
-                tools:visibility="visible" />
+                app:cornerRadius="24dp"
+                tools:visibility="visible"
+                tools:ignore="VisualLintButtonSize" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="When signed in, your downloaded images are also saved to your gallery and downloaded to your device."
+                android:text="@string/when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device"
                 android:gravity="center"
                 android:textColor="@color/brand_text_secondary"
                 android:textSize="12sp"/>
