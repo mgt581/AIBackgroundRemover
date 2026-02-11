@@ -7,7 +7,7 @@
     </item>
     <item>
         <bitmap
-            android:src="@drawable/checkerboard_pattern"
+            android:src="@drawable/checkerboard_tile"
             android:tileMode="repeat" />
     </item>
 </layer-list>
