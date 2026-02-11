@@ -9,7 +9,7 @@ Thank you for your interest in contributing to AI Background Remover! This docum
 ```bash
 # Fork the repository on GitHub, then clone your fork
 git clone https://github.com/YOUR_USERNAME/AIBackgroundRemover.git
-cd AIBackgroundRemover
+cd AIBackgroundRemoverbroken2
 
 # Add the upstream repository
 git remote add upstream https://github.com/mgt581/AIBackgroundRemover.git

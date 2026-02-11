@@ -39,7 +39,7 @@ AI Background Remover is a mobile application that uses artificial intelligence 
 1. Clone the repository:
    ```bash
    git clone https://github.com/mgt581/AIBackgroundRemover.git
-   cd AIBackgroundRemover
+   cd AIBackgroundRemoverbroken2
    ```
 
 2. Open the project in Android Studio
