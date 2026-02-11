@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="sign_in_button" type="id" />
-    <item name="btn_footer_privacy" type="id" />
-    <item name="btn_remove_bg" type="id" />
-    <item name="btn_choose_photo" type="id" />
-    <item name="btn_auth_signin" type="id" />
-    <item name="ll_image_actions" type="id" />
-</resources>

@@ -15,8 +15,7 @@
 -keepclassmembers class * extends android.webkit.WebViewClient {
     public <methods>;
 }
--keepclassmembers class * extends android.webki-keepclassmembers class * extends android.webkit.WebChromeClient {
-t.WebChromeClient {
+-keepclassmembers class * extends android.webkit.WebChromeClient {
     public <methods>;
 }
 
