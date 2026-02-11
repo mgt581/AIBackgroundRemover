@@ -76,4 +76,11 @@
     <string name="back_to_home">Back to Home</string>
     <string name="share">share</string>
     <string name="contact">contact</string>
+    <string name="value" translatable="false"> | </string>
+    <string name="use" translatable="false"> | </string>
+    <string name="user" translatable="false"> | </string>
+    <string name="download_to_device">Download to Device</string>
+    <string name="choose_photo">Choose Photo</string>
+    <string name="remove_background">Remove Background</string>
+    <string name="preview">Preview</string>
 </resources>

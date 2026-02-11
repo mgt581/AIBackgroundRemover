@@ -95,7 +95,8 @@
                 android:text="@string/sign_in"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/btn_sign_up"
@@ -126,7 +127,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/pill_button"
                 android:backgroundTint="#2563EB"
-                android:text="Choose Photo"
+                android:text="@string/choose_photo"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
@@ -142,7 +143,7 @@
                     android:layout_height="300dp"
                     android:scaleType="fitCenter"
                     android:background="@drawable/input_background"
-                    android:contentDescription="Preview" />
+                    android:contentDescription="@string/preview" />
 
                 <ProgressBar
                     android:id="@+id/pb_processing"
@@ -159,7 +160,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/pill_button"
                 android:backgroundTint="#2563EB"
-                android:text="Remove Background"
+                android:text="@string/remove_background"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textStyle="bold"
@@ -179,7 +180,7 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/pill_button"
                     android:backgroundTint="#2563EB"
-                    android:text="Download to Device"
+                    android:text="@string/download_to_device"
                     android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textStyle="bold" />
