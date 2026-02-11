@@ -5,5 +5,8 @@
     <item name="btn_remove_bg" type="id" />
     <item name="btn_choose_photo" type="id" />
     <item name="btn_auth_signin" type="id" />
-    <item name="iv_main_preview" type="id">ids</item>
+    <item name="iv_main_preview" type="id" />
+    <item name="pb_processing" type="id" />
+    <item name="ll_image_actions" type="id" />
+    <item name="btn_download_device" type="id" />
 </resources>
