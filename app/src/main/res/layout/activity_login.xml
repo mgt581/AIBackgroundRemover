@@ -10,87 +10,77 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:orientation="vertical"
-        android:padding="32dp">
+        android:padding="24dp">
 
-        <!-- Header -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <!-- Close Button -->
+        <Button
+            android:id="@+id/btn_close_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/back"
+            android:textColor="@color/white"
+            style="@style/Widget.Material3.Button.TextButton"
+            tools:ignore="VisualLintButtonSize" />
 
-            <ImageButton
-                android:id="@+id/btn_close_login"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="start|top"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/back"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                app:tint="@color/white" />
+        <!-- LOGO -->
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/logo"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="@string/logo" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="vertical">
+        <!-- Text between logo and email box -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ai_background_remover_app"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
 
-                <ImageView
-                    android:id="@+id/imgLogo"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/logo"
-                    android:contentDescription="@string/logo" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/ai_background_remover"
-                    android:textColor="@color/white"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </FrameLayout>
-
-        <!-- Auth Tabs -->
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/toggle_group"
+        <!-- Tabs -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="24dp"
-            app:checkedButton="@+id/btn_tab_signin"
-            app:singleSelection="true">
-
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
             <Button
                 android:id="@+id/btn_tab_signin"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/sign_in"
-                android:textColor="@color/white" />
-
+                android:textColor="@color/white"
+                android:backgroundTint="@color/brand_primary"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/pill_button"
+                tools:ignore="VisualLintButtonSize" />
             <Button
                 android:id="@+id/btn_tab_signup"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/sign_up"
-                android:textColor="@color/white" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
+                android:textColor="@color/white"
+                android:backgroundTint="@color/brand_surface"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/pill_button"
+                tools:ignore="VisualLintButtonSize" />
+        </LinearLayout>
 
-        <!-- Input Fields -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/email"
             android:textColorHint="@color/brand_text_secondary"
+            app:hintTextColor="@color/white"
             app:boxStrokeColor="@color/brand_primary"
-            app:hintTextColor="@color/brand_primary"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_email"
@@ -103,11 +93,11 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:hint="@string/password"
             android:textColorHint="@color/brand_text_secondary"
+            app:hintTextColor="@color/white"
             app:boxStrokeColor="@color/brand_primary"
-            app:hintTextColor="@color/brand_primary"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="@color/white"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
@@ -129,97 +119,70 @@
         <Button
             android:id="@+id/btn_email_login"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:text="@string/auth"
             android:textColor="@color/white"
             android:backgroundTint="@color/brand_primary"
-            android:layout_marginTop="32dp"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp" />
-
-        <!-- Divider -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"
-                android:background="@color/brand_border" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:text="@string/or"
-                android:textColor="@color/brand_text_secondary"
-                android:textSize="12sp" />
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"
-                android:background="@color/brand_border" />
-        </LinearLayout>
+            android:padding="16dp"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-        <!-- Social Buttons -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/or"
+            android:textColor="@color/brand_text_secondary"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp" />
+
         <Button
             android:id="@+id/btn_google_sign_in"
-            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="24dp"
+            android:layout_height="wrap_content"
             android:text="@string/continue_with_google"
             android:textColor="@color/white"
-            android:backgroundTint="@color/brand_surface"
-            app:cornerRadius="12dp"
-            app:icon="@android:drawable/ic_menu_search"
-            app:iconTint="@color/white" />
+            android:backgroundTint="@color/brand_accent"
+            android:layout_marginTop="12dp"
+            android:padding="16dp"
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/btn_anonymous_sign_in"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:text="@string/continue_anonymously"
-            android:textColor="@color/brand_text_secondary" />
+            android:textColor="@color/white"
+            android:backgroundTint="@color/brand_surface"
+            android:layout_marginTop="12dp"
+            android:padding="16dp"
+            android:textSize="14sp"
+            android:strokeWidth="2"
+            android:strokeColor="@color/brand_light_blue" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <!-- Footer -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="16dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp">
             <TextView
                 android:id="@+id/tv_privacy_policy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/privacy_policy"
                 android:textColor="@color/brand_primary"
-                android:padding="12dp"
-                android:textSize="13sp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/divider"
-                android:textColor="@color/brand_text_secondary" />
+                android:padding="8dp"
+                android:clickable="true"
+                android:focusable="true" />
             <TextView
                 android:id="@+id/tv_terms_of_service"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/terms_of_service"
                 android:textColor="@color/brand_primary"
-                android:padding="12dp"
-                android:textSize="13sp" />
+                android:padding="8dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
 
     </LinearLayout>
