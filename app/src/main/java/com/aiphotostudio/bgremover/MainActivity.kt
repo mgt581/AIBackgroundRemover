@@ -1,11 +1,9 @@
-@file:Suppress("DEPRECATION")
 package com.aiphotostudio.bgremover
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -18,10 +16,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.webkit.JavascriptInterface
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -33,6 +29,7 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.get
 import androidx.core.graphics.set
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.mlkit.vision.common.InputImage
@@ -52,24 +49,23 @@ class MainActivity : AppCompatActivity() {
     // UI Elements
     private lateinit var ivMainPreview: ImageView
     private lateinit var pbProcessing: ProgressBar
-    private lateinit var btnChoosePhoto: Button
-    private lateinit var btnRemoveBg: Button
-    private lateinit var btnSaveFixed: Button
-    private lateinit var btnDownloadDevice: Button
-    private lateinit var btnChangeBackground: Button
+    private lateinit var btnChoosePhoto: MaterialButton
+    private lateinit var btnRemoveBg: MaterialButton
+    private lateinit var btnSaveFixed: MaterialButton
+    private lateinit var btnDownloadDevice: MaterialButton
+    private lateinit var btnChangeBackground: MaterialButton
 
-    private var btnAuthAction: TextView? = null
-    private var btnHeaderSettings: Button? = null
-    private var btnGallery: Button? = null
-    private var btnSignUp: TextView? = null
-    private var tvAuthStatus: TextView? = null
+    private lateinit var btnAuthAction: MaterialButton
+    private lateinit var btnHeaderSettings: MaterialButton
+    private lateinit var btnGallery: MaterialButton
+    private lateinit var btnSignUp: MaterialButton
+    private lateinit var tvAuthStatus: TextView
     private var fabSave: ExtendedFloatingActionButton? = null
     
-    private var btnWhatsApp: TextView? = null
-    private var btnTikTok: TextView? = null
-    private var btnFacebook: TextView? = null
+    private lateinit var btnWhatsApp: TextView
+    private lateinit var btnTikTok: TextView
+    private lateinit var btnFacebook: TextView
 
-    // Launchers
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) loadSelectedImage(uri)
     }
@@ -88,18 +84,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        
         auth = FirebaseAuth.getInstance()
-
-        try {
-            setContentView(R.layout.activity_main)
-            initViews()
-            setupClickListeners()
-            updateHeaderUi()
-            checkAndRequestPermissions()
-        } catch (exception: Exception) {
-            Log.e("MainActivity", "Error in onCreate", exception)
-            Toast.makeText(this, "Initialization error", Toast.LENGTH_LONG).show()
-        }
+        initViews()
+        setupClickListeners()
+        updateHeaderUi()
+        checkAndRequestPermissions()
     }
 
     override fun onResume() {
@@ -122,6 +113,7 @@ class MainActivity : AppCompatActivity() {
         btnSignUp = findViewById(R.id.btn_sign_up)
         tvAuthStatus = findViewById(R.id.tv_auth_status)
         fabSave = findViewById(R.id.fab_save)
+        
         btnWhatsApp = findViewById(R.id.btn_whatsapp)
         btnTikTok = findViewById(R.id.btn_tiktok)
         btnFacebook = findViewById(R.id.btn_facebook)
@@ -134,25 +126,19 @@ class MainActivity : AppCompatActivity() {
         btnSaveFixed.setOnClickListener { processedBitmap?.let { saveToInternalGallery(it) } }
         fabSave?.setOnClickListener { processedBitmap?.let { saveImageToGallery(it) } }
 
-        btnGallery?.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
-        btnAuthAction?.setOnClickListener { handleAuthAction() }
-        btnSignUp?.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
-        btnHeaderSettings?.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
+        btnGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
+        btnAuthAction.setOnClickListener { handleAuthAction() }
+        btnSignUp.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
+        btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         
         btnChangeBackground.setOnClickListener {
             Toast.makeText(this, "Change Background coming soon", Toast.LENGTH_SHORT).show()
         }
         
-        btnWhatsApp?.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
-        btnTikTok?.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
-        btnFacebook?.setOnClickListener { openUrl(getString(R.string.facebook_url)) }
+        btnWhatsApp.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
+        btnTikTok.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
+        btnFacebook.setOnClickListener { openUrl(getString(R.string.facebook_url)) }
         
-        findViewById<View>(R.id.footer_gallery).setOnClickListener { 
-            startActivity(Intent(this, GalleryActivity::class.java)) 
-        }
-        findViewById<View>(R.id.footer_settings).setOnClickListener { 
-            startActivity(Intent(this, SettingsActivity::class.java)) 
-        }
         findViewById<View>(R.id.footer_privacy).setOnClickListener {
             openUrl("https://aiphotostudio.co/privacy")
         }
@@ -160,8 +146,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TermsActivity::class.java))
         }
     }
-
-    // --- Image Handling ---
 
     private fun showImagePickerOptions() {
         val options = arrayOf("Gallery", "Camera")
@@ -178,7 +162,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openCamera() {
         val photoFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image.jpg")
-        cameraImageUri = FileProvider.getUriForFile(this, "$packageName.file-provider", photoFile)
+        cameraImageUri = FileProvider.getUriForFile(this, "$packageName.fileprovider", photoFile)
         takePicture.launch(cameraImageUri!!)
     }
 
@@ -190,8 +174,9 @@ class MainActivity : AppCompatActivity() {
                 ivMainPreview.background = null
                 
                 btnRemoveBg.visibility = View.VISIBLE
-                btnSaveFixed.visibility = View.GONE
                 btnChangeBackground.visibility = View.GONE
+                btnSaveFixed.visibility = View.GONE
+                btnDownloadDevice.visibility = View.GONE
                 fabSave?.visibility = View.GONE
             }
         } catch (e: Exception) {
@@ -238,17 +223,15 @@ class MainActivity : AppCompatActivity() {
 
         processedBitmap = resultBitmap
         ivMainPreview.setImageBitmap(processedBitmap)
-        ivMainPreview.setBackgroundResource(R.drawable.checkerboard_background)
         
         pbProcessing.visibility = View.GONE
         btnRemoveBg.visibility = View.GONE
-        btnSaveFixed.visibility = View.VISIBLE
         btnChangeBackground.visibility = View.VISIBLE
+        btnSaveFixed.visibility = View.VISIBLE
+        btnDownloadDevice.visibility = View.VISIBLE
         fabSave?.visibility = View.VISIBLE
         btnRemoveBg.isEnabled = true
     }
-
-    // --- Storage ---
 
     private fun saveToInternalGallery(bitmap: Bitmap) {
         val directory = File(filesDir, "saved_images")
@@ -277,6 +260,7 @@ class MainActivity : AppCompatActivity() {
                 val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
                 imageUri?.let { contentResolver.openOutputStream(it) }
             } else {
+                @Suppress("DEPRECATION")
                 val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                 FileOutputStream(File(imagesDir, filename))
             }
@@ -291,8 +275,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- Auth & Helper ---
-
     private fun handleAuthAction() {
         if (auth.currentUser != null) {
             auth.signOut()
@@ -306,13 +288,13 @@ class MainActivity : AppCompatActivity() {
     private fun updateHeaderUi() {
         val user = auth.currentUser
         if (user != null) {
-            tvAuthStatus?.text = "Account: ${user.email ?: "Guest"}"
-            btnAuthAction?.text = "Logout"
-            btnSignUp?.visibility = View.GONE
+            tvAuthStatus.text = "Account: ${user.email ?: "Guest"}"
+            btnAuthAction.text = "Logout"
+            btnSignUp.visibility = View.GONE
         } else {
-            tvAuthStatus?.text = "Not Signed In"
-            btnAuthAction?.text = "Login"
-            btnSignUp?.visibility = View.VISIBLE
+            tvAuthStatus.text = getString(R.string.not_signed_in)
+            btnAuthAction.text = getString(R.string.sign_in)
+            btnSignUp.visibility = View.VISIBLE
         }
     }
 
@@ -328,11 +310,5 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionsLauncher.launch(arrayOf(Manifest.permission.CAMERA))
         }
-    }
-
-    inner class WebAppInterface(private val mContext: Context) {
-        @JavascriptInterface fun openGallery() { startActivity(Intent(mContext, GalleryActivity::class.java)) }
-        @JavascriptInterface fun openAccount() { handleAuthAction() }
-        @JavascriptInterface fun downloadImage() { processedBitmap?.let { saveImageToGallery(it) } }
     }
 }
