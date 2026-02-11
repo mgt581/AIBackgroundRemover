@@ -96,6 +96,9 @@ dependencies {
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
 
+    // ML Kit
+    implementation(libs.mlkit.segmentation.selfie)
+
     // Firebase
     implementation(libs.play.services.auth)
     implementation(platform(libs.firebase.bom))
