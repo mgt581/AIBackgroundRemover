@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/brand_background">
 
-    <!-- HEADER -->
     <HorizontalScrollView
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -24,69 +23,68 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_auth_action"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/sign_in"
                 android:textColor="@color/white"
-                app:cornerRadius="20dp"
-                android:backgroundTint="@color/brand_primary"
-                style="@style/Widget.Material3.Button"
                 android:textSize="12sp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"/>
+                app:cornerRadius="20dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_sign_up"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/sign_up"
                 android:textColor="@color/white"
-                app:cornerRadius="20dp"
-                android:backgroundTint="@color/brand_primary"
-                style="@style/Widget.Material3.Button"
                 android:textSize="12sp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"/>
+                app:cornerRadius="20dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_gallery"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/gallery"
                 android:textColor="@color/white"
-                app:cornerRadius="20dp"
-                android:backgroundTint="@color/brand_primary"
-                style="@style/Widget.Material3.Button"
                 android:textSize="12sp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"/>
+                app:cornerRadius="20dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_header_settings"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/settings"
                 android:textColor="@color/white"
-                app:cornerRadius="20dp"
-                android:backgroundTint="@color/brand_primary"
-                style="@style/Widget.Material3.Button"
                 android:textSize="12sp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"/>
+                app:cornerRadius="20dp" />
 
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- CONTENT -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/header"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -101,7 +99,7 @@
                 android:layout_marginBottom="16dp"
                 android:text="@string/upload_a_photo_to_begin"
                 android:textColor="@color/brand_text_secondary"
-                android:textSize="16sp"/>
+                android:textSize="16sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_choose_photo"
@@ -110,9 +108,9 @@
                 android:layout_marginTop="8dp"
                 android:backgroundTint="@color/brand_primary"
                 android:padding="14dp"
-                app:cornerRadius="24dp"
                 android:text="@string/choose_photo"
                 android:textColor="@color/white"
+                app:cornerRadius="24dp"
                 tools:ignore="VisualLintButtonSize" />
 
             <com.google.android.material.button.MaterialButton
@@ -121,15 +119,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@color/brand_surface"
-                app:strokeColor="@color/brand_primary"
-                app:strokeWidth="1dp"
                 android:padding="14dp"
-                app:cornerRadius="24dp"
                 android:text="@string/remove_background"
                 android:textColor="@color/white"
                 android:visibility="gone"
-                tools:visibility="visible"
-                tools:ignore="VisualLintButtonSize" />
+                app:cornerRadius="24dp"
+                app:strokeColor="@color/brand_primary"
+                app:strokeWidth="1dp"
+                tools:ignore="VisualLintButtonSize"
+                tools:visibility="visible" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_change_background"
@@ -137,15 +135,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@color/brand_surface"
-                app:strokeColor="@color/brand_primary"
-                app:strokeWidth="1dp"
                 android:padding="14dp"
-                app:cornerRadius="24dp"
                 android:text="@string/change_background"
                 android:textColor="@color/white"
                 android:visibility="gone"
-                tools:visibility="visible"
-                tools:ignore="VisualLintButtonSize" />
+                app:cornerRadius="24dp"
+                app:strokeColor="@color/brand_primary"
+                app:strokeWidth="1dp"
+                tools:ignore="VisualLintButtonSize"
+                tools:visibility="visible" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -159,7 +157,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/preview"
-                    android:scaleType="fitCenter" />
+                    android:scaleType="fitCenter"
+                    tools:ignore="ImageContrastCheck" />
 
                 <ProgressBar
                     android:id="@+id/pb_processing"
@@ -176,12 +175,12 @@
                 android:layout_marginTop="24dp"
                 android:backgroundTint="@color/brand_primary"
                 android:padding="14dp"
-                app:cornerRadius="24dp"
                 android:text="@string/save_to_gallery"
                 android:textColor="@color/white"
                 android:visibility="gone"
-                tools:visibility="visible"
-                tools:ignore="VisualLintButtonSize" />
+                app:cornerRadius="24dp"
+                tools:ignore="VisualLintButtonSize"
+                tools:visibility="visible" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_download_device"
@@ -194,17 +193,17 @@
                 android:textColor="#212121"
                 android:visibility="gone"
                 app:cornerRadius="24dp"
-                tools:visibility="visible"
-                tools:ignore="VisualLintButtonSize" />
+                tools:ignore="VisualLintButtonSize"
+                tools:visibility="visible" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device"
                 android:gravity="center"
+                android:text="@string/when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device"
                 android:textColor="@color/brand_text_secondary"
-                android:textSize="12sp"/>
+                android:textSize="12sp" />
         </LinearLayout>
     </ScrollView>
 
