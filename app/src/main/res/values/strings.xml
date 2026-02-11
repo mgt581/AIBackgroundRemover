@@ -76,10 +76,15 @@
     <string name="back_to_home">Back to Home</string>
     <string name="share">share</string>
     <string name="contact">contact</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="account_email">Account: %1$s</string>
+    <string name="guest">Guest</string>
 
     <!-- Renamed to fix build errors -->
     <string name="footer_divider_1"> | </string>
     <string name="footer_divider_2"> | </string>
     <string name="footer_divider_3"> | </string>
+    <string name="account">Account: %1$s</string>
 
 </resources>
