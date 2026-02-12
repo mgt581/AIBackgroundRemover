@@ -29,7 +29,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
+import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
@@ -46,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var cameraImageUri: Uri? = null
     private var selectedBitmap: Bitmap? = null
     private var processedBitmap: Bitmap? = null
+    private var lastMask: SegmentationMask? = null
 
     // UI Elements
     private lateinit var ivMainPreview: ImageView
@@ -55,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSaveFixed: MaterialButton
     private lateinit var btnDownloadDevice: MaterialButton
     private lateinit var btnChangeBackground: MaterialButton
+    private lateinit var btnChooseBackground: MaterialButton
 
     private lateinit var btnAuthAction: MaterialButton
     private lateinit var btnHeaderSettings: MaterialButton
@@ -69,6 +75,10 @@ class MainActivity : AppCompatActivity() {
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) loadSelectedImage(uri)
+    }
+
+    private val pickBackground = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) applyImageBackground(uri)
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
@@ -107,6 +117,7 @@ class MainActivity : AppCompatActivity() {
         btnSaveFixed = findViewById(R.id.btn_save_fixed)
         btnDownloadDevice = findViewById(R.id.btn_download_device)
         btnChangeBackground = findViewById(R.id.btn_change_background)
+        btnChooseBackground = findViewById(R.id.btn_choose_background)
 
         btnAuthAction = findViewById(R.id.btn_auth_action)
         btnHeaderSettings = findViewById(R.id.btn_header_settings)
@@ -124,25 +135,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyCheckerboardBackground(view: View) {
-        val size = 20 // Size of each small square in pixels
+        val size = 20
         val bitmap = createBitmap(size * 2, size * 2, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val paint = Paint()
+        bitmap.applyCanvas {
+            val paint = Paint()
+            paint.color = Color.WHITE
+            drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
+            drawRect(size.toFloat(), size.toFloat(), (size * 2).toFloat(), (size * 2).toFloat(), paint)
+            paint.color = "#E0E0E0".toColorInt()
+            drawRect(size.toFloat(), 0f, (size * 2).toFloat(), size.toFloat(), paint)
+            drawRect(0f, size.toFloat(), size.toFloat(), (size * 2).toFloat(), paint)
+        }
 
-        // Draw the checkerboard pattern on the bitmap
-        paint.color = Color.WHITE
-        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
-        canvas.drawRect(size.toFloat(), size.toFloat(), (size * 2).toFloat(), (size * 2).toFloat(), paint)
-
-        paint.color = Color.parseColor("#E0E0E0")
-        canvas.drawRect(size.toFloat(), 0f, (size * 2).toFloat(), size.toFloat(), paint)
-        canvas.drawRect(0f, size.toFloat(), size.toFloat(), (size * 2).toFloat(), paint)
-
-        // Create a tiled drawable
         val drawable = BitmapDrawable(resources, bitmap)
         drawable.tileModeX = Shader.TileMode.REPEAT
         drawable.tileModeY = Shader.TileMode.REPEAT
-
         view.background = drawable
     }
 
@@ -158,8 +165,9 @@ class MainActivity : AppCompatActivity() {
         btnSignUp.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
         btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         
-        btnChangeBackground.setOnClickListener {
-            showBackgroundOptions()
+        btnChangeBackground.setOnClickListener { showBackgroundOptions() }
+        btnChooseBackground.setOnClickListener {
+            pickBackground.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
         
         btnWhatsApp.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
@@ -193,6 +201,31 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.iv_main_preview_container).setBackgroundColor(color)
     }
 
+    private fun applyImageBackground(uri: Uri) {
+        try {
+            contentResolver.openInputStream(uri).use { inputStream ->
+                val bgBitmap = BitmapFactory.decodeStream(inputStream) ?: return
+                val subjectBitmap = processedBitmap ?: return
+                
+                val finalBitmap = createBitmap(subjectBitmap.width, subjectBitmap.height, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(finalBitmap)
+                
+                // Draw background scaled to fit subject dimensions
+                val bgScaled = bgBitmap.scale(subjectBitmap.width, subjectBitmap.height, true)
+                canvas.drawBitmap(bgScaled, 0f, 0f, null)
+                
+                // Draw subject on top
+                canvas.drawBitmap(subjectBitmap, 0f, 0f, null)
+                
+                processedBitmap = finalBitmap
+                ivMainPreview.setImageBitmap(processedBitmap)
+                findViewById<View>(R.id.iv_main_preview_container).background = null
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error applying image background", e)
+        }
+    }
+
     private fun showImagePickerOptions() {
         val options = arrayOf("Gallery", "Camera")
         AlertDialog.Builder(this)
@@ -217,12 +250,15 @@ class MainActivity : AppCompatActivity() {
             contentResolver.openInputStream(uri).use { inputStream ->
                 selectedBitmap = BitmapFactory.decodeStream(inputStream)
                 ivMainPreview.setImageBitmap(selectedBitmap)
+                applyCheckerboardBackground(findViewById(R.id.iv_main_preview_container))
                 
                 btnRemoveBg.visibility = View.VISIBLE
                 btnChangeBackground.visibility = View.GONE
+                btnChooseBackground.visibility = View.GONE
                 btnSaveFixed.visibility = View.GONE
                 btnDownloadDevice.visibility = View.GONE
                 fabSave?.visibility = View.GONE
+                lastMask = null
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Error loading image", e)
@@ -241,7 +277,10 @@ class MainActivity : AppCompatActivity() {
         val inputImage = InputImage.fromBitmap(bitmap, 0)
 
         segmenter.process(inputImage)
-            .addOnSuccessListener { mask -> renderResult(mask, bitmap) }
+            .addOnSuccessListener { mask ->
+                lastMask = mask
+                renderResult(mask, bitmap)
+            }
             .addOnFailureListener { e ->
                 pbProcessing.visibility = View.GONE
                 btnRemoveBg.isEnabled = true
@@ -258,7 +297,7 @@ class MainActivity : AppCompatActivity() {
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val confidence = buffer.float
-                if (confidence > 0.8) { // Increased threshold to better separate person from background
+                if (confidence > 0.5) {
                     resultBitmap.setPixel(x, y, original.getPixel(x, y))
                 } else {
                     resultBitmap.setPixel(x, y, Color.TRANSPARENT)
@@ -272,6 +311,7 @@ class MainActivity : AppCompatActivity() {
         pbProcessing.visibility = View.GONE
         btnRemoveBg.visibility = View.GONE
         btnChangeBackground.visibility = View.VISIBLE
+        btnChooseBackground.visibility = View.VISIBLE
         btnSaveFixed.visibility = View.VISIBLE
         btnDownloadDevice.visibility = View.VISIBLE
         fabSave?.visibility = View.VISIBLE
@@ -281,7 +321,6 @@ class MainActivity : AppCompatActivity() {
     private fun saveToInternalGallery(bitmap: Bitmap) {
         val directory = File(filesDir, "saved_images")
         if (!directory.exists()) directory.mkdirs()
-        
         val file = File(directory, "BG_Remover_${System.currentTimeMillis()}.png")
         try {
             FileOutputStream(file).use { out ->
@@ -346,7 +385,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (e: Exception) {
             Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
         }
