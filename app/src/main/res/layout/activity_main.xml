@@ -151,6 +151,7 @@
                 app:strokeWidth="1dp" />
 
             <FrameLayout
+                android:id="@+id/iv_main_preview_container"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_marginTop="24dp"

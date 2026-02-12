@@ -8,7 +8,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,7 +20,6 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -27,8 +30,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
-import androidx.core.graphics.get
-import androidx.core.graphics.set
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
@@ -117,6 +118,32 @@ class MainActivity : AppCompatActivity() {
         btnWhatsApp = findViewById(R.id.btn_whatsapp)
         btnTikTok = findViewById(R.id.btn_tiktok)
         btnFacebook = findViewById(R.id.btn_facebook)
+        
+        // Apply tiled checkerboard background to the container
+        applyCheckerboardBackground(findViewById(R.id.iv_main_preview_container))
+    }
+
+    private fun applyCheckerboardBackground(view: View) {
+        val size = 20 // Size of each small square in pixels
+        val bitmap = createBitmap(size * 2, size * 2, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint()
+
+        // Draw the checkerboard pattern on the bitmap
+        paint.color = Color.WHITE
+        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
+        canvas.drawRect(size.toFloat(), size.toFloat(), (size * 2).toFloat(), (size * 2).toFloat(), paint)
+
+        paint.color = Color.parseColor("#E0E0E0")
+        canvas.drawRect(size.toFloat(), 0f, (size * 2).toFloat(), size.toFloat(), paint)
+        canvas.drawRect(0f, size.toFloat(), size.toFloat(), (size * 2).toFloat(), paint)
+
+        // Create a tiled drawable
+        val drawable = BitmapDrawable(resources, bitmap)
+        drawable.tileModeX = Shader.TileMode.REPEAT
+        drawable.tileModeY = Shader.TileMode.REPEAT
+
+        view.background = drawable
     }
 
     private fun setupClickListeners() {
@@ -132,7 +159,7 @@ class MainActivity : AppCompatActivity() {
         btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         
         btnChangeBackground.setOnClickListener {
-            Toast.makeText(this, "Change Background coming soon", Toast.LENGTH_SHORT).show()
+            showBackgroundOptions()
         }
         
         btnWhatsApp.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
@@ -145,6 +172,25 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.footer_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
         }
+    }
+
+    private fun showBackgroundOptions() {
+        val colors = arrayOf("Solid Blue", "Solid Red", "Solid Green", "Checkerboard")
+        AlertDialog.Builder(this)
+            .setTitle("Change Background")
+            .setItems(colors) { _, which ->
+                when (which) {
+                    0 -> applySolidBackground(Color.BLUE)
+                    1 -> applySolidBackground(Color.RED)
+                    2 -> applySolidBackground(Color.GREEN)
+                    3 -> applyCheckerboardBackground(findViewById(R.id.iv_main_preview_container))
+                }
+            }
+            .show()
+    }
+
+    private fun applySolidBackground(color: Int) {
+        findViewById<View>(R.id.iv_main_preview_container).setBackgroundColor(color)
     }
 
     private fun showImagePickerOptions() {
@@ -171,7 +217,6 @@ class MainActivity : AppCompatActivity() {
             contentResolver.openInputStream(uri).use { inputStream ->
                 selectedBitmap = BitmapFactory.decodeStream(inputStream)
                 ivMainPreview.setImageBitmap(selectedBitmap)
-                ivMainPreview.background = null
                 
                 btnRemoveBg.visibility = View.VISIBLE
                 btnChangeBackground.visibility = View.GONE
@@ -213,10 +258,10 @@ class MainActivity : AppCompatActivity() {
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val confidence = buffer.float
-                if (confidence > 0.4) {
-                    resultBitmap[x, y] = original[x, y]
+                if (confidence > 0.8) { // Increased threshold to better separate person from background
+                    resultBitmap.setPixel(x, y, original.getPixel(x, y))
                 } else {
-                    resultBitmap[x, y] = Color.TRANSPARENT
+                    resultBitmap.setPixel(x, y, Color.TRANSPARENT)
                 }
             }
         }
@@ -285,6 +330,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateHeaderUi() {
         val user = auth.currentUser
         if (user != null) {
