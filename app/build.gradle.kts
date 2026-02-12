@@ -30,12 +30,15 @@ android {
                 val keystoreProperties = Properties()
                 try {
                     keystoreProperties.load(keystorePropertiesFile.inputStream())
-                    val keystoreFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
-                    if (keystoreFile.exists()) {
+                    val keystoreFileName = keystoreProperties.getProperty("storeFile")
+                    val keystoreFile = rootProject.file(keystoreFileName)
+                    if (keystoreFile.exists() && !keystoreFile.isDirectory) {
                         storeFile = keystoreFile
                         storePassword = keystoreProperties.getProperty("storePassword")
                         keyAlias = keystoreProperties.getProperty("keyAlias")
                         keyPassword = keystoreProperties.getProperty("keyPassword")
+                    } else {
+                        println("Warning: Keystore file not found or is a directory: ${keystoreFile.absolutePath}")
                     }
                 } catch (e: Exception) {
                     println("Signing config error: ${e.message}")
@@ -64,10 +67,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Only use release signing if it was actually configured correctly above
+            // Fallback to debug signing if release config is invalid to allow building
             val releaseConfig = signingConfigs.findByName("release")
             if (releaseConfig?.storeFile != null) {
                 signingConfig = releaseConfig
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
+                println("Falling back to debug signing for release build because release keystore is missing.")
             }
         }
         debug {
