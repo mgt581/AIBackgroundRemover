@@ -33,4 +33,7 @@
     <string name="tiktok_url">https://www.tiktok.com/@your_profile</string>
     <string name="_2025_ai_photo_studio_all_rights_reserved">© 2025 AI Photo Studio. All rights reserved.</string>
     <string name="not_signed_in">not signed in</string>
+    <string name="your_gallery">Your Gallery</string>
+    <string name="back_to_studio">Back to Studio</string>
+    <string name="no_saved_images">No saved images yet</string>
 </resources>
