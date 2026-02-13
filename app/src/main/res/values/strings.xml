@@ -15,6 +15,7 @@
     <string name="download_to_device">Download to Device</string>
     <string name="save_to_gallery">Save to Gallery</string>
     <string name="change_background">Change Background</string>
+    <string name="choose_background">Choose Background Image</string>
     <string name="whatsapp">Whats App</string>
     <string name="tiktok">TikTok</string>
     <string name="facebook">Facebook</string>
@@ -33,6 +34,8 @@
     <string name="whatsapp_url">https://wa.me/message/YOUR_ID</string>
     <string name="tiktok_url">https://www.tiktok.com/@your_profile</string>
     <string name="not_signed_in">Not Signed In</string>
+    <string name="privacy">Privacy</string>
+    <string name="terms">Terms</string>
 
     <!-- Missing strings identified from build errors -->
     <string name="your_gallery">Your Gallery</string>
@@ -50,8 +53,6 @@
     <string name="back_to_home">Back to Home</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
-    <string name="privacy">Privacy</string>
-    <string name="terms">Terms</string>
     <string name="upload_a_photo_to_begin">Upload a photo to begin.</string>
     <string name="when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device">When signed in, your downloaded images are also saved to your gallery and downloaded to your device.</string>
 </resources>

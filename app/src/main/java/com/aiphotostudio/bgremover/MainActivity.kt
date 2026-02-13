@@ -19,6 +19,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -65,10 +66,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnChangeBackground: MaterialButton
     private lateinit var btnChooseBackground: MaterialButton
 
-    private lateinit var btnAuthAction: MaterialButton
-    private lateinit var btnHeaderSettings: MaterialButton
-    private lateinit var btnGallery: MaterialButton
-    private lateinit var btnSignUp: MaterialButton
+    private lateinit var btnAuthAction: TextView
+    private lateinit var btnHeaderSettings: Button
+    private lateinit var btnGallery: View
+    private lateinit var btnSignUp: TextView
     private lateinit var tvAuthStatus: TextView
     private var fabSave: ExtendedFloatingActionButton? = null
 
@@ -128,7 +129,7 @@ class MainActivity : AppCompatActivity() {
 
         btnAuthAction = findViewById(R.id.btn_auth_action)
         btnHeaderSettings = findViewById(R.id.btn_header_settings)
-        btnGallery = findViewById(R.id.btn_gallery)
+        btnGallery = findViewById(R.id.footer_gallery)
         btnSignUp = findViewById(R.id.btn_sign_up)
         tvAuthStatus = findViewById(R.id.tv_auth_status)
         fabSave = findViewById(R.id.fab_save)
@@ -321,10 +322,8 @@ class MainActivity : AppCompatActivity() {
         val maskHeight = mask.height
         val buffer = mask.buffer
         
-        // Reset buffer position and set byte order for proper reading
         buffer.rewind()
 
-        // Scale original to mask dimensions for processing
         val scaledOriginal = original.scale(maskWidth, maskHeight)
         val resultBitmap = createBitmap(maskWidth, maskHeight, Bitmap.Config.ARGB_8888)
 
@@ -339,7 +338,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Scale result back to the original size for high quality
         processedBitmap = resultBitmap.scale(original.width, original.height, true)
         ivMainPreview.setImageBitmap(processedBitmap)
 
