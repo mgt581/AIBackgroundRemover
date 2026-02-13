@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
         // Footer Policy Links
         findViewById<View>(R.id.footer_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co.uk/privacy")
+            openUrl("https://ai-photo-studio-24354.web.app/privacy")
         }
         findViewById<View>(R.id.footer_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
@@ -98,11 +98,9 @@ class MainActivity : AppCompatActivity() {
                 useWideViewPort = true
                 cacheMode = WebSettings.LOAD_DEFAULT
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                // Enable third-party cookies if needed for auth
                 setSupportZoom(true)
                 builtInZoomControls = true
                 displayZoomControls = false
-                // Allow file access for uploads if the website needs it
                 allowFileAccess = true
             }
             webViewClient = object : WebViewClient() {
@@ -119,10 +117,9 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-
             }
-            // Use .co.uk as seen in manifest host
-            loadUrl("https://aiphotostudio.co")
+            // Load the Firebase Hosting URL
+            loadUrl("https://ai-photo-studio-24354.web.app")
         }
     }
 

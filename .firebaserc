@@ -1,19 +1,8 @@
 {
   "projects": {
-    "defualt ": "pwa-ai-photo-studio-pro",
-    "default": "ai-photo-studio-24354",
-    "production": "ai-photo-studio-24354",
-    "prod": "ai-photo-studio-24354"
+    "default": "ai-photo-studio-24354"
   },
   "targets": {
-    "pwa-ai-photo-studio-pro": {
-      "hosting": {
-        "AI": [
-          "Background",
-          "Remover"
-        ]
-      }
-    },
     "ai-photo-studio-24354": {
       "hosting": {
         "default": [
@@ -21,6 +10,5 @@
         ]
       }
     }
-  },
-  "etags": {}
+  }
 }
