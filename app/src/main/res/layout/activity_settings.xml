@@ -44,6 +44,17 @@
                 android:text="@string/not_signed_in"
                 android:textColor="@color/brand_text_secondary" />
 
+            <Button
+                android:id="@+id/btn_manage_subscription"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/brand_accent"
+                android:text="Manage Subscription"
+                android:textColor="#212121"
+                android:visibility="gone" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
