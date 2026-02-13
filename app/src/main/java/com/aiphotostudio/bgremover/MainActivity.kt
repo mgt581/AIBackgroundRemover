@@ -320,6 +320,9 @@ class MainActivity : AppCompatActivity() {
         val maskWidth = mask.width
         val maskHeight = mask.height
         val buffer = mask.buffer
+        
+        // Reset buffer position and set byte order for proper reading
+        buffer.rewind()
 
         // Scale original to mask dimensions for processing
         val scaledOriginal = original.scale(maskWidth, maskHeight)
