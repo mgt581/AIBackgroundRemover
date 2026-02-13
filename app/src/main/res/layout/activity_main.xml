@@ -1,112 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/brand_background">
 
-    <!-- HEADER -->
-    <LinearLayout
+    <HorizontalScrollView
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
         android:background="@color/brand_surface"
-        android:gravity="center_vertical"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/logo"
-            android:contentDescription="@string/logo" />
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:scrollbars="none">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="12dp">
-            <TextView
-                android:id="@+id/tv_auth_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/not_signed_in"
-                android:textColor="@color/white"
-                android:textSize="12sp" />
-            <TextView
-                android:id="@+id/btn_auth_action"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sign_in"
-                android:textColor="@color/brand_primary"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/btn_sign_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sign_up"
-            android:textColor="@color/brand_primary"
-            android:layout_marginEnd="16dp"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:clickable="true"
-            android:focusable="true" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btn_header_settings"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:drawableTop="@android:drawable/ic_menu_manage"
-            android:drawableTint="@color/white"
-            android:contentDescription="@string/settings" />
-    </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_auth_action"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/sign_in"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:cornerRadius="20dp" />
 
-    <!-- CONTENT -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_sign_up"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/sign_up"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:cornerRadius="20dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_gallery"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/gallery"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:cornerRadius="20dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_header_settings"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/brand_primary"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/settings"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:cornerRadius="20dp" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/header"
-        app:layout_constraintBottom_toTopOf="@id/footer">
+        app:layout_constraintBottom_toTopOf="@id/footer_links"
+        app:layout_constraintTop_toBottomOf="@id/header">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="20dp"
-            android:gravity="center_horizontal">
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tv_auth_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/not_signed_in"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/ai_background_remover"
+                android:layout_marginBottom="16dp"
+                android:text="@string/upload_a_photo_to_begin"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="16sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_choose_photo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/brand_primary"
+                android:padding="14dp"
+                android:text="@string/choose_photo"
                 android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="24dp" />
+                app:cornerRadius="24dp"
+                tools:ignore="VisualLintButtonSize" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_remove_bg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/brand_surface"
+                android:padding="14dp"
+                android:text="@string/remove_background"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:cornerRadius="24dp"
+                app:strokeColor="@color/brand_primary"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_change_background"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/brand_surface"
+                android:padding="14dp"
+                android:text="@string/change_background"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:cornerRadius="24dp"
+                app:strokeColor="@color/brand_primary"
+                app:strokeWidth="1dp" />
 
             <FrameLayout
                 android:id="@+id/iv_main_preview_container"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:background="@color/brand_surface"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/checkerboard_background"
                 android:padding="4dp">
 
                 <ImageView
                     android:id="@+id/iv_main_preview"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:contentDescription="@string/preview"
                     android:scaleType="fitCenter"
-                    android:contentDescription="@string/preview" />
+                    tools:ignore="ImageContrastCheck" />
 
                 <ProgressBar
                     android:id="@+id/pb_processing"
@@ -116,91 +174,115 @@
                     android:visibility="gone" />
             </FrameLayout>
 
-            <Button
-                android:id="@+id/btn_choose_photo"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save_fixed"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/choose_photo"
                 android:layout_marginTop="24dp"
                 android:backgroundTint="@color/brand_primary"
+                android:padding="14dp"
+                android:text="@string/save_to_gallery"
                 android:textColor="@color/white"
-                android:padding="12dp" />
+                android:visibility="gone"
+                app:cornerRadius="24dp" />
 
-            <Button
-                android:id="@+id/btn_remove_bg"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_download_device"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/remove_background"
                 android:layout_marginTop="12dp"
-                android:backgroundTint="@color/status_green"
-                android:textColor="@color/white"
-                android:padding="12dp"
-                android:visibility="gone" />
+                android:backgroundTint="@color/brand_accent"
+                android:padding="14dp"
+                android:text="@string/download_to_device"
+                android:textColor="#212121"
+                android:visibility="gone"
+                app:cornerRadius="24dp" />
 
-            <LinearLayout
-                android:id="@+id/ll_post_process"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <Button
-                    android:id="@+id/btn_change_background"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/change_background"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="@color/brand_accent"
-                    android:textColor="@color/white"
-                    android:padding="12dp"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/btn_choose_background"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/choose_background"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="@color/brand_accent"
-                    android:textColor="@color/white"
-                    android:padding="12dp"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/btn_save_fixed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/save_to_gallery"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="@color/brand_primary"
-                    android:textColor="@color/white"
-                    android:padding="12dp"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/btn_download_device"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/download_to_device"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="@color/brand_surface"
-                    android:textColor="@color/white"
-                    android:padding="12dp"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="32dp">
-                <TextView android:id="@+id/btn_whatsapp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/whatsapp" android:textColor="@color/whatsapp_green" android:padding="8dp"/>
-                <TextView android:id="@+id/btn_tiktok" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tiktok" android:textColor="@color/white" android:padding="8dp"/>
-                <TextView android:id="@+id/btn_facebook" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/facebook" android:textColor="@color/facebook_blue" android:padding="8dp"/>
-            </LinearLayout>
-
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="12sp" />
         </LinearLayout>
     </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/footer_links"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/brand_surface"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/btn_whatsapp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/whatsapp"
+                android:textColor="@color/brand_light_blue"
+                android:padding="8dp"/>
+            <TextView
+                android:id="@+id/btn_tiktok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tiktok"
+                android:textColor="@color/brand_light_blue"
+                android:padding="8dp"/>
+            <TextView
+                android:id="@+id/btn_facebook"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/facebook"
+                android:textColor="@color/brand_light_blue"
+                android:padding="8dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+            <TextView
+                android:id="@+id/footer_privacy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/privacy_policy"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="12sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/divider"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="12sp"/>
+            <TextView
+                android:id="@+id/footer_terms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/terms_of_service"
+                android:textColor="@color/brand_text_secondary"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:text="@string/footer_ownership"
+            android:textColor="@color/brand_text_secondary"
+            android:textSize="11sp"/>
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_save"
@@ -208,97 +290,9 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="@string/save"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/brand_primary"
-        app:icon="@android:drawable/ic_menu_save"
-        app:iconTint="@color/white"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/footer"
+        app:icon="@android:drawable/ic_menu_save"
+        app:layout_constraintBottom_toTopOf="@id/footer_links"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- FOOTER -->
-    <LinearLayout
-        android:id="@+id/footer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/brand_surface"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <LinearLayout
-                android:id="@+id/footer_gallery"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp"
-                    android:contentDescription="@string/gallery"
-                    android:src="@android:drawable/ic_menu_gallery" app:tint="@color/white"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/gallery" android:textColor="@color/white" android:textSize="10sp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/footer_settings"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp"
-                    android:contentDescription="@string/settings"
-                    android:src="@android:drawable/ic_menu_manage" app:tint="@color/white"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings" android:textColor="@color/white" android:textSize="10sp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/footer_privacy"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_info_details" app:tint="@color/white"
-                    android:contentDescription="@string/privacy" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/privacy" android:textColor="@color/white" android:textSize="10sp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/footer_terms"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="true"
-                android:focusable="true">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_help" app:tint="@color/white"
-                    android:contentDescription="@string/terms" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/terms" android:textColor="@color/white" android:textSize="10sp"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/footer_ownership"
-            android:textColor="@color/brand_text_secondary"
-            android:textSize="10sp"
-            android:gravity="center"
-            android:paddingBottom="8dp" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
