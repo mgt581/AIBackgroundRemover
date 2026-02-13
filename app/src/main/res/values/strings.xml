@@ -52,4 +52,6 @@
     <string name="app_version">Version 1.0</string>
     <string name="back_to_home">Back to Home</string>
     <string name="delete">Delete</string>
+    <string name="upload_a_photo_to_begin">Upload a photo to begin</string>
+    <string name="when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device">When signed in, your downloaded images are also saved to your gallery and downloaded to your device</string>
 </resources>
