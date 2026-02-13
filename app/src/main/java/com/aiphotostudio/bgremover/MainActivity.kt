@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
 
             }
             // Use .co.uk as seen in manifest host
-            loadUrl("https://aiphotostudio.co.uk")
+            loadUrl("https://aiphotostudio.co")
         }
     }
 
