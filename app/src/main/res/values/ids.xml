@@ -28,4 +28,7 @@
     <item name="footer_terms" type="id" />
     <item name="fab_save" type="id" />
     <item name="btn_back_home" type="id" />
+
+<!-- Changed from -->
+    <!-- <item name="btn_back_home" type="id">back</item> -->
 </resources>
