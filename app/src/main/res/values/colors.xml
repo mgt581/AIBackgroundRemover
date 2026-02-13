@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_background">#0B1221</color>
+    <color name="brand_background">#3F51B5</color>
     <color name="brand_surface">#161E2E</color>
-    <color name="brand_primary">#6342FF</color>
+    <color name="brand_primary">#4285F4</color>
     <color name="brand_accent">#4285F4</color>
     <color name="brand_text">#FFFFFF</color>
     <color name="brand_text_secondary">#94A3B8</color>
-    <color name="brand_border">#1E293B</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="brand_border">#00BCD4</color>
 </resources>
