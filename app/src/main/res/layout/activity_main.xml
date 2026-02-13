@@ -66,7 +66,8 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:drawableTop="@android:drawable/ic_menu_manage"
-            android:drawableTint="@color/white" />
+            android:drawableTint="@color/white"
+            android:contentDescription="@string/settings" />
     </LinearLayout>
 
     <!-- CONTENT -->
@@ -94,6 +95,7 @@
                 android:layout_marginBottom="24dp" />
 
             <FrameLayout
+                android:id="@+id/iv_main_preview_container"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:background="@color/brand_surface"
@@ -147,6 +149,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/change_background"
+                    android:layout_marginTop="12dp"
+                    android:backgroundTint="@color/brand_accent"
+                    android:textColor="@color/white"
+                    android:padding="12dp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_choose_background"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/choose_background"
                     android:layout_marginTop="12dp"
                     android:backgroundTint="@color/brand_accent"
                     android:textColor="@color/white"
@@ -229,7 +242,7 @@
                 android:clickable="true"
                 android:focusable="true">
                 <ImageView android:layout_width="24dp" android:layout_height="24dp"
-                    android:contentDescription="TODO"
+                    android:contentDescription="@string/gallery"
                     android:src="@android:drawable/ic_menu_gallery" app:tint="@color/white"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/gallery" android:textColor="@color/white" android:textSize="10sp"/>
             </LinearLayout>
@@ -244,7 +257,7 @@
                 android:clickable="true"
                 android:focusable="true">
                 <ImageView android:layout_width="24dp" android:layout_height="24dp"
-                    android:contentDescription="TODO"
+                    android:contentDescription="@string/settings"
                     android:src="@android:drawable/ic_menu_manage" app:tint="@color/white"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings" android:textColor="@color/white" android:textSize="10sp"/>
             </LinearLayout>
@@ -258,8 +271,9 @@
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_info_details" app:tint="@color/white"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Privacy" android:textColor="@color/white" android:textSize="10sp"/>
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_info_details" app:tint="@color/white"
+                    android:contentDescription="@string/privacy" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/privacy" android:textColor="@color/white" android:textSize="10sp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -271,8 +285,9 @@
                 android:gravity="center"
                 android:clickable="true"
                 android:focusable="true">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_help" app:tint="@color/white"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Terms" android:textColor="@color/white" android:textSize="10sp"/>
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_help" app:tint="@color/white"
+                    android:contentDescription="@string/terms" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/terms" android:textColor="@color/white" android:textSize="10sp"/>
             </LinearLayout>
         </LinearLayout>
 
