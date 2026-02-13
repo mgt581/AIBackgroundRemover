@@ -5,5 +5,9 @@
             <solid android:color="#E0E0E0" />
         </shape>
     </item>
-    <item android:drawable="@drawable/checkerboard_tile" />
+    <item>
+        <bitmap
+            android:src="@drawable/checkerboard_tile"
+            android:tileMode="repeat" />
+    </item>
 </layer-list>
