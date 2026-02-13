@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">AI Background Remover</string>
     <string name="ai_background_remover">AI Background Remover</string>
+    <string name="ai_background_remover_app">AI Background remover</string>
     <string name="logo">Logo</string>
     <string name="gallery">Gallery</string>
     <string name="settings">Settings</string>
@@ -14,6 +15,7 @@
     <string name="download_to_device">Download to Device</string>
     <string name="save_to_gallery">Save to Gallery</string>
     <string name="change_background">Change Background</string>
+    <string name="choose_background">Choose Background</string>
     <string name="whatsapp">Whats App</string>
     <string name="tiktok">TikTok</string>
     <string name="facebook">Facebook</string>
@@ -32,9 +34,25 @@
     <string name="whatsapp_url">https://wa.me/message/YOUR_ID</string>
     <string name="tiktok_url">https://www.tiktok.com/@your_profile</string>
     <string name="_2025_ai_photo_studio_all_rights_reserved">© 2025 AI Photo Studio. All rights reserved.</string>
-    <string name="not_signed_in">Not signed in</string>
+    <string name="not_signed_in">not signed in</string>
+    <string name="your_gallery">Your Gallery</string>
+    <string name="back_to_studio">Back to Studio</string>
+    <string name="no_saved_images">No saved images yet</string>
+    <string name="back">Back</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="auth">Sign In</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_anonymously">Continue Anonymously</string>
+    <string name="save">Save</string>
+    <string name="privacy">Privacy</string>
+    <string name="terms">Terms</string>
     <string name="account_label">Account</string>
     <string name="about_label">About</string>
-    <string name="app_version">Version 1.0.0</string>
+    <string name="app_version">Version 1.0</string>
     <string name="back_to_home">Back to Home</string>
+    <string name="delete">Delete</string>
+    <string name="upload_a_photo_to_begin">Upload a photo to begin</string>
+    <string name="when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device">When signed in, your downloaded images are also saved to your gallery and downloaded to your device</string>
+    <string name="save_image_desc">Save Image</string>
 </resources>
