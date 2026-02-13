@@ -1,30 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.aiphotostudio.bgremover">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions: Must be above the <application> tag -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- Storage permissions for older Android versions -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <!-- Storage permissions for compatibility -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
-    <!-- Granular media permissions for Android 13+ -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
-        tools:ignore="PhotoAndVideoPolicy,SelectedPhotoAccess" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
-        tools:ignore="PhotoAndVideoPolicy,SelectedPhotoAccess" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"
-        tools:ignore="PhotoAndVideoPolicy" />
+    <!-- Media permissions for Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
-    <!-- Android 14+ Selected Photos Access -->
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
-        tools:ignore="PhotoAndVideoPolicy" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
-    <!-- CRITICAL: Allows Sign-In/Up buttons to communicate with Google/Chrome -->
     <queries>
         <intent>
             <action android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN" />
@@ -32,8 +27,6 @@
         <package android:name="com.google.android.gms" />
         <package android:name="com.android.chrome" />
     </queries>
-
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:name=".AIApplication"
@@ -59,7 +52,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Deep Linking Support -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -76,13 +68,14 @@
             android:exported="true"
             android:theme="@style/Theme.AIBackgroundRemover.NoActionBar" />
 
-        <activity android:name=".GalleryActivity" android:exported="false" android:label="My Gallery" />
-        <activity android:name=".SettingsActivity" android:exported="false" android:label="Settings" />
-        <activity android:name=".TermsActivity" android:exported="false" android:label="Terms of Service" />
+        <activity android:name=".GalleryActivity" android:exported="false" android:label="@string/gallery" />
+        <activity android:name=".SettingsActivity" android:exported="false" android:label="@string/settings" />
+        <activity android:name=".TermsActivity" android:exported="false" android:label="@string/terms_of_service" />
+        <activity android:name=".WebPageActivity" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.aiphotostudio.bgremover.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

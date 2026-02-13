@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Base background (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0h16v16h-16z" />
+    <!-- Two gray squares for the checkerboard -->
+    <path
+        android:fillColor="#EEEEEE"
+        android:pathData="M0,0h8v8h-8z M8,8h8v8h-8z" />
+</vector>

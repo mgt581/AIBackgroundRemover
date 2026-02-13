@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
@@ -36,7 +37,7 @@ class GalleryActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.rv_gallery)
         tvEmpty = findViewById(R.id.tv_empty)
 
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
         loadImages()
     }
 
@@ -48,7 +49,12 @@ class GalleryActivity : AppCompatActivity() {
             val files = directory.listFiles()
             files?.sortByDescending { it.lastModified() }
             files?.forEach { file ->
-                imageList.add(Uri.fromFile(file))
+                val uri = FileProvider.getUriForFile(
+                    this,
+                    "${packageName}.fileprovider",
+                    file
+                )
+                imageList.add(uri)
             }
         }
 
@@ -69,13 +75,23 @@ class GalleryActivity : AppCompatActivity() {
 
     private fun deleteImage(uri: Uri) {
         try {
-            val path = uri.path
-            if (path != null) {
-                val file = File(path)
+            // Since we're using FileProvider URIs, we need to handle deletion carefully
+            // If the URI is a file URI or content URI from our provider
+            val directory = File(filesDir, "saved_images")
+            val files = directory.listFiles()
+            
+            // Extract filename from URI if possible, or match by other means
+            // For simplicity in this internal app, we might need a better way if URIs are complex
+            // But usually, we can find the file in our private directory
+            
+            val fileName = uri.lastPathSegment
+            if (fileName != null) {
+                val file = File(directory, fileName)
                 if (file.exists()) {
-                    file.delete()
-                    loadImages()
-                    Toast.makeText(this, "Image deleted", Toast.LENGTH_SHORT).show()
+                    if (file.delete()) {
+                        loadImages()
+                        Toast.makeText(this, "Image deleted", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -85,15 +101,18 @@ class GalleryActivity : AppCompatActivity() {
 
     private fun downloadImage(uri: Uri) {
         try {
-            val path = uri.path ?: return
-            val file = File(path)
+            val directory = File(filesDir, "saved_images")
+            val fileNameFromUri = uri.lastPathSegment ?: return
+            val file = File(directory, fileNameFromUri)
+            if (!file.exists()) return
+
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val values = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AIPhotoStudio")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Background Remover")
                 }
 
                 val contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -105,12 +124,12 @@ class GalleryActivity : AppCompatActivity() {
                             inputStream.copyTo(outputStream!!)
                         }
                     }
-                    Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
                 }
             } else {
                 @Suppress("DEPRECATION")
                 val publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                val studioDir = File(publicDir, "AIPhotoStudio")
+                val studioDir = File(publicDir, "AI Background Remover")
                 if (!studioDir.exists()) studioDir.mkdirs()
 
                 val destFile = File(studioDir, fileName)
@@ -122,8 +141,10 @@ class GalleryActivity : AppCompatActivity() {
 
                 // Refresh MediaStore
                 @Suppress("DEPRECATION")
-                sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(destFile)))
-                Toast.makeText(this, "Saved to Gallery", Toast.LENGTH_SHORT).show()
+                val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                mediaScanIntent.data = Uri.fromFile(destFile)
+                sendBroadcast(mediaScanIntent)
+                Toast.makeText(this, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Log.e("GalleryActivity", "Error downloading image", e)

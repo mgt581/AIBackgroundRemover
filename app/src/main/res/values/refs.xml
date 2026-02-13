@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="ic_whatsapp_brand" type="drawable">@drawable/btn_primary</item>
+    <item name="ic_tiktok_brand" type="drawable">@drawable/btn_primary</item>
+    <item name="ic_facebook_brand" type="drawable">@drawable/btn_primary</item>
+</resources>

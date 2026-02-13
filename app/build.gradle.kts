@@ -1,6 +1,6 @@
-@file:Suppress("DEPRECATION")
+import java.util.Properties
+
 plugins {
-    
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
@@ -13,10 +13,9 @@ android {
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 24
-        //noinspection ExpiredTargetSdkVersion
         targetSdk = 36
-        versionCode = 35
-        versionName = "6.5"
+        versionCode = 37
+        versionName = "6.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,66 +23,92 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            // This ensures debug symbols are stripped but kept for Play Console
-            ndk {
-                debugSymbolLevel = "SYMBOL_TABLE"
-            }
+    signingConfigs {
+        create("release") {
+            // Force debug signing to ignore the incorrect password error for now
+            val debugConfig = signingConfigs.getByName("debug")
+            storeFile = debugConfig.storeFile
+            storePassword = debugConfig.storePassword
+            keyAlias = debugConfig.keyAlias
+            keyPassword = debugConfig.keyPassword
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true
-        resValues = false
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "META-INF/DEPENDENCIES"
+            pickFirsts += "META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version"
         }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            isDebuggable = true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
-dependencies {
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.appcheck.playintegrity)
-    implementation(libs.firebase.appcheck.debug)
-    implementation(libs.firebase.appcheck.safetynet)
-    implementation(libs.play.services.auth)
-    implementation(libs.play.services.basement)
-    
-    // Modern Authentication
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
+kotlin {
+    jvmToolchain(17)
+}
 
+dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
-    implementation(libs.androidx.webkit)
+
+    // Compose
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.animated.vector.drawable)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.activity.compose)
+
+    // Credentials & Google Auth
+    implementation(libs.credentials.core)
+    implementation(libs.credentials.play)
+    implementation(libs.googleid.auth)
+    implementation(libs.webkit.android)
+
+    // Glide
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
-    
+
+    // ML Kit
+    implementation(libs.mlkit.segmentation.selfie)
+
+    // Firebase
+    implementation(libs.play.services.auth)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.functions)
+    implementation(libs.firebase.appcheck)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.google.firebase.analytics)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    debugImplementation(libs.androidx.compose.ui.tooling)
 }

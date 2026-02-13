@@ -4,7 +4,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
+import android.widget.Button
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -17,8 +17,8 @@ class GalleryAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val ivImage: ImageView = view.findViewById(R.id.iv_image)
-        val btnDelete: ImageButton = view.findViewById(R.id.btn_delete)
-        val btnDownload: ImageButton = view.findViewById(R.id.btn_download)
+        val btnDelete: Button = view.findViewById(R.id.btn_delete)
+        val btnDownload: Button = view.findViewById(R.id.btn_download)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,8 +29,8 @@ class GalleryAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val uri = images[position]
-        
-        Glide.with(holder.ivImage.context)
+
+        Glide.with(holder.itemView.context)
             .load(uri)
             .centerCrop()
             .into(holder.ivImage)

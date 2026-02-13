@@ -5,4 +5,30 @@
     <item name="btn_remove_bg" type="id" />
     <item name="btn_choose_photo" type="id" />
     <item name="btn_auth_signin" type="id" />
+    <item name="iv_main_preview" type="id" />
+    <item name="pb_processing" type="id" />
+    <item name="ll_image_actions" type="id" />
+    <item name="btn_download_device" type="id" />
+    <item name="btn_change_background" type="id" />
+    <item name="btn_share" type="id" />
+    <item name="ll_social_footer" type="id" />
+    <item name="btn_save_fixed" type="id" />
+    <item name="btn_gallery" type="id" />
+    <item name="btn_auth_action" type="id" />
+    <item name="btn_header_settings" type="id" />
+    <item name="btn_sign_up" type="id" />
+    <item name="tv_auth_status" type="id" />
+    <item name="btn_whatsapp" type="id" />
+    <item name="btn_tiktok" type="id" />
+    <item name="btn_facebook" type="id" />
+    <item name="footer_gallery" type="id" />
+    <item name="footer_contact" type="id" />
+    <item name="footer_settings" type="id" />
+    <item name="footer_privacy" type="id" />
+    <item name="footer_terms" type="id" />
+    <item name="fab_save" type="id" />
+    <item name="btn_back_home" type="id" />
+
+<!-- Changed from -->
+    <!-- <item name="btn_back_home" type="id">back</item> -->
 </resources>
