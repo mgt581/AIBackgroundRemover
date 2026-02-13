@@ -268,7 +268,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openCamera() {
         val photoFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temp_image.jpg")
-        cameraImageUri = FileProvider.getUriForFile(this, "$packageName.fileprovider", photoFile)
+        cameraImageUri = FileProvider.getUriForFile(this, "$packageName.file-provider", photoFile)
         takePicture.launch(cameraImageUri!!)
     }
 
@@ -336,7 +336,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Scale result back to original size for high quality
+        // Scale result back to the original size for high quality
         processedBitmap = resultBitmap.scale(original.width, original.height, true)
         ivMainPreview.setImageBitmap(processedBitmap)
 
@@ -418,7 +418,7 @@ class MainActivity : AppCompatActivity() {
     private fun openUrl(url: String) {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
         }
     }
