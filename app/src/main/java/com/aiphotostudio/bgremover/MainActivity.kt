@@ -120,20 +120,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    // Optional: show a loading indicator
-                }
-
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    // Optional: hide loading indicator
-                }
-
-                override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: android.webkit.WebResourceError?) {
-                    super.onReceivedError(view, request, error)
-                    // Log error for debugging
-                }
             }
             // Use .co.uk as seen in manifest host
             loadUrl("https://aiphotostudio.co.uk")
