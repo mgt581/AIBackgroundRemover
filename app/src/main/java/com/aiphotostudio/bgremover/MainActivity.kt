@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
         // Footer Policy Links
         findViewById<View>(R.id.footer_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy")
+            openUrl("https://aiphotostudio.co.uk/privacy")
         }
         findViewById<View>(R.id.footer_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
@@ -98,6 +98,12 @@ class MainActivity : AppCompatActivity() {
                 useWideViewPort = true
                 cacheMode = WebSettings.LOAD_DEFAULT
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                // Enable third-party cookies if needed for auth
+                setSupportZoom(true)
+                builtInZoomControls = true
+                displayZoomControls = false
+                // Allow file access for uploads if the website needs it
+                allowFileAccess = true
             }
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -113,8 +119,24 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+
+                override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    // Optional: show a loading indicator
+                }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    // Optional: hide loading indicator
+                }
+
+                override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: android.webkit.WebResourceError?) {
+                    super.onReceivedError(view, request, error)
+                    // Log error for debugging
+                }
             }
-            loadUrl("https://aiphotostudio.co")
+            // Use .co.uk as seen in manifest host
+            loadUrl("https://aiphotostudio.co.uk")
         }
     }
 
