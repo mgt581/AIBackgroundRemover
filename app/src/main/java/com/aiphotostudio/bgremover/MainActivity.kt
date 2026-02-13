@@ -45,6 +45,7 @@ import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.ByteOrder
 
 class MainActivity : AppCompatActivity() {
 
@@ -323,6 +324,7 @@ class MainActivity : AppCompatActivity() {
         
         // Reset buffer position and set byte order for proper reading
         buffer.rewind()
+        buffer.order(ByteOrder.nativeOrder())
 
         // Scale original to mask dimensions for processing
         val scaledOriginal = original.scale(maskWidth, maskHeight)
