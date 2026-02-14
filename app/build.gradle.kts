@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.aiphotostudio.bgremover"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = rootProject.extra["myValue"] as String
+        applicationId = "com.aiphotostudio.bgremover"
         minSdk = 26
-        targetSdkVersion(rootProject.extra["myValue"] as String)
+        targetSdk = 35
         versionCode = 37
         versionName = "6.7"
 
@@ -19,7 +19,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        applicationIdSuffix = rootProject.extra["myValue"] as String
     }
 
     signingConfigs {
@@ -31,8 +30,7 @@ android {
         }
         create("release") {
             val debugConfig = signingConfigs.getByName("debug")
-            val keystorePath = rootProject.extra["myValue"]?.toString() ?: ""
-            storeFile = if (keystorePath.isNotEmpty()) file(keystorePath) else null
+            storeFile = file("/Users/alexbryantmacm12020/Desktop/AIBackgroundRemover/signing.keystore")
             storePassword = debugConfig.storePassword
             keyAlias = debugConfig.keyAlias
             keyPassword = debugConfig.keyPassword
@@ -65,7 +63,7 @@ android {
         debug {
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
-            versionNameSuffix = rootProject.extra["myValue"] as String
+            applicationIdSuffix = ".debug"
         }
     }
 
