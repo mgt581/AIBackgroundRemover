@@ -9,9 +9,9 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.aiphotostudio.bgremover"
-        minSdk = 24
-        targetSdk = 36
+        applicationId = rootProject.extra["myValue"] as String
+        minSdk = 26
+        targetSdkVersion(rootProject.extra["myValue"] as String)
         versionCode = 37
         versionName = "6.7"
 
@@ -19,17 +19,17 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        applicationIdSuffix = rootProject.extra["myValue"] as String
     }
 
     signingConfigs {
         getByName("debug") {
             storeFile = file("/Users/alexbryantmacm12020/Desktop/AIBackgroundRemover/signing.keystore")
-            storePassword = "Alfia10"
+            storePassword = "Alifa10"
             keyAlias = "Alifa10"
             keyPassword = "Alifa10"
         }
         create("release") {
-            // Force debug signing to ignore the incorrect password error for now
             val debugConfig = signingConfigs.getByName("debug")
             val keystorePath = rootProject.extra["myValue"]?.toString() ?: ""
             storeFile = if (keystorePath.isNotEmpty()) file(keystorePath) else null
@@ -64,6 +64,8 @@ android {
         }
         debug {
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = rootProject.extra["myValue"] as String
         }
     }
 

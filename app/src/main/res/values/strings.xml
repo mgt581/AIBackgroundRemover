@@ -25,14 +25,14 @@
     <string name="terms_of_service">Terms of Service</string>
     <string name="footer_ownership">© 2025 AI Photo Studio. All rights reserved.</string>
     <string name="divider"> | </string>
-    <string name="default_web_client_id" translatable="false">YOUR_WEB_CLIENT_ID</string>
+    <string name="default_web_client_id" translatable="false">495715411996-hlru6g459h2s8lut08c8575n06b7on18.apps.googleusercontent.com</string>
     <string name="saved_to_gallery">Saved to gallery</string>
     <string name="value">Value</string>
     <string name="use">Use</string>
     <string name="user">User</string>
     <string name="facebook_url">https://www.facebook.com/share/183sNAUy8H/?mibextid=wwXIfr</string>
-    <string name="whatsapp_url">https://wa.me/message/YOUR_ID</string>
-    <string name="tiktok_url">https://www.tiktok.com/@your_profile</string>
+    <string name="whatsapp_url">https://wa.me/447843969254</string>
+    <string name="tiktok_url">https://www.tiktok.com/@bryantgroupholdin?_r=1&amp;_t=ZN-93hwoXqlQuk</string>
     <string name="_2025_ai_photo_studio_all_rights_reserved">© 2025 AI Photo Studio. All rights reserved.</string>
     <string name="not_signed_in">not signed in</string>
     <string name="your_gallery">Your Gallery</string>
@@ -55,4 +55,37 @@
     <string name="upload_a_photo_to_begin">Upload a photo to begin</string>
     <string name="when_signed_in_your_downloaded_images_are_also_saved_to_your_gallery_and_downloaded_to_your_device">When signed in, your downloaded images are also saved to your gallery and downloaded to your device</string>
     <string name="save_image_desc">Save Image</string>
+
+    <!-- Additional strings from secondary source -->
+    <string name="signed_in_status">✓ Signed in</string>
+    <string name="signed_in_as">✓ %1$s</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="user_placeholder">User</string>
+    <string name="signed_out_success">Signed out successfully</string>
+    <string name="processing_download">Processing download...</string>
+    <string name="save_failed">Save failed: %1$s</string>
+    <string name="download_started">Download started...</string>
+    <string name="camera_permission_required">Camera permission required for photos</string>
+    <string name="select_image_source">Select Image Source</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="choose_from_gallery">Choose from Gallery</string>
+    <string name="bds_url">bryantdigitalsolutions.com</string>
+    <string name="bgh_url">bryantgroupholdings.co.uk</string>
+    <string name="mpa_url">https://multipostapp.co.uk</string>
+    <string name="owner_email">alex@bryantdigitalsolutions.com</string>
+    <string name="continue_as_guest">Continue as Guest</string>
+    <string name="cancel">Cancel</string>
+    <string name="login_with_email">Login with Email</string>
+    <string name="ai_photo_studio">Ai Photo Studio</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="day_pass">Day Pass £1</string>
+    <string name="monthly_pass">Monthly £4.99</string>
+    <string name="yearly_pass">Start Free Trial (Yearly)</string>
+    <string name="contact_us">CONTACT US</string>
+    <string name="header_title">|</string>
+    <string name="settings_button">SETTINGS</string>
+    <string name="contact_us_button">CONTACT US</string>
+    <string name="button_gallery">GALLERY</string>
+    <string name="multi_post_app">MULTI POST APP</string>
+    <string name="ai_photo_studio_app">AI Photo Studio</string>
 </resources>
