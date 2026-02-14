@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViews() {
         // Header/Auth Elements
-        btnAuthAction = findViewById(R.id.btn_auth_action)
+        btnAuthAction = findViewById(R.id.ybtn_auth_action)
         btnHeaderSettings = findViewById(R.id.btn_header_settings)
         btnGallery = findViewById(R.id.btn_gallery)
         btnSignUp = findViewById(R.id.btn_sign_up)
