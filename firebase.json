@@ -3,9 +3,25 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
-  "functions": {
-    "source": "functions"
-  },
+  "functions": [
+    {
+      "codebase": "default",
+      "source": "functions"
+    },
+    {
+      "source": "remove-bg",
+      "codebase": "remove-bg",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "runtime": "python313"
+    }
+  ],
   "hosting": {
     "public": "public",
     "target": "default",

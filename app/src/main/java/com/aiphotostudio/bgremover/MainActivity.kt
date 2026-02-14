@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var auth: FirebaseAuth
+    lateinit var auth: FirebaseAuth
     private lateinit var backgroundWebView: WebView
 
     // UI Elements (Headers/Buttons)

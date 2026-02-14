@@ -4,3 +4,4 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.google.services) apply false
 }
+val myValue by extra("/Users/alexbryantmacm12020/Desktop/AIBackgroundRemover/functions/index.js")

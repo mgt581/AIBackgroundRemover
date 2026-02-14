@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -24,10 +22,17 @@ android {
     }
 
     signingConfigs {
+        getByName("debug") {
+            storeFile = file("/Users/alexbryantmacm12020/Desktop/AIBackgroundRemover/signing.keystore")
+            storePassword = "Alfia10"
+            keyAlias = "Alifa10"
+            keyPassword = "Alifa10"
+        }
         create("release") {
             // Force debug signing to ignore the incorrect password error for now
             val debugConfig = signingConfigs.getByName("debug")
-            storeFile = debugConfig.storeFile
+            val keystorePath = rootProject.extra["myValue"]?.toString() ?: ""
+            storeFile = if (keystorePath.isNotEmpty()) file(keystorePath) else null
             storePassword = debugConfig.storePassword
             keyAlias = debugConfig.keyAlias
             keyPassword = debugConfig.keyPassword
@@ -37,6 +42,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
 
     packaging {
