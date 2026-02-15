@@ -10,4 +10,11 @@
     <color name="black">#00090D</color>
     <color name="white">#F1F3F6</color>
     <color name="brand_light_blue">#E3F2FD</color>
+
+    <!-- UI Status Colors -->
+    <color name="status_green">#4CAF50</color>
+
+    <!-- Brand Colors -->
+    <color name="whatsapp_green">#25D366</color>
+    <color name="facebook_blue">#1877F2</color>
 </resources>

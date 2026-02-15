@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -21,19 +23,25 @@ android {
         }
     }
 
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(keystorePropertiesFile.inputStream())
+    }
+
     signingConfigs {
-        getByName("debug") {
-            storeFile = file("/Users/alexbryantmacm12020/Desktop/AIBackgroundRemover/signing.keystore")
-            storePassword = "Alifa10"
-            keyAlias = "Alifa10"
-            keyPassword = "Alifa10"
-        }
         create("release") {
-            val debugConfig = signingConfigs.getByName("debug")
-            storeFile = file("/Users/alexbryantmacm12020/Desktop/AIBackgroundRemover/signing.keystore")
-            storePassword = debugConfig.storePassword
-            keyAlias = debugConfig.keyAlias
-            keyPassword = debugConfig.keyPassword
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+            storePassword = keystoreProperties["storePassword"] as String?
+        }
+        getByName("debug") {
+            // Use release config for debug if needed, or point to standard debug.keystore
+            keyAlias = keystoreProperties["keyAlias"] as String? ?: "androiddebugkey"
+            keyPassword = keystoreProperties["keyPassword"] as String? ?: "android"
+            storeFile = keystoreProperties["storeFile"]?.let { file(it) } ?: (signingConfigs.getByName("debug").storeFile)
+            storePassword = keystoreProperties["storePassword"] as String? ?: "android"
         }
     }
 
