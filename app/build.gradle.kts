@@ -130,4 +130,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Security Fix for Guava vulnerability
+    constraints {
+        implementation("com.google.guava:guava:32.1.2-android") {
+            because("Earlier versions have a security vulnerability")
+        }
+    }
 }
