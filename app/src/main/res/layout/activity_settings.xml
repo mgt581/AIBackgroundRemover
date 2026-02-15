@@ -82,21 +82,21 @@
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Settings"
+                android:text="@string/settings"
                 android:textColor="@color/white" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_sign_in"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sign In"
+                android:text="@string/sign_in"
                 android:textColor="@color/white" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_sign_up"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sign Up"
+                android:text="@string/sign_up"
                 android:textColor="@color/white" />
         </LinearLayout>
 
@@ -110,21 +110,21 @@
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Gallery"
+                android:text="@string/gallery"
                 android:textColor="@color/white" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_privacy"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Privacy Policy"
+                android:text="@string/privacy_policy"
                 android:textColor="@color/white" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_terms"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Terms"
+                android:text="@string/terms"
                 android:textColor="@color/white" />
         </LinearLayout>
     </LinearLayout>

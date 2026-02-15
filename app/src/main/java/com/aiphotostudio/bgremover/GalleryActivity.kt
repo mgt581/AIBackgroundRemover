@@ -14,8 +14,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -39,6 +41,40 @@ class GalleryActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         loadImages()
+        setupFooter()
+    }
+
+    private fun setupFooter() {
+        findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_sign_in).setOnClickListener {
+            if (FirebaseAuth.getInstance().currentUser == null) {
+                startActivity(Intent(this, LoginActivity::class.java))
+            } else {
+                Toast.makeText(this, "Already signed in", Toast.LENGTH_SHORT).show()
+            }
+        }
+        findViewById<View>(R.id.footer_btn_sign_up).setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
+            // Already here
+        }
+        findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
+            openUrl("https://ai-photo-studio-24354.web.app/privacy")
+        }
+        findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
+            startActivity(Intent(this, TermsActivity::class.java))
+        }
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+        } catch (_: Exception) {
+            Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadImages() {
@@ -75,15 +111,7 @@ class GalleryActivity : AppCompatActivity() {
 
     private fun deleteImage(uri: Uri) {
         try {
-            // Since we're using FileProvider URIs, we need to handle deletion carefully
-            // If the URI is a file URI or content URI from our provider
             val directory = File(filesDir, "saved_images")
-            val files = directory.listFiles()
-            
-            // Extract filename from URI if possible, or match by other means
-            // For simplicity in this internal app, we might need a better way if URIs are complex
-            // But usually, we can find the file in our private directory
-            
             val fileName = uri.lastPathSegment
             if (fileName != null) {
                 val file = File(directory, fileName)
@@ -139,7 +167,6 @@ class GalleryActivity : AppCompatActivity() {
                     }
                 }
 
-                // Refresh MediaStore
                 @Suppress("DEPRECATION")
                 val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
                 mediaScanIntent.data = Uri.fromFile(destFile)

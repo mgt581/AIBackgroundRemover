@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 
@@ -52,12 +53,46 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_about_privacy).setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://aiphotostudio.co/privacy"))
-            startActivity(intent)
+            openUrl("https://aiphotostudio.co/privacy")
         }
 
         findViewById<Button>(R.id.btn_back_home).setOnClickListener {
             goToHome()
+        }
+
+        setupFooter()
+    }
+
+    private fun setupFooter() {
+        findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
+            // Already here
+        }
+        findViewById<View>(R.id.footer_btn_sign_in).setOnClickListener {
+            if (auth.currentUser == null) {
+                startActivity(Intent(this, LoginActivity::class.java))
+            } else {
+                Toast.makeText(this, "Already signed in", Toast.LENGTH_SHORT).show()
+            }
+        }
+        findViewById<View>(R.id.footer_btn_sign_up).setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
+            startActivity(Intent(this, GalleryActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
+            openUrl("https://ai-photo-studio-24354.web.app/privacy")
+        }
+        findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
+            startActivity(Intent(this, TermsActivity::class.java))
+        }
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+        } catch (_: Exception) {
+            Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
         }
     }
 
