@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : AppCompatActivity() {
 
     lateinit var auth: FirebaseAuth
-    private lateinit var backgroundWebView: WebView
+    private lateinit var webView: WebView
 
     // UI Elements (Headers/Buttons)
     private lateinit var btnAuthAction: MaterialButton
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         btnFacebook = findViewById(R.id.btn_facebook)
 
         // Main Content WebView
-        backgroundWebView = findViewById(R.id.backgroundWebView)
+        webView = findViewById(R.id.webView)
     }
 
     private fun setupClickListeners() {
@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        backgroundWebView.apply {
+        webView.apply {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -102,6 +102,9 @@ class MainActivity : AppCompatActivity() {
                 builtInZoomControls = true
                 displayZoomControls = false
                 allowFileAccess = true
+                allowContentAccess = true
+                javaScriptCanOpenWindowsAutomatically = true
+                mediaPlaybackRequiresUserGesture = false
             }
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -118,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-            // Load the requested URL
+            // Load the background remover tool
             loadUrl("https://aiphotostudio.co")
         }
     }
@@ -126,8 +129,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (backgroundWebView.canGoBack()) {
-                    backgroundWebView.goBack()
+                if (webView.canGoBack()) {
+                    webView.goBack()
                 } else {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
