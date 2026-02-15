@@ -86,6 +86,30 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.footer_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
         }
+
+        // New Footer Buttons
+        findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_sign_in).setOnClickListener {
+            if (auth.currentUser == null) {
+                startActivity(Intent(this, LoginActivity::class.java))
+            } else {
+                Toast.makeText(this, "Already signed in", Toast.LENGTH_SHORT).show()
+            }
+        }
+        findViewById<View>(R.id.footer_btn_sign_up).setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
+            startActivity(Intent(this, GalleryActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
+            openUrl("https://ai-photo-studio-24354.web.app/privacy")
+        }
+        findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
+            startActivity(Intent(this, TermsActivity::class.java))
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
