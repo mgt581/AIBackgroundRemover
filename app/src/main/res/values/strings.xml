@@ -2,6 +2,8 @@
 
     <!-- App Identity -->
     <string name="app_name">AI Photo Studio</string>
+    <string name="ai_background_remover" translatable="false">AI Background Remover</string>
+    <string name="ai_background_remover_app" translatable="false">AI Background Remover</string>
     <string name="logo" translatable="false">Logo</string>
 
     <!-- Navigation -->
@@ -16,6 +18,7 @@
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
     <string name="sign_out">Sign Out</string>
+    <string name="auth">Sign In</string>
     <string name="or">or</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
@@ -46,8 +49,8 @@
     <string name="delete">Delete</string>
     <string name="saved_to_gallery">Saved to gallery</string>
     <string name="save_image_desc">Save Image</string>
-    <string name="processing_download">Processing download...</string>
-    <string name="download_started">Download started...</string>
+    <string name="processing_download">Processing download…</string>
+    <string name="download_started">Download started…</string>
     <string name="save_failed">Save failed: %1$s</string>
 
     <!-- Gallery -->
@@ -96,8 +99,6 @@
     <string name="owner_email" translatable="false">alex@bryantdigitalsolutions.com</string>
 
     <!-- Technical -->
-    <string name="default_web_client_id" translatable="false">
-        495715411996-hlru6g459h2s8lut08c8575n06b7on18.apps.googleusercontent.com
-    </string>
+    <string name="default_web_client_id" translatable="false">495715411996-slru6g459h2s8lut08c8575n06b7on18.apps.intercontinental.com</string>
 
 </resources>
