@@ -16,13 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_header_settings"
-                style="@style/Widget.Material3.Button.IconButton"
+            <TextView
+                android:id="@+id/tv_header_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:icon="@android:drawable/ic_menu_manage"
-                app:iconTint="@color/white"
+                android:text="AI Background Remover"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -36,9 +37,10 @@
                 android:singleLine="true"
                 android:textAlignment="center"
                 android:textColor="@color/white"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/ybtn_auth_action"
-                app:layout_constraintStart_toEndOf="@id/btn_header_settings"
+                app:layout_constraintStart_toEndOf="@id/tv_header_title"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton
