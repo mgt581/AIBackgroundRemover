@@ -118,8 +118,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-            // Load the Firebase Hosting URL
-            loadUrl("https://ai-photo-studio-24354.web.app")
+            // Load the requested URL
+            loadUrl("https://aiphotostudio.co")
         }
     }
 
