@@ -237,7 +237,7 @@
             android:padding="8dp">
 
             <LinearLayout
-                android:id="@+id/footer_gallery"
+                android:id="@+id/footer_btn_gallery"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -264,7 +264,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/footer_settings"
+                android:id="@+id/footer_btn_settings"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -290,7 +290,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/footer_privacy"
+                android:id="@+id/footer_btn_privacy"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -316,7 +316,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/footer_terms"
+                android:id="@+id/footer_btn_terms"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

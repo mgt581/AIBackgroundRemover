@@ -79,15 +79,7 @@ class MainActivity : AppCompatActivity() {
         btnTikTok.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
         btnFacebook.setOnClickListener { openUrl(getString(R.string.facebook_url)) }
 
-        // Footer Policy Links
-        findViewById<View>(R.id.footer_privacy).setOnClickListener {
-            openUrl("https://ai-photo-studio-24354.web.app/privacy")
-        }
-        findViewById<View>(R.id.footer_terms).setOnClickListener {
-            startActivity(Intent(this, TermsActivity::class.java))
-        }
-
-        // New Footer Buttons
+        // Footer Navigation Buttons
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
