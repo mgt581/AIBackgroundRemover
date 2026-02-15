@@ -2,8 +2,11 @@ package com.aiphotostudio.bgremover
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -11,6 +14,7 @@ import android.webkit.WebViewClient
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.android.material.button.MaterialButton
@@ -20,6 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var auth: FirebaseAuth
     private lateinit var backgroundWebView: WebView
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
     // UI Elements (Headers/Buttons)
     private lateinit var btnAuthAction: MaterialButton
@@ -32,6 +37,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnWhatsApp: TextView
     private lateinit var btnTikTok: TextView
     private lateinit var btnFacebook: TextView
+
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        val results = if (uri != null) arrayOf(uri) else null
+        filePathCallback?.onReceiveValue(results)
+        filePathCallback = null
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,6 +129,7 @@ class MainActivity : AppCompatActivity() {
                 builtInZoomControls = true
                 displayZoomControls = false
                 allowFileAccess = true
+                allowContentAccess = true
             }
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -132,6 +144,18 @@ class MainActivity : AppCompatActivity() {
                             true
                         }
                     }
+                }
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    this@MainActivity.filePathCallback?.onReceiveValue(null)
+                    this@MainActivity.filePathCallback = filePathCallback
+                    filePickerLauncher.launch("image/*")
+                    return true
                 }
             }
             // Load the requested URL
