@@ -30,18 +30,24 @@ android {
     }
 
     signingConfigs {
+        val ksFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+        val hasKeystore = ksFile?.exists() == true
+
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String?
-            keyPassword = keystoreProperties["keyPassword"] as String?
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-            storePassword = keystoreProperties["storePassword"] as String?
+            if (hasKeystore) {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = ksFile
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
         }
         getByName("debug") {
-            // Use release config for debug if needed, or point to standard debug.keystore
-            keyAlias = keystoreProperties["keyAlias"] as String? ?: "androiddebugkey"
-            keyPassword = keystoreProperties["keyPassword"] as String? ?: "android"
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) } ?: (signingConfigs.getByName("debug").storeFile)
-            storePassword = keystoreProperties["storePassword"] as String? ?: "android"
+            if (hasKeystore) {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = ksFile
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
         }
     }
 
