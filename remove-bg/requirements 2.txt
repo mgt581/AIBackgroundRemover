@@ -1,0 +1,9 @@
+firebase-functions~=0.1.0
+firebase-admin
+transformers
+torch
+torchvision
+numpy
+pillow
+scikit-image
+requests
