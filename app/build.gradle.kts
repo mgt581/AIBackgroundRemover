@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.aiphotostudio.bgremover"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
@@ -63,7 +63,6 @@ android {
         debug {
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
-            applicationIdSuffix = ".debug"
         }
     }
 
