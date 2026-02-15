@@ -75,6 +75,7 @@
         <activity android:name=".GalleryActivity" android:exported="false" android:label="@string/gallery" />
         <activity android:name=".SettingsActivity" android:exported="false" android:label="@string/settings" />
         <activity android:name=".TermsActivity" android:exported="false" android:label="@string/terms_of_service" />
+        <activity android:name=".PrivacyActivity" android:exported="false" android:label="@string/privacy_policy" />
         <activity android:name=".WebPageActivity" android:exported="false" />
 
         <provider
