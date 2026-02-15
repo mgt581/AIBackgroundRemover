@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose from photos"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:drawablePadding="12dp"
+        android:drawableStart="@android:drawable/ic_menu_gallery"
+        android:id="@+id/btn_choose_photo_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#DDDDDD"
+        android:layout_marginVertical="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Presets"
+        android:textStyle="bold"
+        android:padding="8dp"/>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:alignmentMode="alignMargins"
+        android:padding="8dp">
+
+        <View android:id="@+id/color_red" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#FF0000" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_blue" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#0000FF" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_green" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#00FF00" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_yellow" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#FFFF00" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_pink" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#FFC0CB" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_purple" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#800080" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_white" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#FFFFFF" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_black" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#000000" android:clickable="true" android:focusable="true"/>
+        <View android:id="@+id/color_grey" android:layout_width="80dp" android:layout_height="80dp" android:layout_margin="8dp" android:background="#808080" android:clickable="true" android:focusable="true"/>
+
+    </GridLayout>
+
+</LinearLayout>
