@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -15,6 +16,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.google.android.material.button.MaterialButton
@@ -131,6 +133,7 @@ class MainActivity : AppCompatActivity() {
                 allowFileAccess = true
                 allowContentAccess = true
             }
+            addJavascriptInterface(AndroidInterface(), "Android")
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
@@ -144,6 +147,11 @@ class MainActivity : AppCompatActivity() {
                             true
                         }
                     }
+                }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    injectBackgroundPickerHook()
                 }
             }
             webChromeClient = object : WebChromeClient() {
@@ -161,6 +169,55 @@ class MainActivity : AppCompatActivity() {
             // Load the requested URL
             loadUrl("https://aiphotostudio.co")
         }
+    }
+
+    private fun injectBackgroundPickerHook() {
+        // This JS finds the "Choose Background" button and intercepts it
+        // Note: The selector "button:contains('Choose Background')" might need adjustment based on actual HTML
+        val script = """
+            (function() {
+                const observer = new MutationObserver((mutations) => {
+                    const buttons = document.querySelectorAll('button');
+                    buttons.forEach(button => {
+                        if (button.innerText.trim() === 'Choose Background' && !button.dataset.hooked) {
+                            button.dataset.hooked = 'true';
+                            button.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                Android.showBackgroundPicker();
+                            };
+                        }
+                    });
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+            })();
+        """.trimIndent()
+        backgroundWebView.evaluateJavascript(script, null)
+    }
+
+    inner class AndroidInterface {
+        @JavascriptInterface
+        fun showBackgroundPicker() {
+            runOnUiThread {
+                val colors = arrayOf("Red", "Blue", "Green", "Yellow", "Pink", "Purple", "White")
+                val hexColors = arrayOf("#FF0000", "#0000FF", "#00FF00", "#FFFF00", "#FFC0CB", "#800080", "#FFFFFF")
+
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Choose Background Color")
+                    .setItems(colors) { _, which ->
+                        val selectedColor = hexColors[which]
+                        applyBackgroundColor(selectedColor)
+                    }
+                    .show()
+            }
+        }
+    }
+
+    private fun applyBackgroundColor(color: String) {
+        // This script attempts to apply the color to the website's editor
+        // We assume the website has a way to receive this, e.g., via a global function or setting an input
+        val script = "if (typeof setBackgroundColor === 'function') { setBackgroundColor('$color'); } else { console.log('setBackgroundColor not found'); }"
+        backgroundWebView.evaluateJavascript(script, null)
     }
 
     private fun setupBackNavigation() {
