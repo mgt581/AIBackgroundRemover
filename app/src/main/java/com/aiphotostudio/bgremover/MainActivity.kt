@@ -8,6 +8,7 @@ import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -179,6 +180,20 @@ class MainActivity : AppCompatActivity() {
                             true
                         }
                     }
+                }
+
+                override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+                    val url = request?.url ?: return null
+                    if (url.scheme == "content") {
+                        return try {
+                            val mime = contentResolver.getType(url) ?: "image/*"
+                            val input = contentResolver.openInputStream(url) ?: return null
+                            WebResourceResponse(mime, "UTF-8", input)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    return super.shouldInterceptRequest(view, request)
                 }
             }
 
