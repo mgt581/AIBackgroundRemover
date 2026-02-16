@@ -2,8 +2,8 @@
 
     <!-- App Identity -->
     <string name="app_name">AI Photo Studio</string>
-    <string name="ai_background_remover" translatable="false">AI Background Remover</string>
-    <string name="ai_background_remover_app" translatable="false">AI Background Remover</string>
+    <string name="ai_background_remover" translatable="false">Background Remover</string>
+    <string name="ai_background_remover_app" translatable="false">Background Remover</string>
     <string name="logo" translatable="false">Logo</string>
 
     <!-- Navigation -->
