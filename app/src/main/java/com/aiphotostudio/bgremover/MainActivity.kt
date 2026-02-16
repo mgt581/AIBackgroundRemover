@@ -204,6 +204,7 @@ class MainActivity : AppCompatActivity() {
                 allowContentAccess = true
             }
             addJavascriptInterface(AndroidInterface(), "Android")
+            addJavascriptInterface(AndroidInterface(), "Studio")
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
@@ -348,6 +349,11 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
             }
+        }
+
+        @JavascriptInterface
+        fun downloadImage(base64Data: String?) {
+            saveToDevice(base64Data)
         }
 
         @JavascriptInterface
