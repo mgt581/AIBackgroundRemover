@@ -102,7 +102,47 @@ class MainActivity : AppCompatActivity() {
         
         btnSaveToGallery.setOnClickListener {
             // Trigger JS to get the image data and send it to Android
-            backgroundWebView.evaluateJavascript("if (typeof getResultImageData === 'function') { Android.saveToGallery(getResultImageData()); } else { Android.saveToGallery(document.querySelector('img')?.src); }", null)
+            val js = """
+                (async function() {
+                    try {
+                        let dataUrl = "";
+                        // 1. Try getResultImageData if defined
+                        if (typeof getResultImageData === 'function') {
+                            dataUrl = getResultImageData();
+                        } 
+                        
+                        // 2. If not found, look for result images
+                        if (!dataUrl) {
+                            const imgs = Array.from(document.querySelectorAll('img'));
+                            // Filter for images that look like results (often large or specifically styled)
+                            const resultImg = imgs.find(img => (img.src.startsWith('data:') || img.src.startsWith('blob:')) && img.width > 100) || imgs[0];
+                            
+                            if (resultImg) {
+                                if (resultImg.src.startsWith('blob:')) {
+                                    const response = await fetch(resultImg.src);
+                                    const blob = await response.blob();
+                                    dataUrl = await new Promise(resolve => {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => resolve(reader.result);
+                                        reader.readAsDataURL(blob);
+                                    });
+                                } else {
+                                    dataUrl = resultImg.src;
+                                }
+                            }
+                        }
+
+                        if (dataUrl && dataUrl.startsWith('data:image')) {
+                            Android.saveToGallery(dataUrl);
+                        } else {
+                            Android.showToast("No image found to save to gallery");
+                        }
+                    } catch (e) {
+                        Android.showToast("Error saving: " + e.message);
+                    }
+                })();
+            """.trimIndent()
+            backgroundWebView.evaluateJavascript(js, null)
         }
 
         // Social Links
@@ -185,8 +225,18 @@ class MainActivity : AppCompatActivity() {
                     return true
                 }
             }
+            
+            setDownloadListener { url, _, _, _, _ ->
+                if (url.startsWith("data:image")) {
+                    AndroidInterface().saveToDevice(url)
+                } else {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                }
+            }
+            
             // Load the requested URL
-            loadUrl("https://aiphotostudio.co")
+            loadUrl("https://aiphotostudio.co.uk")
         }
     }
 
@@ -215,33 +265,44 @@ class MainActivity : AppCompatActivity() {
     private fun injectSaveToDeviceHook() {
         val script = """
             (function() {
-                const observer = new MutationObserver((mutations) => {
-                    const buttons = document.querySelectorAll('button');
-                    buttons.forEach(button => {
-                        if ((button.innerText.trim().toLowerCase().includes('save') || 
-                             button.innerText.trim().toLowerCase().includes('download')) && 
-                            !button.dataset.saveHooked) {
-                            button.dataset.saveHooked = 'true';
-                            button.onclick = (e) => {
-                                // We don't necessarily want to prevent default if the web app handles it fine,
-                                // but we can intercept the data if it provides it.
-                                // For now, let's assume we want to intercept 'Download' to save to local storage.
-                                if (button.innerText.trim().toLowerCase().includes('download')) {
-                                     // Intercept and handle via Android
-                                     // e.preventDefault();
-                                     // Android.saveToDevice(...);
+                // Intercept clicks on links that might be downloads (blobs/data URLs)
+                document.addEventListener('click', async function(e) {
+                    const anchor = e.target.closest('a');
+                    if (anchor && anchor.href && (anchor.href.startsWith('blob:') || anchor.href.startsWith('data:'))) {
+                        if (anchor.download || anchor.innerText.toLowerCase().includes('download') || anchor.innerText.toLowerCase().includes('save')) {
+                            e.preventDefault();
+                            let dataUrl = anchor.href;
+                            if (dataUrl.startsWith('blob:')) {
+                                try {
+                                    const response = await fetch(dataUrl);
+                                    const blob = await response.blob();
+                                    dataUrl = await new Promise(resolve => {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => resolve(reader.result);
+                                        reader.readAsDataURL(blob);
+                                    });
+                                } catch (err) {
+                                    Android.showToast("Failed to process download: " + err.message);
+                                    return;
                                 }
-                            };
+                            }
+                            Android.saveToDevice(dataUrl);
                         }
-                    });
-                });
-                observer.observe(document.body, { childList: true, subtree: true });
+                    }
+                }, true);
             })();
         """.trimIndent()
         backgroundWebView.evaluateJavascript(script, null)
     }
 
     inner class AndroidInterface {
+        @JavascriptInterface
+        fun showToast(message: String) {
+            runOnUiThread {
+                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+
         @JavascriptInterface
         fun showBackgroundPicker() {
             runOnUiThread {
@@ -260,7 +321,7 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun saveToGallery(base64Data: String?) {
             if (base64Data == null || !base64Data.startsWith("data:image")) {
-                runOnUiThread { Toast.makeText(this@MainActivity, "No image found to save", Toast.LENGTH_SHORT).show() }
+                runOnUiThread { Toast.makeText(this@MainActivity, "Invalid image data", Toast.LENGTH_SHORT).show() }
                 return
             }
             
@@ -270,8 +331,13 @@ class MainActivity : AppCompatActivity() {
                     val decodedBytes = Base64.decode(pureBase64, Base64.DEFAULT)
                     val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                     
+                    if (bitmap == null) {
+                        Toast.makeText(this@MainActivity, "Failed to decode image", Toast.LENGTH_SHORT).show()
+                        return@runOnUiThread
+                    }
+
                     val userId = auth.currentUser?.uid ?: "guest"
-                    val userDir = File(filesDir, "saved_images/$userId")
+                    val userDir = File(filesDir, "saved_images/${userId}")
                     if (!userDir.exists()) userDir.mkdirs()
                     
                     val fileName = "img_${System.currentTimeMillis()}.png"
@@ -291,7 +357,10 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun saveToDevice(base64Data: String?) {
-            if (base64Data == null || !base64Data.startsWith("data:image")) return
+            if (base64Data == null || !base64Data.startsWith("data:image")) {
+                 runOnUiThread { Toast.makeText(this@MainActivity, "Invalid image data for device", Toast.LENGTH_SHORT).show() }
+                 return
+            }
             
             runOnUiThread {
                 saveBitmapToPublicGallery(base64Data)
@@ -304,6 +373,11 @@ class MainActivity : AppCompatActivity() {
             val pureBase64 = base64Data.substring(base64Data.indexOf(",") + 1)
             val decodedBytes = Base64.decode(pureBase64, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+
+            if (bitmap == null) {
+                Toast.makeText(this, "Failed to decode image for device", Toast.LENGTH_SHORT).show()
+                return
+            }
 
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
             var outputStream: OutputStream? = null
