@@ -26,22 +26,26 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var auth: FirebaseAuth
     private lateinit var backgroundWebView: WebView
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private var cameraImageUri: Uri? = null
 
     // UI Elements (Headers/Buttons)
     private lateinit var btnAuthAction: MaterialButton
-    private lateinit var btnHeaderSettings: MaterialButton
     private lateinit var btnGallery: MaterialButton
     private lateinit var btnSignUp: MaterialButton
     private lateinit var btnSaveToGallery: MaterialButton
@@ -52,9 +56,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnTikTok: TextView
     private lateinit var btnFacebook: TextView
 
-    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         val results = if (uri != null) arrayOf(uri) else null
         filePathCallback?.onReceiveValue(results)
+        filePathCallback = null
+    }
+
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && cameraImageUri != null) {
+            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
         filePathCallback = null
     }
 
@@ -79,7 +92,6 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         // Header/Auth Elements
         btnAuthAction = findViewById(R.id.ybtn_auth_action)
-        btnHeaderSettings = findViewById(R.id.btn_header_settings)
         btnGallery = findViewById(R.id.btn_gallery)
         btnSignUp = findViewById(R.id.btn_sign_up)
         btnSaveToGallery = findViewById(R.id.btn_save_to_gallery)
@@ -98,7 +110,6 @@ class MainActivity : AppCompatActivity() {
         btnGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
         btnAuthAction.setOnClickListener { handleAuthAction() }
         btnSignUp.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
-        btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         
         btnSaveToGallery.setOnClickListener {
             // Trigger manual save
@@ -164,7 +175,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     if (dataUrl && dataUrl.startsWith('data:image')) {
-                        Android.saveToGallery(dataUrl);
+                        Android.saveToDevice(dataUrl);
                     } else {
                         Android.showToast("No image found to save");
                     }
@@ -222,14 +233,14 @@ class MainActivity : AppCompatActivity() {
                 ): Boolean {
                     this@MainActivity.filePathCallback?.onReceiveValue(null)
                     this@MainActivity.filePathCallback = filePathCallback
-                    filePickerLauncher.launch("image/*")
+                    
+                    showImageSourceDialog()
                     return true
                 }
             }
             
             setDownloadListener { url, _, _, _, _ ->
                 if (url.startsWith("data:image") || url.startsWith("blob:")) {
-                    // Handled by our JS bridge for better reliability
                     evaluateJavascript("Android.saveToDevice('$url')", null)
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -239,6 +250,38 @@ class MainActivity : AppCompatActivity() {
             
             loadUrl("https://aiphotostudio.co")
         }
+    }
+
+    private fun showImageSourceDialog() {
+        val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
+        AlertDialog.Builder(this)
+            .setTitle("Select Image Source")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> { // Take Photo
+                        val photoFile = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), 
+                            "IMG_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.jpg")
+                        cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
+                        cameraImageUri?.let { cameraLauncher.launch(it) } ?: run {
+                            filePathCallback?.onReceiveValue(null)
+                            filePathCallback = null
+                        }
+                    }
+                    1 -> { // Choose from Gallery
+                        galleryLauncher.launch("image/*")
+                    }
+                    2 -> { // Cancel
+                        filePathCallback?.onReceiveValue(null)
+                        filePathCallback = null
+                        dialog.dismiss()
+                    }
+                }
+            }
+            .setOnCancelListener {
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = null
+            }
+            .show()
     }
 
     private fun injectBackgroundPickerHook() {
@@ -266,11 +309,9 @@ class MainActivity : AppCompatActivity() {
     private fun injectAutoSaveHook() {
         val script = """
             (function() {
-                // Monitor for new result images and auto-save them to gallery
                 const observer = new MutationObserver((mutations) => {
                     const imgs = document.querySelectorAll('img');
                     imgs.forEach(async img => {
-                        // If it's a new result image (large and data/blob)
                         if ((img.src.startsWith('data:image') || img.src.startsWith('blob:')) && 
                             img.width > 200 && !img.dataset.autoSaved) {
                             
@@ -296,22 +337,6 @@ class MainActivity : AppCompatActivity() {
                     });
                 });
                 observer.observe(document.body, { childList: true, subtree: true });
-
-                // Also intercept explicit save/download button clicks
-                document.addEventListener('click', async function(e) {
-                    const target = e.target.closest('button, a');
-                    if (target && (target.innerText.toLowerCase().includes('save') || target.innerText.toLowerCase().includes('download'))) {
-                        // Wait a bit for the app to generate the image if needed
-                        setTimeout(() => {
-                            const imgs = Array.from(document.querySelectorAll('img'));
-                            const latest = imgs.reverse().find(img => img.src.startsWith('data:') || img.src.startsWith('blob:'));
-                            if (latest) {
-                                // Manual save to device on explicit click
-                                Android.saveToDevice(latest.src);
-                            }
-                        }, 500);
-                    }
-                }, true);
             })();
         """.trimIndent()
         backgroundWebView.evaluateJavascript(script, null)
@@ -343,8 +368,6 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun saveToGallery(base64Data: String?) {
             if (base64Data == null) return
-            
-            // Handle blob conversion if passed directly
             if (base64Data.startsWith("blob:")) {
                 runOnUiThread {
                     backgroundWebView.evaluateJavascript("""
@@ -375,7 +398,7 @@ class MainActivity : AppCompatActivity() {
                     val file = File(userDir, "img_${System.currentTimeMillis()}.png")
                     FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                     
-                    Toast.makeText(this@MainActivity, "Auto-saved to Gallery", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Auto-saved to App Gallery", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     Log.e("MainActivity", "Gallery save failed", e)
                 }
@@ -385,7 +408,6 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun saveToDevice(base64Data: String?) {
             if (base64Data == null) return
-            
             if (base64Data.startsWith("blob:")) {
                 runOnUiThread {
                     backgroundWebView.evaluateJavascript("""
@@ -402,7 +424,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (!base64Data.startsWith("data:image")) return
-            
             runOnUiThread {
                 saveBitmapToPublicGallery(base64Data)
             }
@@ -438,6 +459,8 @@ class MainActivity : AppCompatActivity() {
             outputStream?.use {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                 Toast.makeText(this, "Saved to device storage", Toast.LENGTH_SHORT).show()
+                // Also save to app gallery
+                AndroidInterface().saveToGallery(base64Data)
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Device save failed", e)
