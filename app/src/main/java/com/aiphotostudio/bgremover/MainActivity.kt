@@ -101,48 +101,8 @@ class MainActivity : AppCompatActivity() {
         btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         
         btnSaveToGallery.setOnClickListener {
-            // Trigger JS to get the image data and send it to Android
-            val js = """
-                (async function() {
-                    try {
-                        let dataUrl = "";
-                        // 1. Try getResultImageData if defined
-                        if (typeof getResultImageData === 'function') {
-                            dataUrl = getResultImageData();
-                        } 
-                        
-                        // 2. If not found, look for result images
-                        if (!dataUrl) {
-                            const imgs = Array.from(document.querySelectorAll('img'));
-                            // Filter for images that look like results (often large or specifically styled)
-                            const resultImg = imgs.find(img => (img.src.startsWith('data:') || img.src.startsWith('blob:')) && img.width > 100) || imgs[0];
-                            
-                            if (resultImg) {
-                                if (resultImg.src.startsWith('blob:')) {
-                                    const response = await fetch(resultImg.src);
-                                    const blob = await response.blob();
-                                    dataUrl = await new Promise(resolve => {
-                                        const reader = new FileReader();
-                                        reader.onloadend = () => resolve(reader.result);
-                                        reader.readAsDataURL(blob);
-                                    });
-                                } else {
-                                    dataUrl = resultImg.src;
-                                }
-                            }
-                        }
-
-                        if (dataUrl && dataUrl.startsWith('data:image')) {
-                            Android.saveToGallery(dataUrl);
-                        } else {
-                            Android.showToast("No image found to save to gallery");
-                        }
-                    } catch (e) {
-                        Android.showToast("Error saving: " + e.message);
-                    }
-                })();
-            """.trimIndent()
-            backgroundWebView.evaluateJavascript(js, null)
+            // Trigger manual save
+            extractAndSaveImage()
         }
 
         // Social Links
@@ -175,6 +135,47 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun extractAndSaveImage() {
+        val js = """
+            (async function() {
+                try {
+                    let dataUrl = "";
+                    if (typeof getResultImageData === 'function') {
+                        dataUrl = getResultImageData();
+                    } 
+                    
+                    if (!dataUrl) {
+                        const imgs = Array.from(document.querySelectorAll('img'));
+                        const resultImg = imgs.find(img => (img.src.startsWith('data:') || img.src.startsWith('blob:')) && img.width > 100) || imgs[0];
+                        
+                        if (resultImg) {
+                            if (resultImg.src.startsWith('blob:')) {
+                                const response = await fetch(resultImg.src);
+                                const blob = await response.blob();
+                                dataUrl = await new Promise(resolve => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolve(reader.result);
+                                    reader.readAsDataURL(blob);
+                                });
+                            } else {
+                                dataUrl = resultImg.src;
+                            }
+                        }
+                    }
+
+                    if (dataUrl && dataUrl.startsWith('data:image')) {
+                        Android.saveToGallery(dataUrl);
+                    } else {
+                        Android.showToast("No image found to save");
+                    }
+                } catch (e) {
+                    Android.showToast("Save error: " + e.message);
+                }
+            })();
+        """.trimIndent()
+        backgroundWebView.evaluateJavascript(js, null)
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         backgroundWebView.apply {
@@ -196,7 +197,7 @@ class MainActivity : AppCompatActivity() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
                     return if (url.startsWith("http://") || url.startsWith("https://")) {
-                        false // Let WebView load the URL
+                        false
                     } else {
                         try {
                             startActivity(Intent(Intent.ACTION_VIEW, request.url))
@@ -210,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     injectBackgroundPickerHook()
-                    injectSaveToDeviceHook()
+                    injectAutoSaveHook()
                 }
             }
             webChromeClient = object : WebChromeClient() {
@@ -227,15 +228,15 @@ class MainActivity : AppCompatActivity() {
             }
             
             setDownloadListener { url, _, _, _, _ ->
-                if (url.startsWith("data:image")) {
-                    AndroidInterface().saveToDevice(url)
+                if (url.startsWith("data:image") || url.startsWith("blob:")) {
+                    // Handled by our JS bridge for better reliability
+                    evaluateJavascript("Android.saveToDevice('$url')", null)
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                     startActivity(intent)
                 }
             }
             
-            // Load the requested URL
             loadUrl("https://aiphotostudio.co.uk")
         }
     }
@@ -262,16 +263,20 @@ class MainActivity : AppCompatActivity() {
         backgroundWebView.evaluateJavascript(script, null)
     }
 
-    private fun injectSaveToDeviceHook() {
+    private fun injectAutoSaveHook() {
         val script = """
             (function() {
-                // Intercept clicks on links that might be downloads (blobs/data URLs)
-                document.addEventListener('click', async function(e) {
-                    const anchor = e.target.closest('a');
-                    if (anchor && anchor.href && (anchor.href.startsWith('blob:') || anchor.href.startsWith('data:'))) {
-                        if (anchor.download || anchor.innerText.toLowerCase().includes('download') || anchor.innerText.toLowerCase().includes('save')) {
-                            e.preventDefault();
-                            let dataUrl = anchor.href;
+                // Monitor for new result images and auto-save them to gallery
+                const observer = new MutationObserver((mutations) => {
+                    const imgs = document.querySelectorAll('img');
+                    imgs.forEach(async img => {
+                        // If it's a new result image (large and data/blob)
+                        if ((img.src.startsWith('data:image') || img.src.startsWith('blob:')) && 
+                            img.width > 200 && !img.dataset.autoSaved) {
+                            
+                            img.dataset.autoSaved = 'true';
+                            let dataUrl = img.src;
+                            
                             if (dataUrl.startsWith('blob:')) {
                                 try {
                                     const response = await fetch(dataUrl);
@@ -281,13 +286,30 @@ class MainActivity : AppCompatActivity() {
                                         reader.onloadend = () => resolve(reader.result);
                                         reader.readAsDataURL(blob);
                                     });
-                                } catch (err) {
-                                    Android.showToast("Failed to process download: " + err.message);
-                                    return;
-                                }
+                                } catch (e) { return; }
                             }
-                            Android.saveToDevice(dataUrl);
+                            
+                            if (dataUrl.startsWith('data:image')) {
+                                Android.saveToGallery(dataUrl);
+                            }
                         }
+                    });
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+
+                // Also intercept explicit save/download button clicks
+                document.addEventListener('click', async function(e) {
+                    const target = e.target.closest('button, a');
+                    if (target && (target.innerText.toLowerCase().includes('save') || target.innerText.toLowerCase().includes('download'))) {
+                        // Wait a bit for the app to generate the image if needed
+                        setTimeout(() => {
+                            const imgs = Array.from(document.querySelectorAll('img'));
+                            const latest = imgs.reverse().find(img => img.src.startsWith('data:') || img.src.startsWith('blob:'));
+                            if (latest) {
+                                // Manual save to device on explicit click
+                                Android.saveToDevice(latest.src);
+                            }
+                        }, 500);
                     }
                 }, true);
             })();
@@ -320,47 +342,66 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun saveToGallery(base64Data: String?) {
-            if (base64Data == null || !base64Data.startsWith("data:image")) {
-                runOnUiThread { Toast.makeText(this@MainActivity, "Invalid image data", Toast.LENGTH_SHORT).show() }
+            if (base64Data == null) return
+            
+            // Handle blob conversion if passed directly
+            if (base64Data.startsWith("blob:")) {
+                runOnUiThread {
+                    backgroundWebView.evaluateJavascript("""
+                        (async function() {
+                            const response = await fetch('$base64Data');
+                            const blob = await response.blob();
+                            const reader = new FileReader();
+                            reader.onloadend = () => Android.saveToGallery(reader.result);
+                            reader.readAsDataURL(blob);
+                        })()
+                    """.trimIndent(), null)
+                }
                 return
             }
-            
+
+            if (!base64Data.startsWith("data:image")) return
+
             runOnUiThread {
                 try {
                     val pureBase64 = base64Data.substring(base64Data.indexOf(",") + 1)
                     val decodedBytes = Base64.decode(pureBase64, Base64.DEFAULT)
-                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    
-                    if (bitmap == null) {
-                        Toast.makeText(this@MainActivity, "Failed to decode image", Toast.LENGTH_SHORT).show()
-                        return@runOnUiThread
-                    }
+                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size) ?: return@runOnUiThread
 
                     val userId = auth.currentUser?.uid ?: "guest"
                     val userDir = File(filesDir, "saved_images/${userId}")
                     if (!userDir.exists()) userDir.mkdirs()
                     
-                    val fileName = "img_${System.currentTimeMillis()}.png"
-                    val file = File(userDir, fileName)
+                    val file = File(userDir, "img_${System.currentTimeMillis()}.png")
+                    FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                     
-                    FileOutputStream(file).use { out ->
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                    }
-                    
-                    Toast.makeText(this@MainActivity, "Saved to App Gallery", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Auto-saved to Gallery", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
-                    Log.e("MainActivity", "Error saving to gallery", e)
-                    Toast.makeText(this@MainActivity, "Failed to save to gallery", Toast.LENGTH_SHORT).show()
+                    Log.e("MainActivity", "Gallery save failed", e)
                 }
             }
         }
 
         @JavascriptInterface
         fun saveToDevice(base64Data: String?) {
-            if (base64Data == null || !base64Data.startsWith("data:image")) {
-                 runOnUiThread { Toast.makeText(this@MainActivity, "Invalid image data for device", Toast.LENGTH_SHORT).show() }
-                 return
+            if (base64Data == null) return
+            
+            if (base64Data.startsWith("blob:")) {
+                runOnUiThread {
+                    backgroundWebView.evaluateJavascript("""
+                        (async function() {
+                            const response = await fetch('$base64Data');
+                            const blob = await response.blob();
+                            const reader = new FileReader();
+                            reader.onloadend = () => Android.saveToDevice(reader.result);
+                            reader.readAsDataURL(blob);
+                        })()
+                    """.trimIndent(), null)
+                }
+                return
             }
+
+            if (!base64Data.startsWith("data:image")) return
             
             runOnUiThread {
                 saveBitmapToPublicGallery(base64Data)
@@ -372,12 +413,7 @@ class MainActivity : AppCompatActivity() {
         try {
             val pureBase64 = base64Data.substring(base64Data.indexOf(",") + 1)
             val decodedBytes = Base64.decode(pureBase64, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-
-            if (bitmap == null) {
-                Toast.makeText(this, "Failed to decode image for device", Toast.LENGTH_SHORT).show()
-                return
-            }
+            val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size) ?: return
 
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
             var outputStream: OutputStream? = null
@@ -389,20 +425,14 @@ class MainActivity : AppCompatActivity() {
                     put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Photo Studio")
                 }
                 val itemUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-                if (itemUri != null) {
-                    outputStream = contentResolver.openOutputStream(itemUri)
-                }
+                if (itemUri != null) outputStream = contentResolver.openOutputStream(itemUri)
             } else {
-                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
-                val studioDir = File(imagesDir, "AI Photo Studio")
+                val studioDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "AI Photo Studio")
                 if (!studioDir.exists()) studioDir.mkdirs()
                 val file = File(studioDir, fileName)
                 outputStream = FileOutputStream(file)
-                
                 @Suppress("DEPRECATION")
-                val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-                mediaScanIntent.data = Uri.fromFile(file)
-                sendBroadcast(mediaScanIntent)
+                sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
             }
 
             outputStream?.use {
@@ -410,25 +440,19 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Saved to device storage", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
-            Log.e("MainActivity", "Error saving to device", e)
-            Toast.makeText(this, "Failed to save to device", Toast.LENGTH_SHORT).show()
+            Log.e("MainActivity", "Device save failed", e)
         }
     }
 
     private fun applyBackgroundColor(color: String) {
-        val script = "if (typeof setBackgroundColor === 'function') { setBackgroundColor('$color'); } else { console.log('setBackgroundColor not found'); }"
-        backgroundWebView.evaluateJavascript(script, null)
+        backgroundWebView.evaluateJavascript("if (typeof setBackgroundColor === 'function') { setBackgroundColor('$color'); }", null)
     }
 
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (backgroundWebView.canGoBack()) {
-                    backgroundWebView.goBack()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                }
+                if (backgroundWebView.canGoBack()) backgroundWebView.goBack()
+                else { isEnabled = false; onBackPressedDispatcher.onBackPressed() }
             }
         })
     }
@@ -438,9 +462,7 @@ class MainActivity : AppCompatActivity() {
             auth.signOut()
             updateHeaderUi()
             Toast.makeText(this, "Signed out", Toast.LENGTH_SHORT).show()
-        } else {
-            startActivity(Intent(this, LoginActivity::class.java))
-        }
+        } else startActivity(Intent(this, LoginActivity::class.java))
     }
 
     @SuppressLint("SetTextI18n")
@@ -459,10 +481,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openUrl(url: String) {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-        } catch (_: Exception) {
-            Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
-        }
+        try { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+        catch (_: Exception) { Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show() }
     }
 }
