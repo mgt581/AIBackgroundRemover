@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:411346648650:android:3762e8d057b4c3b5fab0b3",
         "android_client_info": {
-          "package_name": "com.aiphotostudiobgremover"
+          "package_name": "com.aiphotostudio.bgremover"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "411346648650-ggktvc8l6qldmoh8sdgeb6r1o7rn0d77.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.aiphotostudiobgremover",
+            "package_name": "com.aiphotostudio.bgremover",
             "certificate_hash": "ed1769cc68887992668fe15a93b9a65cd1aaa7d1"
           }
         },
