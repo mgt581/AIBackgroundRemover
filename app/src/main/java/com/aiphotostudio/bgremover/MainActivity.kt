@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -19,12 +20,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -53,6 +59,19 @@ class MainActivity : AppCompatActivity() {
             filePathCallback?.onReceiveValue(null)
         }
         filePathCallback = null
+    }
+
+    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Log.e("MainActivity", "Google sign in failed", e)
+                Toast.makeText(this, "Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -141,6 +160,11 @@ class MainActivity : AppCompatActivity() {
                         showImageSourceDialog()
                     }
                 },
+                onGoogleSignInRequested = {
+                    runOnUiThread {
+                        startNativeGoogleSignIn()
+                    }
+                },
                 callback = { success, uriOrMessage ->
                     this@MainActivity.runOnUiThread {
                         if (success) {
@@ -221,6 +245,32 @@ class MainActivity : AppCompatActivity() {
             
             loadUrl("https://aiphotostudio.co.uk")
         }
+    }
+
+    private fun startNativeGoogleSignIn() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        val googleSignInClient = GoogleSignIn.getClient(this, gso)
+        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    updateHeaderUi()
+                    // Notify WebView about success
+                    backgroundWebView.evaluateJavascript("if(window.onNativeLoginSuccess) window.onNativeLoginSuccess();", null)
+                    // Or simply reload if your page handles session on load
+                    backgroundWebView.reload()
+                    Toast.makeText(this, "Sign-in successful", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Firebase Auth failed", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 
     private fun showImageSourceDialog() {

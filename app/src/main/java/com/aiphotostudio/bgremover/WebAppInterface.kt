@@ -17,12 +17,14 @@ import java.io.FileOutputStream
  *
  * @property context The application context.
  * @property onBackgroundPickerRequested Callback for when background picker is requested.
+ * @property onGoogleSignInRequested Callback to trigger native Google Sign-In.
  * @property callback General purpose callback for results.
  */
 @Suppress("SpellCheckingInspection", "HardcodedStringLiteral")
 class WebAppInterface(
     private val context: Context,
     private val onBackgroundPickerRequested: () -> Unit,
+    private val onGoogleSignInRequested: () -> Unit,
     private val callback: (Boolean, String?) -> Unit
 ) {
 
@@ -43,24 +45,6 @@ class WebAppInterface(
     @JavascriptInterface
     fun saveImage(base64: String, fileName: String?) {
         saveToDevice(base64, fileName)
-    }
-
-    /**
-     * Saves an image to the gallery.
-     * @param base64 The base64 image data.
-     */
-    @JavascriptInterface
-    fun saveToGallery(base64: String) {
-        val name = "img_${System.currentTimeMillis()}.png"
-        saveToDevice(base64, name)
-    }
-
-    /**
-     * Fallback for saveToGallery without arguments.
-     */
-    @JavascriptInterface
-    fun saveToGallery() {
-        callback(false, context.getString(R.string.no_saved_images))
     }
 
     /**
@@ -123,28 +107,27 @@ class WebAppInterface(
     }
 
     /**
-     * Download image wrapper.
-     * @param base64 The base64 image data.
-     */
-    @JavascriptInterface
-    fun downloadImage(base64: String) {
-        saveToDevice(base64)
-    }
-
-    /**
-     * Fallback for downloadImage.
-     */
-    @JavascriptInterface
-    fun downloadImage() {
-        callback(false, context.getString(R.string.no_saved_images))
-    }
-
-    /**
      * Triggers native background picker.
      */
     @JavascriptInterface
     fun showBackgroundPicker() {
         onBackgroundPickerRequested()
+    }
+
+    /**
+     * Triggers native Google Sign-In.
+     */
+    @JavascriptInterface
+    fun googleSignIn() {
+        onGoogleSignInRequested()
+    }
+
+    /**
+     * Returns the current user ID or null if not signed in.
+     */
+    @JavascriptInterface
+    fun getUserId(): String? {
+        return FirebaseAuth.getInstance().currentUser?.uid
     }
 
     /**
