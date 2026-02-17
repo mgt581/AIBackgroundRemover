@@ -48,6 +48,25 @@ class WebAppInterface(
     }
 
     /**
+     * Saves an image to the gallery.
+     * @param base64 The base64 image data.
+     */
+    @JavascriptInterface
+    fun saveToGallery(base64: String) {
+        val name = "img_${System.currentTimeMillis()}.png"
+        saveToDevice(base64, name)
+    }
+
+    /**
+     * Downloads an image from base64 string.
+     * @param base64 The base64 image data.
+     */
+    @JavascriptInterface
+    fun downloadImage(base64: String) {
+        saveToDevice(base64, null)
+    }
+
+    /**
      * Saves to device with default naming.
      * @param base64 The base64 image data.
      */
@@ -63,6 +82,7 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun saveToDevice(base64: String, fileName: String?) {
+        Log.d("WebAppInterface", "saveToDevice called")
         try {
             val name = fileName ?: "AI_Studio_${System.currentTimeMillis()}.png"
             val comma = ","
@@ -83,10 +103,17 @@ class WebAppInterface(
                 }
             }
 
-            val uri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            val uri: Uri? =
+                resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-            uri?.let { itemUri ->
-                resolver.openOutputStream(itemUri)?.use { stream ->
+            uri?.let { /**
+                        *
+                        */
+                       itemUri ->
+                resolver.openOutputStream(itemUri)?.use { /**
+                                                           *
+                                                           */
+                                                          stream ->
                     stream.write(bytes)
                 }
 
@@ -152,7 +179,13 @@ class WebAppInterface(
                 Log.e("WebAppInterface", "Failed to create directory")
             }
             val file = File(userDir, fileName)
-            FileOutputStream(file).use { outputStream ->
+            FileOutputStream(file).use { /**
+                                          *
+                                          */
+                    /**
+                     *
+                     */
+                    outputStream ->
                 outputStream.write(bytes)
             }
         } catch (e: Exception) {
