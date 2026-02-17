@@ -13,6 +13,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     // UI Elements
     private lateinit var tvAuthStatus: TextView
+    private lateinit var btnHeaderLogin: Button
 
     // Social Links
     private lateinit var btnWhatsApp: TextView
@@ -94,6 +96,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViews() {
         tvAuthStatus = findViewById(R.id.tv_auth_status)
+        btnHeaderLogin = findViewById(R.id.btn_header_login)
 
         // Social Links
         btnWhatsApp = findViewById(R.id.btn_whatsapp)
@@ -105,6 +108,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
+        btnHeaderLogin.setOnClickListener {
+            if (auth.currentUser != null) {
+                auth.signOut()
+                updateHeaderUi()
+                backgroundWebView.reload()
+            } else {
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+        }
+
         // Social Links
         btnWhatsApp.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
         btnTikTok.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
@@ -155,11 +168,11 @@ class MainActivity : AppCompatActivity() {
                     this@MainActivity.runOnUiThread {
                         if (success) {
                             Toast.makeText(this@MainActivity, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
-                            backgroundWebView.evaluateJavascript("window.onNativeSaveSuccess('$uriOrMessage');", null)
+                            backgroundWebView.evaluateJavascript("if(window.onNativeSaveSuccess) window.onNativeSaveSuccess('$uriOrMessage');", null)
                         } else {
                             val message = uriOrMessage ?: "Save Failed"
                             Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                            backgroundWebView.evaluateJavascript("window.onNativeSaveFailed('$message');", null)
+                            backgroundWebView.evaluateJavascript("if(window.onNativeSaveFailed) window.onNativeSaveFailed('$message');", null)
                         }
                     }
                 }
@@ -303,9 +316,11 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user != null) {
             tvAuthStatus.visibility = View.VISIBLE
-            tvAuthStatus.text = getString(R.string.signed_in_as, user.email ?: "Guest")
+            tvAuthStatus.text = user.email ?: "Signed In"
+            btnHeaderLogin.text = "Logout"
         } else {
             tvAuthStatus.visibility = View.GONE
+            btnHeaderLogin.text = getString(R.string.sign_in)
         }
     }
 
