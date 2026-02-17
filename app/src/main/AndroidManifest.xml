@@ -57,14 +57,12 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="aiphotostudio.co"
-                    android:pathPrefix="/auth" />
-                <data
-                    android:scheme="https"
-                    android:host="aiphotostudio.co.uk"
-                    android:pathPrefix="/auth" />
+
+                <data android:scheme="https" android:host="aiphotostudio.co.uk" android:pathPrefix="/__/auth" />
+                <data android:scheme="https" android:host="aiphotostudio.co.uk" android:pathPrefix="/auth" />
+
+                <data android:scheme="https" android:host="aiphotostudio.co" android:pathPrefix="/__/auth" />
+                <data android:scheme="https" android:host="aiphotostudio.co" android:pathPrefix="/auth" />
             </intent-filter>
         </activity>
 

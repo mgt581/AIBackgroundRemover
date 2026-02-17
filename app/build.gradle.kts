@@ -41,13 +41,12 @@ android {
                 storePassword = keystoreProperties["storePassword"] as String?
             }
         }
+
+        // Modified: Resetting debug to use default keys to bypass the password error
         getByName("debug") {
-            if (hasKeystore) {
-                keyAlias = keystoreProperties["keyAlias"] as String?
-                keyPassword = keystoreProperties["keyPassword"] as String?
-                storeFile = ksFile
-                storePassword = keystoreProperties["storePassword"] as String?
-            }
+            // By leaving this block empty or pointing to default,
+            // Android uses the standard debug.keystore, allowing
+            // ./gradlew signingReport to work without a password.
         }
     }
 
