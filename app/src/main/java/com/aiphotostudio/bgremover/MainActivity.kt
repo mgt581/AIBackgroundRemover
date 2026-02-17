@@ -104,8 +104,9 @@ class MainActivity : AppCompatActivity() {
         btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         
         btnSaveToGallery.setOnClickListener {
+            Toast.makeText(this, "Requesting image save from web...", Toast.LENGTH_SHORT).show()
             // Trigger the web-side save function which uses the AndroidBridge
-            backgroundWebView.evaluateJavascript("window.saveToGallery();", null)
+            backgroundWebView.evaluateJavascript("if(window.saveToGallery) { window.saveToGallery(); } else { console.log('saveToGallery not found'); }", null)
         }
 
         // Social Links
@@ -160,14 +161,15 @@ class MainActivity : AppCompatActivity() {
                             showImageSourceDialog()
                         }
                     },
-                    callback = { success, uri ->
+                    callback = { success, uriOrMessage ->
                         this@MainActivity.runOnUiThread {
                             if (success) {
                                 Toast.makeText(this@MainActivity, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
-                                backgroundWebView.evaluateJavascript("window.onNativeSaveSuccess('$uri');", null)
+                                backgroundWebView.evaluateJavascript("window.onNativeSaveSuccess('$uriOrMessage');", null)
                             } else {
-                                Toast.makeText(this@MainActivity, "Save Failed", Toast.LENGTH_SHORT).show()
-                                backgroundWebView.evaluateJavascript("window.onNativeSaveFailed();", null)
+                                val message = uriOrMessage ?: "Save Failed"
+                                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                                backgroundWebView.evaluateJavascript("window.onNativeSaveFailed('$message');", null)
                             }
                         }
                     }
