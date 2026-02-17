@@ -29,7 +29,7 @@ class AIApplication : Application() {
             } else {
                 val playServicesStatus = GoogleApiAvailability.getInstance()
                     .isGooglePlayServicesAvailable(this)
-                if (playServicesStatus == ConnectionResult.SUCCESS) {
+                if (shouldEnablePlayIntegrity(playServicesStatus)) {
                     Log.d("AIApplication", "App Check: Installing PlayIntegrityAppCheckProviderFactory")
                     appCheck.installAppCheckProviderFactory(
                         PlayIntegrityAppCheckProviderFactory.getInstance()
@@ -46,6 +46,12 @@ class AIApplication : Application() {
             Log.d("AIApplication", "Firebase and App Check initialized successfully")
         } catch (e: Exception) {
             Log.e("AIApplication", "Firebase initialization failed", e)
+        }
+    }
+
+    companion object {
+        fun shouldEnablePlayIntegrity(playServicesStatus: Int): Boolean {
+            return playServicesStatus == ConnectionResult.SUCCESS
         }
     }
 }
