@@ -224,7 +224,10 @@ class MainActivity : AppCompatActivity() {
                         val photoFile = File(getExternalFilesDir(null), 
                             "IMG_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.jpg")
                         cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
-                        cameraImageUri?.let { cameraLauncher.launch(it) }
+                        cameraImageUri?.let { cameraLauncher.launch(it) } ?: run {
+                            filePathCallback?.onReceiveValue(null)
+                            filePathCallback = null
+                        }
                     }
                     1 -> galleryLauncher.launch("image/*")
                     2 -> {
