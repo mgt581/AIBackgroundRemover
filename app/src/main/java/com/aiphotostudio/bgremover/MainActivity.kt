@@ -110,18 +110,18 @@ class MainActivity : AppCompatActivity() {
         btnTikTok.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
         btnFacebook.setOnClickListener { openUrl(getString(R.string.facebook_url)) }
 
-        // Footer Navigation Buttons
+        // Footer Navigation Buttons redirecting to WebView URLs
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings.html")
         }
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
-            startActivity(Intent(this, GalleryActivity::class.java))
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/gallery.html")
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            openUrl("https://ai-photo-studio-24354.web.app/privacy")
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/privacy")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
-            startActivity(Intent(this, TermsActivity::class.java))
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/terms")
         }
     }
 
