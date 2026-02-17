@@ -20,7 +20,7 @@ import java.io.FileOutputStream
  * @property onGoogleSignInRequested Callback to trigger native Google Sign-In.
  * @property callback General purpose callback for results.
  */
-@Suppress("SpellCheckingInspection", "HardcodedStringLiteral")
+@Suppress("unused", "HardcodedStringLiteral", "SpellCheckingInspection")
 class WebAppInterface(
     private val context: Context,
     private val onBackgroundPickerRequested: () -> Unit,
@@ -103,17 +103,10 @@ class WebAppInterface(
                 }
             }
 
-            val uri: Uri? =
-                resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            val uri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-            uri?.let { /**
-                        *
-                        */
-                       itemUri ->
-                resolver.openOutputStream(itemUri)?.use { /**
-                                                           *
-                                                           */
-                                                          stream ->
+            uri?.let { itemUri ->
+                resolver.openOutputStream(itemUri)?.use { stream ->
                     stream.write(bytes)
                 }
 
@@ -151,6 +144,7 @@ class WebAppInterface(
 
     /**
      * Returns the current user ID or null if not signed in.
+     * @return The user ID or null.
      */
     @JavascriptInterface
     fun getUserId(): String? {
@@ -179,13 +173,7 @@ class WebAppInterface(
                 Log.e("WebAppInterface", "Failed to create directory")
             }
             val file = File(userDir, fileName)
-            FileOutputStream(file).use { /**
-                                          *
-                                          */
-                    /**
-                     *
-                     */
-                    outputStream ->
+            FileOutputStream(file).use { outputStream ->
                 outputStream.write(bytes)
             }
         } catch (e: Exception) {
