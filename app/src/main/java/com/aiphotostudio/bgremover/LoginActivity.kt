@@ -23,6 +23,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
 
+/**
+ * Activity for handling user authentication (Sign In, Sign Up, Anonymous, Google).
+ */
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -31,9 +34,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
     private lateinit var toggleGroup: MaterialButtonToggleGroup
     private lateinit var progressBar: ProgressBar
-    
+
     private var isSignUpMode = false
-    
+
     companion object {
         private const val TAG = "LoginActivity"
     }
@@ -42,9 +45,9 @@ class LoginActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
-                val account = task.getResult(ApiException::class.java)!!
+                val account = task.getResult(ApiException::class.java) ?: return@registerForActivityResult
                 Log.d(TAG, "Google sign-in successful, authenticating with Firebase")
-                firebaseAuthWithGoogle(account.idToken!!)
+                firebaseAuthWithGoogle(account.idToken ?: return@registerForActivityResult)
             } catch (e: ApiException) {
                 Log.e(TAG, "Google sign-in failed with code: ${e.statusCode}", e)
                 Toast.makeText(this, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -57,7 +60,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        
+
         auth = FirebaseAuth.getInstance()
 
         // Initialize UI Elements
@@ -149,19 +152,19 @@ class LoginActivity : AppCompatActivity() {
             etEmail.requestFocus()
             return
         }
-        
+
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show()
             etEmail.requestFocus()
             return
         }
-        
+
         if (password.isEmpty()) {
             Toast.makeText(this, "Please enter your password", Toast.LENGTH_SHORT).show()
             etPassword.requestFocus()
             return
         }
-        
+
         if (password.length < 6) {
             Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
             etPassword.requestFocus()
@@ -170,7 +173,7 @@ class LoginActivity : AppCompatActivity() {
 
         progressBar.visibility = View.VISIBLE
         btnLogin.isEnabled = false
-        
+
         if (isSignUpMode) {
             Log.d(TAG, "Attempting to create account with email: $email")
             auth.createUserWithEmailAndPassword(email, password)
@@ -231,7 +234,7 @@ class LoginActivity : AppCompatActivity() {
     private fun handleAuthError(exception: Exception?) {
         val errorCode = (exception as? FirebaseAuthException)?.errorCode
         Log.e(TAG, "Auth failed: ${exception?.message}, error code: $errorCode", exception)
-        
+
         val errorMessage = when (errorCode) {
             "ERROR_EMAIL_ALREADY_IN_USE" -> "An account with this email already exists"
             "ERROR_WEAK_PASSWORD" -> "Password is too weak"
@@ -241,7 +244,7 @@ class LoginActivity : AppCompatActivity() {
             "ERROR_TOO_MANY_REQUESTS" -> "Too many attempts. Please try again later"
             else -> exception?.localizedMessage ?: "Authentication failed"
         }
-        
+
         Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
     }
 

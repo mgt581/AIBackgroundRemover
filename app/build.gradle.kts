@@ -1,6 +1,5 @@
 import java.util.Properties
 
-@Suppress("HardcodedStringLiteral")
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
