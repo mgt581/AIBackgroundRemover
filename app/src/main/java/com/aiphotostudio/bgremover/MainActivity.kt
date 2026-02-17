@@ -19,7 +19,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.text.SimpleDateFormat
@@ -33,15 +32,10 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
-    // UI Elements (Headers/Buttons)
-    private lateinit var btnAuthAction: MaterialButton
-    private lateinit var btnHeaderSettings: MaterialButton
-    private lateinit var btnGallery: MaterialButton
-    private lateinit var btnSignUp: MaterialButton
-    private lateinit var btnSaveToGallery: MaterialButton
+    // UI Elements
     private lateinit var tvAuthStatus: TextView
 
-    // Footer Social Links
+    // Social Links
     private lateinit var btnWhatsApp: TextView
     private lateinit var btnTikTok: TextView
     private lateinit var btnFacebook: TextView
@@ -80,12 +74,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        // Header/Auth Elements
-        btnAuthAction = findViewById(R.id.ybtn_auth_action)
-        btnHeaderSettings = findViewById(R.id.btn_header_settings)
-        btnGallery = findViewById(R.id.btn_gallery)
-        btnSignUp = findViewById(R.id.btn_sign_up)
-        btnSaveToGallery = findViewById(R.id.btn_save_to_gallery)
         tvAuthStatus = findViewById(R.id.tv_auth_status)
 
         // Social Links
@@ -98,32 +86,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        btnGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
-        btnAuthAction.setOnClickListener { handleAuthAction() }
-        btnSignUp.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
-        btnHeaderSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-        
-        btnSaveToGallery.setOnClickListener {
-            Toast.makeText(this, "Requesting image save from web...", Toast.LENGTH_SHORT).show()
-            // Trigger the web-side save function which uses the AndroidBridge
-            backgroundWebView.evaluateJavascript("(function() { " +
-                "var bridge = window.AndroidBridge || window.Studio || window.StudioBridge; " +
-                "if(bridge && typeof bridge.saveToGallery === 'function') { " +
-                "  bridge.saveToGallery(); " +
-                "  return 'success: bridge found'; " +
-                "} else if(typeof window.saveToGallery === 'function') { " +
-                "  window.saveToGallery(); " +
-                "  return 'success: global function found'; " +
-                "} else { " +
-                "  return 'error: saveToGallery not found'; " +
-                "} " +
-                "})()", { result ->
-                    if (result?.contains("error") == true) {
-                        Toast.makeText(this, "Save function not found on page", Toast.LENGTH_SHORT).show()
-                    }
-                })
-        }
-
         // Social Links
         btnWhatsApp.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
         btnTikTok.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
@@ -151,6 +113,10 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
+        }
+        
+        findViewById<View>(R.id.btn_sign_up).setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 
@@ -189,15 +155,25 @@ class MainActivity : AppCompatActivity() {
                 }
             )
 
-            // Register multiple names to ensure compatibility with different web versions
             addJavascriptInterface(webInterface, "AndroidBridge")
             addJavascriptInterface(webInterface, "Studio")
 
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    // CSS to hide payment buttons and unwanted elements
-                    val css = "document.querySelectorAll('.payment-button, .checkout-btn, #payment-section').forEach(el => el.style.display = 'none');"
+                    val css = """
+                        (function() {
+                            var style = document.createElement('style');
+                            style.innerHTML = `
+                                .payment-button, .checkout-btn, #payment-section, 
+                                .buy-now, [class*="payment"], [id*="payment"],
+                                .stripe-button, .paypal-button { 
+                                    display: none !important; 
+                                }
+                            `;
+                            document.head.appendChild(style);
+                        })()
+                    """.trimIndent()
                     view?.evaluateJavascript(css, null)
                 }
 
@@ -286,26 +262,14 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun handleAuthAction() {
-        if (auth.currentUser != null) {
-            auth.signOut()
-            updateHeaderUi()
-            Toast.makeText(this, R.string.signed_out_success, Toast.LENGTH_SHORT).show()
-        } else startActivity(Intent(this, LoginActivity::class.java))
-    }
-
     @SuppressLint("SetTextI18n")
     private fun updateHeaderUi() {
         val user = auth.currentUser
         if (user != null) {
             tvAuthStatus.visibility = View.VISIBLE
             tvAuthStatus.text = getString(R.string.signed_in_as, user.email ?: "Guest")
-            btnAuthAction.text = getString(R.string.sign_out)
-            btnSignUp.visibility = View.GONE
         } else {
             tvAuthStatus.visibility = View.GONE
-            btnAuthAction.text = getString(R.string.sign_in)
-            btnSignUp.visibility = View.VISIBLE
         }
     }
 

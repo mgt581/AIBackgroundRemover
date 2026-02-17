@@ -37,17 +37,6 @@
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 
-            <TextView
-                android:id="@+id/btn_auth_action"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="@string/sign_in"
-                android:textColor="@color/brand_primary"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:ignore="TouchTargetSizeCheck" />
         </LinearLayout>
 
         <TextView
@@ -63,15 +52,6 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btn_header_settings"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/settings_button"
-            android:drawableTop="@android:drawable/ic_menu_manage"
-            android:drawableTint="@color/white" />
     </LinearLayout>
 
     <!-- CONTENT -->
@@ -155,17 +135,6 @@
                     android:text="@string/choose_background"
                     android:layout_marginTop="12dp"
                     android:backgroundTint="@color/brand_accent"
-                    android:textColor="@color/white"
-                    android:padding="12dp"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/btn_save_fixed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/save_to_gallery"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="@color/brand_primary"
                     android:textColor="@color/white"
                     android:padding="12dp"
                     android:visibility="gone" />
