@@ -14,14 +14,32 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <Button
-            android:id="@+id/btn_close_login"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:text="@string/back"
-            android:textColor="@color/white" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_home"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/home"
+                android:textColor="@color/white" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btn_close_login"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/back"
+                android:textColor="@color/white" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/imgLogo"
@@ -54,7 +72,7 @@
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:text="@string/sign_in"
-                android:textColor="#616161" />
+                android:textColor="@color/white" />
 
             <Button
                 android:id="@+id/btn_tab_signup"
@@ -79,8 +97,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:textColor="@color/white"
-                tools:ignore="VisualLintTextFieldSize" />
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -100,28 +117,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:textColor="@color/white"
-                tools:ignore="VisualLintTextFieldSize" />
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btn_forgot_password"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/forgot_password"
+            android:textColor="@color/brand_light_blue"
+            android:textSize="12sp" />
 
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_email_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/brand_primary"
             android:padding="12dp"
             android:text="@string/auth"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            tools:ignore="VisualLintButtonSize" />
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -139,8 +164,7 @@
             android:backgroundTint="@color/brand_accent"
             android:padding="12dp"
             android:text="@string/continue_with_google"
-            android:textColor="#212121"
-            tools:ignore="VisualLintButtonSize" />
+            android:textColor="#212121" />
 
         <Button
             android:id="@+id/btn_anonymous_sign_in"
@@ -152,8 +176,7 @@
             android:text="@string/continue_anonymously"
             android:textColor="@color/white"
             app:strokeColor="@color/brand_light_blue"
-            app:strokeWidth="1dp"
-            tools:ignore="VisualLintButtonSize" />
+            app:strokeWidth="1dp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -170,8 +193,7 @@
                 android:padding="8dp"
                 android:text="@string/privacy_policy"
                 android:textColor="#2979FF"
-                android:textSize="12sp"
-                tools:ignore="TouchTargetSizeCheck" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tv_terms_of_service"
@@ -182,8 +204,7 @@
                 android:padding="8dp"
                 android:text="@string/terms_of_service"
                 android:textColor="#2979FF"
-                android:textSize="12sp"
-                tools:ignore="TouchTargetSizeCheck" />
+                android:textSize="12sp" />
         </LinearLayout>
 
     </LinearLayout>

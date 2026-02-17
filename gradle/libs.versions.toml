@@ -19,6 +19,8 @@ googleid = "1.2.0"
 webkit = "1.15.0"
 animatedVectorDrawable = "1.2.0"
 mlkitSegmentationSelfie = "16.0.0-beta6"
+animatedVectorDrawableVersion = "28.0.0"
+guava = "33.5.0-android"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +45,7 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
 # Using flat names to avoid accessor issues
 credentials-core = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
@@ -52,6 +55,7 @@ webkit-android = { group = "androidx.webkit", name = "webkit", version.ref = "we
 animated-vector-drawable = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version.ref = "animatedVectorDrawable" }
 
 mlkit-segmentation-selfie = { group = "com.google.mlkit", name = "segmentation-selfie", version.ref = "mlkitSegmentationSelfie" }
+support-animated-vector-drawable = { group = "com.android.support", name = "animated-vector-drawable", version.ref = "animatedVectorDrawableVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

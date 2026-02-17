@@ -7,10 +7,12 @@ import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -91,6 +93,17 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
+        findViewById<View>(R.id.btn_home).setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            startActivity(intent)
+            finish()
+        }
+
+        findViewById<Button>(R.id.btn_forgot_password).setOnClickListener {
+            showForgotPasswordDialog()
+        }
+
         findViewById<TextView>(R.id.tv_privacy_policy).setOnClickListener {
             startActivity(
                 Intent(this, WebPageActivity::class.java)
@@ -100,17 +113,11 @@ class LoginActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.tv_terms_of_service).setOnClickListener {
-            // Re-using same logic as Privacy Policy but for Terms if activity exists, 
-            // otherwise using specific TermsActivity if it handles its own URL
-            try {
-                startActivity(Intent(this, TermsActivity::class.java))
-            } catch (e: Exception) {
-                startActivity(
-                    Intent(this, WebPageActivity::class.java)
-                        .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.terms_of_service))
-                        .putExtra(WebPageActivity.EXTRA_URL, "https://aiphotostudio.co/terms")
-                )
-            }
+            startActivity(
+                Intent(this, WebPageActivity::class.java)
+                    .putExtra(WebPageActivity.EXTRA_TITLE, getString(R.string.terms_of_service))
+                    .putExtra(WebPageActivity.EXTRA_URL, "https://aiphotostudio.co/terms")
+            )
         }
 
         // Initialize state
@@ -193,6 +200,32 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
         }
+    }
+
+    private fun showForgotPasswordDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Reset Password")
+        val input = EditText(this)
+        input.hint = "Enter your email"
+        builder.setView(input)
+
+        builder.setPositiveButton("Send") { dialog, _ ->
+            val email = input.text.toString().trim()
+            if (email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                auth.sendPasswordResetEmail(email)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Password reset email sent.", Toast.LENGTH_LONG).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Failed to send reset email: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                    }
+            } else {
+                Toast.makeText(this, "Please enter a valid email.", Toast.LENGTH_SHORT).show()
+            }
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        builder.show()
     }
 
     private fun handleAuthError(exception: Exception?) {

@@ -34,6 +34,17 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_header_login"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sign_in"
+            android:textSize="12sp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/brand_primary"
+            app:cornerRadius="20dp" />
+
         <TextView
             android:id="@+id/tv_auth_status"
             android:layout_width="wrap_content"

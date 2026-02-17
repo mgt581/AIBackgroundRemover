@@ -13,6 +13,7 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_policy_content">Your privacy is important to us. This application does not collect any personal data without your consent. All photo processing is done on our secure servers and deleted after processing.</string>
     <string name="terms_of_service">Terms of Service</string>
+    <string name="home">Home</string>
 
     <!-- Authentication -->
     <string name="sign_in_now">Sign in now</string>
@@ -98,6 +99,12 @@
     <string name="bds_url" translatable="false">bryantdigitalsolutions.com</string>
     <string name="bgh_url" translatable="false">bryantgroupholdings.co.uk</string>
     <string name="owner_email" translatable="false">alex@bryantdigitalsolutions.com</string>
+
+    <!-- Build and Configuration Constants -->
+    <string name="build_type_release" translatable="false">release</string>
+    <string name="build_type_debug" translatable="false">debug</string>
+    <string name="guava_dependency" translatable="false">com.google.guava:guava:32.1.2-android</string>
+    <string name="guava_security_reason" translatable="false">Earlier versions have a security vulnerability</string>
 
     <!-- Technical -->
     <string name="default_web_client_id" translatable="false">495715411996-slru6g459h2s8lut08c8575n06b7on18.apps.intercontinental.com</string>

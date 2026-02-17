@@ -1,5 +1,6 @@
 import java.util.Properties
 
+@Suppress("HardcodedStringLiteral")
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -13,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 37
         versionName = "6.7"
 
@@ -42,11 +43,8 @@ android {
             }
         }
 
-        // Modified: Resetting debug to use default keys to bypass the password error
         getByName("debug") {
-            // By leaving this block empty or pointing to default,
-            // Android uses the standard debug.keystore, allowing
-            // ./gradlew signingReport to work without a password.
+            // Standard debug configuration
         }
     }
 
@@ -131,9 +129,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Security Fix for Guava vulnerability
-    constraints {
-        implementation("com.google.guava:guava:32.1.2-android") {
-            because("Earlier versions have a security vulnerability")
-        }
-    }
+    implementation(libs.guava)
 }
