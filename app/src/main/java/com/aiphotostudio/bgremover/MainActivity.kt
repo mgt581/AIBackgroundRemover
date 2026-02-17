@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             
-            loadUrl("https://aiphotostudio.co.uk")
+            loadUrl("https://aiphotostudio.co.uk/")
         }
     }
 
