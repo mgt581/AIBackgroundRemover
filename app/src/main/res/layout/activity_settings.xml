@@ -15,6 +15,7 @@
         app:titleTextColor="@color/white" />
 
     <LinearLayout
+        android:id="@+id/settings_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
@@ -27,15 +28,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:textSize="18sp"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textIsSelectable="true"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/btn_manage_subscription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Manage Subscription"
+            android:text="@string/manage_subscription"
             android:textColor="@color/white" />
 
         <Button
@@ -75,8 +77,9 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_settings"
                 style="@style/Widget.Material3.Button.TextButton"
@@ -84,6 +87,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/settings"
                 android:textColor="@color/white" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_sign_in"
                 style="@style/Widget.Material3.Button.TextButton"
@@ -91,6 +95,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/sign_in"
                 android:textColor="@color/white" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_sign_up"
                 style="@style/Widget.Material3.Button.TextButton"
@@ -103,8 +108,9 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_gallery"
                 style="@style/Widget.Material3.Button.TextButton"
@@ -112,6 +118,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/gallery"
                 android:textColor="@color/white" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_privacy"
                 style="@style/Widget.Material3.Button.TextButton"
@@ -119,6 +126,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/privacy_policy"
                 android:textColor="@color/white" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/footer_btn_terms"
                 style="@style/Widget.Material3.Button.TextButton"

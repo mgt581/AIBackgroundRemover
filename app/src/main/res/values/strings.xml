@@ -34,6 +34,29 @@
     <string name="not_signed_in">Not signed in</string>
     <string name="user_placeholder">User</string>
 
+    <!-- Auth Error & Status Messages -->
+    <string name="enter_email">Please enter your email</string>
+    <string name="enter_valid_email">Please enter a valid email address</string>
+    <string name="enter_password">Please enter your password</string>
+    <string name="password_min_length">Password must be at least 6 characters</string>
+    <string name="account_created">Account created successfully</string>
+    <string name="login_successful">Login successful</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="send">Send</string>
+    <string name="reset_email_sent">Password reset email sent</string>
+    <string name="reset_email_failed_with_message">Reset failed: %1$s</string>
+    <string name="err_email_in_use">This email is already in use</string>
+    <string name="err_weak_password">The password is too weak</string>
+    <string name="err_wrong_password">Incorrect password</string>
+    <string name="err_user_not_found">No user found with this email</string>
+    <string name="err_invalid_credential">Invalid credentials</string>
+    <string name="err_too_many_requests">Too many attempts. Try again later.</string>
+    <string name="auth_failed">Authentication failed</string>
+    <string name="google_login_successful">Google login successful</string>
+    <string name="logged_in_as_guest">Logged in as guest</string>
+    <string name="google_sign_in_failed">Google sign-in failed</string>
+    <string name="google_sign_in_failed_with_message">Google sign-in failed: %1$s</string>
+
     <!-- Core Features -->
     <string name="choose_photo">Choose Photo</string>
     <string name="take_photo">Take Photo</string>
@@ -108,5 +131,6 @@
 
     <!-- Technical -->
     <string name="default_web_client_id" translatable="false">495715411996-slru6g459h2s8lut08c8575n06b7on18.apps.intercontinental.com</string>
+    <string name="manage_subscription">manage subscription</string>
 
 </resources>
