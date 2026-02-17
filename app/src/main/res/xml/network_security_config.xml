@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Allow HTTP assets for aiphotostudio.co until deploy serves HTTPS-only content. -->
+    <!-- Allow HTTP assets and all required Firebase/Google domains for Auth. -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">aiphotostudio.co</domain>
         <domain includeSubdomains="true">www.aiphotostudio.co</domain>
         <domain includeSubdomains="true">aiphotostudio.co.uk</domain>
         <domain includeSubdomains="true">www.aiphotostudio.co.uk</domain>
         <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">www.googleapis.com</domain>
+        <domain includeSubdomains="true">apis.google.com</domain>
         <domain includeSubdomains="true">firebaseapp.com</domain>
+        <domain includeSubdomains="true">identitytoolkit.googleapis.com</domain>
+        <domain includeSubdomains="true">securetoken.googleapis.com</domain>
     </domain-config>
 </network-security-config>

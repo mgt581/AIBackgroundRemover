@@ -105,7 +105,10 @@ class WebAppInterface(
 
             val uri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-            uri?.let { itemUri ->
+            uri?.let { /**
+                        *
+                        */
+                       itemUri ->
                 resolver.openOutputStream(itemUri)?.use { stream ->
                     stream.write(bytes)
                 }
