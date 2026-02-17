@@ -153,17 +153,25 @@ class MainActivity : AppCompatActivity() {
             }
 
             addJavascriptInterface(
-                WebAppInterface(this@MainActivity) { success, uri ->
-                    this@MainActivity.runOnUiThread {
-                        if (success) {
-                            Toast.makeText(this@MainActivity, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
-                            backgroundWebView.evaluateJavascript("window.onNativeSaveSuccess('$uri');", null)
-                        } else {
-                            Toast.makeText(this@MainActivity, "Save Failed", Toast.LENGTH_SHORT).show()
-                            backgroundWebView.evaluateJavascript("window.onNativeSaveFailed();", null)
+                WebAppInterface(
+                    context = this@MainActivity,
+                    onBackgroundPickerRequested = {
+                        runOnUiThread {
+                            showImageSourceDialog()
+                        }
+                    },
+                    callback = { success, uri ->
+                        this@MainActivity.runOnUiThread {
+                            if (success) {
+                                Toast.makeText(this@MainActivity, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
+                                backgroundWebView.evaluateJavascript("window.onNativeSaveSuccess('$uri');", null)
+                            } else {
+                                Toast.makeText(this@MainActivity, "Save Failed", Toast.LENGTH_SHORT).show()
+                                backgroundWebView.evaluateJavascript("window.onNativeSaveFailed();", null)
+                            }
                         }
                     }
-                },
+                ),
                 "AndroidBridge"
             )
 
