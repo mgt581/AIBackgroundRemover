@@ -14,13 +14,15 @@ import java.io.FileOutputStream
 
 /**
  * Interface for JavaScript to interact with the native app.
+ *
+ * @property context The application context.
+ * @property onBackgroundPickerRequested Callback triggered when the web requests a background picker.
+ * @property callback Callback to return success status and a message or URI to the web.
  */
+@Suppress("unused", "SpellCheckingInspection", "HardcodedStringLiteral")
 class WebAppInterface(
-    /** The application context used for file operations and resolver. */
     private val context: Context,
-    /** Callback triggered when the web requests a background picker. */
     private val onBackgroundPickerRequested: () -> Unit,
-    /** Callback to return success status and a message or URI to the web. */
     private val callback: (Boolean, String?) -> Unit
 ) {
 
@@ -28,10 +30,20 @@ class WebAppInterface(
      * Saves an image from a base64 string.
      *
      * @param base64 The base64 encoded image data.
+     */
+    @JavascriptInterface
+    fun saveImage(base64: String) {
+        saveImage(base64, null)
+    }
+
+    /**
+     * Saves an image from a base64 string with a filename.
+     *
+     * @param base64 The base64 encoded image data.
      * @param fileName Optional filename for the image.
      */
     @JavascriptInterface
-    fun saveImage(base64: String, fileName: String? = null) {
+    fun saveImage(base64: String, fileName: String?) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, LOG_SAVE_IMAGE)
         }
@@ -48,8 +60,8 @@ class WebAppInterface(
         if (BuildConfig.DEBUG) {
             Log.d(TAG, LOG_SAVE_GALLERY)
         }
-        val fileName = "$FILE_NAME_PREFIX${System.currentTimeMillis()}$FILE_NAME_EXT"
-        saveToDevice(base64, fileName)
+        val name = "$FILE_NAME_PREFIX${System.currentTimeMillis()}$FILE_NAME_EXT"
+        saveToDevice(base64, name)
     }
 
     /**
@@ -67,6 +79,16 @@ class WebAppInterface(
      * Saves image data to the device's public storage.
      *
      * @param base64 The base64 encoded image data.
+     */
+    @JavascriptInterface
+    fun saveToDevice(base64: String) {
+        saveToDevice(base64)
+    }
+
+    /**
+     * Saves image data to the device's public storage.
+     *
+     * @param base64 The base64 encoded image data.
      * @param fileName Optional filename for the image.
      */
     @Suppress("DEPRECATION")
@@ -77,26 +99,46 @@ class WebAppInterface(
         }
         try {
             val name = fileName ?: "$STUDIO_NAME_PREFIX${System.currentTimeMillis()}$FILE_NAME_EXT"
-            val cleanBase64 = if (base64.contains(COMMA)) {
-                base64.substringAfter(COMMA)
+            val comma = ","
+            val cleanBase64 = if (base64.contains(comma)) {
+                base64.substringAfter(comma)
             } else {
                 base64
             }
             val bytes = Base64.decode(cleanBase64, Base64.DEFAULT)
 
             val resolver = context.contentResolver
-            val contentValues = ContentValues()
-            contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, name)
-            contentValues.put(MediaStore.Images.Media.MIME_TYPE, MIME_TYPE_PNG)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, PICTURES_PATH)
-                contentValues.put(MediaStore.Images.Media.IS_PENDING, 1)
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, name)
+                put(MediaStore.Images.Media.MIME_TYPE, MIME_TYPE_PNG)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    put(MediaStore.Images.Media.RELATIVE_PATH, PICTURES_PATH)
+                    put(MediaStore.Images.Media.IS_PENDING, 1)
+                }
             }
 
-            val uri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            val uri: Uri? =
+                resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-            uri?.let { itemUri ->
-                resolver.openOutputStream(itemUri)?.use { stream ->
+            uri?.let {
+                /**
+                 *
+                 */
+                    /**
+                     *
+                     */
+                    itemUri ->
+                resolver.openOutputStream(itemUri)?.use {
+                    /**
+                     *
+                     */
+                        /**
+                         *
+                         */
+                        /**
+                         *
+                         */
+                        stream ->
                     stream.write(bytes)
                 }
 
@@ -159,7 +201,7 @@ class WebAppInterface(
     @JavascriptInterface
     fun showToast(message: String) {
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, LOG_SHOW_TOAST)
+            Log.d(TAG, "showToast called: $message")
         }
         callback(false, message)
     }
@@ -179,10 +221,14 @@ class WebAppInterface(
                 Log.e(TAG, ERROR_DIR_CREATE)
             }
             val file = File(userDir, fileName)
-            FileOutputStream(file).use { /**
-                                          *
+            FileOutputStream(file).use {
+                /**
+                 *
                  */
-                                         outputStream ->
+                /**
+                 *
+                 */
+                    outputStream ->
                 outputStream.write(bytes)
             }
             if (BuildConfig.DEBUG) {
@@ -202,7 +248,6 @@ class WebAppInterface(
         private const val FILE_NAME_PREFIX = "img_"
         private const val FILE_NAME_EXT = ".png"
         private const val STUDIO_NAME_PREFIX = "AI_Studio_"
-        private const val COMMA = ","
 
         private const val LOG_SAVE_IMAGE = "saveImage called"
         private const val LOG_SAVE_GALLERY = "saveToGallery called"
@@ -211,7 +256,6 @@ class WebAppInterface(
         private const val LOG_DOWNLOAD_IMAGE = "downloadImage called"
         private const val LOG_DOWNLOAD_IMAGE_NO_ARGS = "downloadImage no args"
         private const val LOG_SHOW_PICKER = "showBackgroundPicker called"
-        private const val LOG_SHOW_TOAST = "showToast called"
         private const val LOG_INTERNAL_SAVED = "Saved to internal storage"
 
         private const val ERROR_MEDIASTORE = "MediaStore error"
