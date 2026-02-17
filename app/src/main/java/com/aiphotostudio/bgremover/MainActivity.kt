@@ -194,6 +194,13 @@ class MainActivity : AppCompatActivity() {
             addJavascriptInterface(webInterface, "Studio")
 
             webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    // CSS to hide payment buttons and unwanted elements
+                    val css = "document.querySelectorAll('.payment-button, .checkout-btn, #payment-section').forEach(el => el.style.display = 'none');"
+                    view?.evaluateJavascript(css, null)
+                }
+
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
                     return if (url.startsWith("http://") || url.startsWith("https://")) {
@@ -236,7 +243,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             
-            loadUrl("https://aiphotostudio.co")
+            loadUrl("https://aiphotostudio.co.uk")
         }
     }
 

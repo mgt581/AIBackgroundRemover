@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- Allow HTTP assets for aiphotostudio.co until deploy serves HTTPS-only content. -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">aiphotostudio.co</domain>
-        <domain includeSubdomains="true">aiphotostudio.co.uk</domain>
+        <domain includeSubdomains="true">www.aiphotostudio.co</domain>
     </domain-config>
 </network-security-config>

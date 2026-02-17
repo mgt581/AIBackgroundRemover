@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Multipost | Access Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap');
+
+        :root {
+            --bg: linear-gradient(135deg, #0f172a, #0b2f52 60%, #0ea5e9);
+            --card: #0b1829;
+            --border: rgba(255, 255, 255, 0.08);
+            --muted: #94a3b8;
+            --text: #e2e8f0;
+            --accent: #7c3aed;
+            --accent-2: #0ea5e9;
+            --shadow: 0 14px 40px rgba(15, 23, 42, 0.45);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            font-family: 'Manrope', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 40px 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .logo-box {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .logo-box img { width: 44px; height: 44px; }
+
+        h1 { font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -1px; }
+        p { color: var(--muted); font-size: 15px; margin: 8px 0 30px; }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+        }
+
+        .form-group { text-align: left; margin-bottom: 16px; }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--accent-2); }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 10px 20px rgba(14, 165, 233, 0.2);
+        }
+
+        .btn-google {
+            background: white;
+            color: #0f172a;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .forgot-link {
+            display: block;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .forgot-link:hover { color: var(--accent-2); }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <div class="logo-box">
+        <img src="logo.png" alt="Logo">
+    </div>
+    <h1>Multipost</h1>
+    <p id="form-hint">Access your multi-channel dashboard</p>
+
+    <div class="tabs">
+        <button id="tab-login" class="tab active" onclick="switchMode('login')">Sign In</button>
+        <button id="tab-signup" class="tab" onclick="switchMode('signup')">Sign Up</button>
+    </div>
+
+    <div id="auth-form">
+        <div class="form-group">
+            <input id="email" type="email" placeholder="Email Address">
+        </div>
+        <div class="form-group">
+            <input id="password" type="password" placeholder="Password">
+        </div>
+
+        <button class="btn" onclick="handleAuthSubmit()">
+            <span id="btn-text">Enter Workspace</span>
+            <div id="btn-loader" class="loader"></div>
+        </button>
+
+        <button class="btn btn-google" onclick="handleGoogleSignIn()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+            Continue with Google
+        </button>
+
+        <a href="#" class="forgot-link" onclick="handlePasswordReset()">Forgot your password?</a>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        GoogleAuthProvider,
+        signInWithRedirect,
+        getRedirectResult,
+        onAuthStateChanged,
+        sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC1DMsu_ktTXfqe42q9juEloTTrKJUqpbk",
+        authDomain: "pwa-ai-photo-studio-pro.firebaseapp.com",
+        projectId: "pwa-ai-photo-studio-pro",
+        storageBucket: "pwa-ai-photo-studio-pro.firebasestorage.app",
+        messagingSenderId: "495715411996"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentMode = "login";
+
+    // Logic for handling Google redirect result
+    getRedirectResult(auth).then((result) => {
+        if (result?.user) {
+            localStorage.setItem("currentUserKey", result.user.email || result.user.uid);
+            window.location.replace("app.html"); // Redirect to Dashboard
+        }
+    }).catch((error) => {
+        console.error("Google Auth Error:", error);
+    });
+
+    window.switchMode = (mode) => {
+        currentMode = mode;
+        document.getElementById("tab-login").classList.toggle("active", mode === "login");
+        document.getElementById("tab-signup").classList.toggle("active", mode === "signup");
+        document.getElementById("btn-text").innerText = mode === "login" ? "Enter Workspace" : "Create Account";
+        document.getElementById("form-hint").innerText = mode === "login" ? "Access your multi-channel dashboard" : "Start your journey with us today";
+    };
+
+    window.handleAuthSubmit = async () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const btnText = document.getElementById("btn-text");
+        const loader = document.getElementById("btn-loader");
+
+        if (!email || !password) return alert("Please fill in all fields");
+
+        btnText.style.display = "none";
+        loader.style.display = "block";
+
+        try {
+            if (currentMode === "login") {
+                await signInWithEmailAndPassword(auth, email, password);
+            } else {
+                await createUserWithEmailAndPassword(auth, email, password);
+            }
+        } catch (err) {
+            alert(err.message);
+            btnText.style.display = "block";
+            loader.style.display = "none";
+        }
+    };
+
+    window.handleGoogleSignIn = () => {
+        signInWithRedirect(auth, provider);
+    };
+
+    window.handlePasswordReset = async () => {
+        const email = document.getElementById("email").value;
+        if (!email) return alert("Enter your email first");
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert("Reset email sent!");
+        } catch (err) { alert(err.message); }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            localStorage.setItem("currentUserKey", user.email || user.uid);
+            if (window.location.pathname.includes("signin.html")) {
+                window.location.replace("app.html"); // Redirect to Dashboard
+            }
+        }
+    });
+</script>
+</body>
+</html>
