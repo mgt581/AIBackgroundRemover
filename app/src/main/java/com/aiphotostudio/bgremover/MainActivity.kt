@@ -106,7 +106,20 @@ class MainActivity : AppCompatActivity() {
         btnSaveToGallery.setOnClickListener {
             Toast.makeText(this, "Requesting image save from web...", Toast.LENGTH_SHORT).show()
             // Trigger the web-side save function which uses the AndroidBridge
-            backgroundWebView.evaluateJavascript("if(window.saveToGallery) { window.saveToGallery(); } else { console.log('saveToGallery not found'); }", null)
+            backgroundWebView.evaluateJavascript("(function() { " +
+                "if(window.AndroidBridge && window.AndroidBridge.saveToGallery) { " +
+                "  window.AndroidBridge.saveToGallery(); " +
+                "} else if(window.saveToGallery) { " +
+                "  window.saveToGallery(); " +
+                "} else { " +
+                "  return 'saveToGallery not found'; " +
+                "} " +
+                "return 'success'; " +
+                "})()", { result ->
+                    if (result?.contains("not found") == true) {
+                        Toast.makeText(this, "Save function not found on page", Toast.LENGTH_SHORT).show()
+                    }
+                })
         }
 
         // Social Links
