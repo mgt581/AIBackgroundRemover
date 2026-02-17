@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateHeaderUi()
+        injectNativeConfig()
     }
 
     private fun initViews() {
@@ -150,6 +151,7 @@ class MainActivity : AppCompatActivity() {
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
                 allowContentAccess = true
+                databaseEnabled = true
             }
 
             val webInterface = WebAppInterface(
@@ -184,20 +186,7 @@ class MainActivity : AppCompatActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    val css = """
-                        (function() {
-                            var style = document.createElement('style');
-                            style.innerHTML = `
-                                .payment-button, .checkout-btn, #payment-section, 
-                                .buy-now, [class*="payment"], [id*="payment"],
-                                .stripe-button, .paypal-button { 
-                                    display: none !important; 
-                                }
-                            `;
-                            document.head.appendChild(style);
-                        })()
-                    """.trimIndent()
-                    view?.evaluateJavascript(css, null)
+                    injectNativeConfig()
                 }
 
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -246,6 +235,42 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun injectNativeConfig() {
+        val user = auth.currentUser
+        val userId = user?.uid ?: ""
+        val userEmail = user?.email ?: "Guest"
+        
+        val script = """
+            (function() {
+                // Set Global Native Config
+                window.MVP_FREE_PRO = true;
+                window.NATIVE_AUTH_USER_ID = '$userId';
+                window.NATIVE_AUTH_EMAIL = '$userEmail';
+                
+                // Hide Web Authentication and Payment UI
+                var style = document.createElement('style');
+                style.innerHTML = `
+                    .auth-container, .login-btn, .signup-btn, #auth-section,
+                    .payment-button, .checkout-btn, #payment-section, 
+                    .buy-now, [class*="payment"], [id*="payment"],
+                    .stripe-button, .paypal-button, .nav-auth-links { 
+                        display: none !important; 
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Override internal gallery logic to use Native ID
+                if (window.setNativeUser) {
+                    window.setNativeUser('$userId', '$userEmail');
+                }
+                
+                console.log('Native config injected. User: ' + '$userId');
+            })()
+        """.trimIndent()
+        
+        backgroundWebView.evaluateJavascript(script, null)
+    }
+
     private fun startNativeGoogleSignIn() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -261,9 +286,7 @@ class MainActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     updateHeaderUi()
-                    // Notify WebView about success
-                    backgroundWebView.evaluateJavascript("if(window.onNativeLoginSuccess) window.onNativeLoginSuccess();", null)
-                    // Or simply reload if your page handles session on load
+                    injectNativeConfig()
                     backgroundWebView.reload()
                     Toast.makeText(this, "Sign-in successful", Toast.LENGTH_SHORT).show()
                 } else {
