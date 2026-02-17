@@ -28,7 +28,7 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var auth: FirebaseAuth
+    private lateinit var auth: FirebaseAuth
     private lateinit var backgroundWebView: WebView
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
@@ -107,16 +107,18 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Requesting image save from web...", Toast.LENGTH_SHORT).show()
             // Trigger the web-side save function which uses the AndroidBridge
             backgroundWebView.evaluateJavascript("(function() { " +
-                "if(window.AndroidBridge && window.AndroidBridge.saveToGallery) { " +
-                "  window.AndroidBridge.saveToGallery(); " +
-                "} else if(window.saveToGallery) { " +
+                "var bridge = window.AndroidBridge || window.Studio || window.StudioBridge; " +
+                "if(bridge && typeof bridge.saveToGallery === 'function') { " +
+                "  bridge.saveToGallery(); " +
+                "  return 'success: bridge found'; " +
+                "} else if(typeof window.saveToGallery === 'function') { " +
                 "  window.saveToGallery(); " +
+                "  return 'success: global function found'; " +
                 "} else { " +
-                "  return 'saveToGallery not found'; " +
+                "  return 'error: saveToGallery not found'; " +
                 "} " +
-                "return 'success'; " +
                 "})()", { result ->
-                    if (result?.contains("not found") == true) {
+                    if (result?.contains("error") == true) {
                         Toast.makeText(this, "Save function not found on page", Toast.LENGTH_SHORT).show()
                     }
                 })
@@ -166,29 +168,30 @@ class MainActivity : AppCompatActivity() {
                 allowContentAccess = true
             }
 
-            addJavascriptInterface(
-                WebAppInterface(
-                    context = this@MainActivity,
-                    onBackgroundPickerRequested = {
-                        runOnUiThread {
-                            showImageSourceDialog()
-                        }
-                    },
-                    callback = { success, uriOrMessage ->
-                        this@MainActivity.runOnUiThread {
-                            if (success) {
-                                Toast.makeText(this@MainActivity, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
-                                backgroundWebView.evaluateJavascript("window.onNativeSaveSuccess('$uriOrMessage');", null)
-                            } else {
-                                val message = uriOrMessage ?: "Save Failed"
-                                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                                backgroundWebView.evaluateJavascript("window.onNativeSaveFailed('$message');", null)
-                            }
+            val webInterface = WebAppInterface(
+                context = this@MainActivity,
+                onBackgroundPickerRequested = {
+                    runOnUiThread {
+                        showImageSourceDialog()
+                    }
+                },
+                callback = { success, uriOrMessage ->
+                    this@MainActivity.runOnUiThread {
+                        if (success) {
+                            Toast.makeText(this@MainActivity, "Saved to Device Gallery", Toast.LENGTH_SHORT).show()
+                            backgroundWebView.evaluateJavascript("window.onNativeSaveSuccess('$uriOrMessage');", null)
+                        } else {
+                            val message = uriOrMessage ?: "Save Failed"
+                            Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                            backgroundWebView.evaluateJavascript("window.onNativeSaveFailed('$message');", null)
                         }
                     }
-                ),
-                "AndroidBridge"
+                }
             )
+
+            // Register multiple names to ensure compatibility with different web versions
+            addJavascriptInterface(webInterface, "AndroidBridge")
+            addJavascriptInterface(webInterface, "Studio")
 
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -238,9 +241,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showImageSourceDialog() {
-        val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
+        val options = arrayOf(getString(R.string.take_photo), getString(R.string.choose_from_gallery), getString(R.string.cancel))
         AlertDialog.Builder(this)
-            .setTitle("Select Image Source")
+            .setTitle(R.string.select_image_source)
             .setItems(options) { dialog, which ->
                 when (which) {
                     0 -> {
@@ -280,7 +283,7 @@ class MainActivity : AppCompatActivity() {
         if (auth.currentUser != null) {
             auth.signOut()
             updateHeaderUi()
-            Toast.makeText(this, "Signed out", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.signed_out_success, Toast.LENGTH_SHORT).show()
         } else startActivity(Intent(this, LoginActivity::class.java))
     }
 
@@ -289,8 +292,8 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user != null) {
             tvAuthStatus.visibility = View.VISIBLE
-            tvAuthStatus.text = "Account: ${user.email ?: "Guest"}"
-            btnAuthAction.text = "Logout"
+            tvAuthStatus.text = getString(R.string.signed_in_as, user.email ?: "Guest")
+            btnAuthAction.text = getString(R.string.sign_out)
             btnSignUp.visibility = View.GONE
         } else {
             tvAuthStatus.visibility = View.GONE
