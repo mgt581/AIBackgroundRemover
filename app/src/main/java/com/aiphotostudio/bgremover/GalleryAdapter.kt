@@ -60,7 +60,7 @@ class GalleryAdapter(
     /**
      * Called by RecyclerView to display the data at the specified position.
      *
-     * @param holder The ImageViewHolder which should be updated to represent the contents of the item at the given position.
+     * @param holder The ImageViewHolder, which should be updated to represent the contents of the item at the given position.
      * @param position The position of the item within the adapter's data set.
      */
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
@@ -69,7 +69,7 @@ class GalleryAdapter(
 
         val uri = FileProvider.getUriForFile(
             context,
-            "${context.packageName}.fileprovider",
+            "${context.packageName}.file provider",
             file
         )
 

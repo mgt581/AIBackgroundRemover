@@ -27,9 +27,9 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Main Activity for the application.
- * Manages the primary WebView and synchronizes native authentication with it.
+ * Main Activity for the AI Background Remover application.
  */
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -69,21 +69,15 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateHeaderUi()
-        injectNativeConfig() // Re-inject on every resume
+        injectNativeConfig()
     }
 
-    /**
-     * Binds UI elements from the layout.
-     */
     private fun initViews() {
         tvAuthStatus = findViewById(R.id.tv_auth_status)
         btnHeaderLogin = findViewById(R.id.btn_header_login)
         backgroundWebView = findViewById(R.id.backgroundWebView)
     }
 
-    /**
-     * Sets up click listeners for header buttons.
-     */
     private fun setupClickListeners() {
         btnHeaderLogin.setOnClickListener {
             if (auth.currentUser != null) {
@@ -94,17 +88,23 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, LoginActivity::class.java))
             }
         }
+
+        // WIRE UP NATIVE BUTTONS
+        findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
+            startActivity(Intent(this, GalleryActivity::class.java))
+        }
     }
 
-    /**
-     * Configures the WebView, its settings, and the JavaScript interface.
-     */
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         backgroundWebView.apply {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
+                databaseEnabled = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
             }
@@ -134,13 +134,13 @@ class MainActivity : AppCompatActivity() {
 
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
-                    if (url.contains("signin.html") || url.contains("/login")) {
+                    if (url.contains("signin.html") || url.contains("login")) {
                         if (auth.currentUser == null) {
                             startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         }
-                        return true // Prevent the WebView from loading the web login page
+                        return true
                     }
-                    return false // Let the WebView handle all other links
+                    return false
                 }
             }
 
@@ -155,45 +155,42 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Injects JavaScript into the WebView to synchronize authentication state.
-     */
-    internal fun injectNativeConfig() {
+    private fun injectNativeConfig() {
         val user = auth.currentUser
         val userId = user?.uid ?: ""
         val userEmail = user?.email ?: ""
 
         val script = """
             (function() {
-                console.log('Injecting Native Auth State. User ID: $userId');
-                
-                // Forcefully set auth info for the web app to use
+                // 1. Pass Native Auth to Web
                 window.NATIVE_AUTH_USER_ID = '$userId';
                 window.NATIVE_AUTH_EMAIL = '$userEmail';
-
                 if ('$userId' !== '') {
                     localStorage.setItem('userId', '$userId');
                     sessionStorage.setItem('userId', '$userId');
-                    // Trigger any JS function that re-checks auth
-                    if (window.onNativeAuthResolved) {
-                        window.onNativeAuthResolved('$userId', '$userEmail');
-                    }
+                    if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
                 }
 
-                // Hide all web-based login elements permanently
+                // 2. CSS Overrides: Hide Web Buttons and Remove Watermark
                 var style = document.createElement('style');
-                style.innerHTML = '.auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"] { display: none !important; }';
+                style.innerHTML = `
+                    .auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"],
+                    .gallery-btn, .settings-btn, #nav-gallery, #nav-settings,
+                    .watermark, #watermark, [class*="watermark"], [id*="watermark"] { 
+                        display: none !important; 
+                    }
+                `;
                 document.head.appendChild(style);
+                
+                // 3. JS Logic to force login status
+                if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
             })();
         """.trimIndent()
         
         backgroundWebView.evaluateJavascript(script, null)
     }
 
-    /**
-     * Displays a dialog to choose between taking a photo or selecting from the gallery.
-     */
-    internal fun showImageSourceDialog() {
+    private fun showImageSourceDialog() {
         val options = arrayOf(getString(R.string.take_photo), getString(R.string.choose_from_gallery), getString(R.string.cancel))
         AlertDialog.Builder(this)
             .setTitle(R.string.select_image_source)
@@ -206,18 +203,12 @@ class MainActivity : AppCompatActivity() {
             }.show()
     }
 
-    /**
-     * Opens the camera to take a photo.
-     */
     private fun openCamera() {
         val photoFile = File(getExternalFilesDir(null), "IMG_${System.currentTimeMillis()}.jpg")
         cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
         cameraImageUri?.let { cameraLauncher.launch(it) }
     }
 
-    /**
-     * Sets up the back press handler to navigate WebView history.
-     */
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -231,9 +222,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    /**
-     * Updates the header UI to reflect the current authentication state.
-     */
     private fun updateHeaderUi() {
         val user = auth.currentUser
         if (user != null) {
