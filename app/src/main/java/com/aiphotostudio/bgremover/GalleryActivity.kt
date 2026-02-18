@@ -21,6 +21,9 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
+/**
+ * Activity to display and manage saved images.
+ */
 class GalleryActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -65,7 +68,7 @@ class GalleryActivity : AppCompatActivity() {
             // Already here
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            openUrl("https://ai-photo-studio-24354.web.app/privacy")
+            openUrl("https://mgt581.github.io/photo-static-main-3/privacy")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))

@@ -130,16 +130,16 @@ class MainActivity : AppCompatActivity() {
 
         // Footer Navigation Buttons redirecting to WebView URLs
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings.html")
+            backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/settings.html")
         }
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/gallery.html")
+            backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/gallery.html")
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/privacy")
+            backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/privacy")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/terms")
+            backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/terms")
         }
     }
 
@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             
-            loadUrl("https://aiphotostudio.co.uk/")
+            loadUrl("https://mgt581.github.io/photo-static-main-3/")
         }
     }
 
