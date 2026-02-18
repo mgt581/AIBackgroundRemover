@@ -120,7 +120,12 @@ class LoginActivity : AppCompatActivity() {
                     is FirebaseAuthUserCollisionException -> getString(R.string.err_email_in_use)
                     else -> task.exception?.message ?: getString(R.string.auth_failed)
                 }
-                showToast(getString(if (isSignIn) R.string.signin_failed_with_message else R.string.signup_failed_with_message, error))
+                showToast(
+                    getString(
+                        if (isSignIn) R.string.signin_failed_with_message else R.string.signup_failed_with_message,
+                        error
+                    )
+                )
             }
         }
     }
@@ -208,7 +213,11 @@ class LoginActivity : AppCompatActivity() {
      * Updates the UI text based on the current auth mode (Sign In/Sign Up).
      */
     private fun updateUiForAuthMode() {
-        btnEmailLogin.text = if (isSignIn) getString(R.string.sign_in) else getString(R.string.sign_up)
+        btnEmailLogin.text = if (isSignIn) {
+            getString(R.string.sign_in)
+        } else {
+            getString(R.string.sign_up)
+        }
     }
 
     /**
