@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -21,15 +22,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
- * Main Activity for the AI Background Remover application.
+ * Main Activity for the application.
+ * Manages the primary WebView and synchronizes native authentication with it.
  */
-@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var backgroundWebView: WebView
+    private var backgroundWebView: WebView? = null // Make WebView nullable for safety
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
@@ -42,8 +46,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
-        if (success && cameraImageUri != null) {
-            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        if (success) {
+            cameraImageUri?.let { filePathCallback?.onReceiveValue(arrayOf(it)) }
         } else {
             filePathCallback?.onReceiveValue(null)
         }
@@ -53,13 +57,26 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        try {
+            setContentView(R.layout.activity_main)
 
-        auth = FirebaseAuth.getInstance()
-        initViews()
-        setupClickListeners()
-        setupWebView()
-        setupBackNavigation()
+            auth = FirebaseAuth.getInstance()
+            if (!initViews()) {
+                Log.e(TAG, "FATAL: View initialization failed. Check activity_main.xml for missing UI elements.")
+                Toast.makeText(this, "Critical Error: App UI failed to load.", Toast.LENGTH_LONG).show()
+                finish()
+                return
+            }
+            
+            setupClickListeners()
+            setupWebView()
+            setupBackNavigation()
+
+        } catch (e: Exception) {
+            Log.e(TAG, "FATAL CRASH during onCreate", e)
+            Toast.makeText(this, "App failed to start. Check Logcat for MainActivity_FATAL.", Toast.LENGTH_LONG).show()
+            finish()
+        }
     }
 
     override fun onResume() {
@@ -68,10 +85,21 @@ class MainActivity : AppCompatActivity() {
         injectNativeConfig()
     }
 
-    private fun initViews() {
-        tvAuthStatus = findViewById(R.id.tv_auth_status)
-        btnHeaderLogin = findViewById(R.id.btn_header_login)
-        backgroundWebView = findViewById(R.id.backgroundWebView)
+    private fun initViews(): Boolean {
+        try {
+            tvAuthStatus = findViewById(R.id.tv_auth_status)
+            btnHeaderLogin = findViewById(R.id.btn_header_login)
+            backgroundWebView = findViewById(R.id.backgroundWebView)
+
+            if (backgroundWebView == null) {
+                Log.e(TAG, "Could not find WebView with ID 'backgroundWebView' in your layout.")
+                return false
+            }
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception during view initialization", e)
+            return false
+        }
     }
 
     private fun setupClickListeners() {
@@ -79,13 +107,11 @@ class MainActivity : AppCompatActivity() {
             if (auth.currentUser != null) {
                 auth.signOut()
                 updateHeaderUi()
-                backgroundWebView.reload()
+                backgroundWebView?.reload()
             } else {
                 startActivity(Intent(this, LoginActivity::class.java))
             }
         }
-
-        // WIRE UP NATIVE BUTTONS
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -96,11 +122,10 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        backgroundWebView.apply {
+        backgroundWebView?.apply {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
-                databaseEnabled = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
             }
@@ -110,7 +135,7 @@ class MainActivity : AppCompatActivity() {
                 onBackgroundPickerRequested = { runOnUiThread { showImageSourceDialog() } },
                 onGoogleSignInRequested = { runOnUiThread { startActivity(Intent(this@MainActivity, LoginActivity::class.java)) } },
                 onLoginRequested = { runOnUiThread { startActivity(Intent(this@MainActivity, LoginActivity::class.java)) } },
-                onLoginSuccess = { runOnUiThread { backgroundWebView.reload() } },
+                onLoginSuccess = { runOnUiThread { backgroundWebView?.reload() } },
                 callback = { success, message ->
                     runOnUiThread {
                         val toastMessage = if (success) getString(R.string.saved_to_gallery) else message ?: getString(R.string.save_failed)
@@ -130,7 +155,7 @@ class MainActivity : AppCompatActivity() {
 
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
-                    if (url.contains("signin.html") || url.contains("login")) {
+                    if (url.contains("signin.html") || url.contains("/login")) {
                         if (auth.currentUser == null) {
                             startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         }
@@ -151,42 +176,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun injectNativeConfig() {
-        val user = auth.currentUser
-        val userId = user?.uid ?: ""
-        val userEmail = user?.email ?: ""
-
+    internal fun injectNativeConfig() {
+        val userId = auth.currentUser?.uid ?: ""
         val script = """
             (function() {
-                // 1. Pass Native Auth to Web
                 window.NATIVE_AUTH_USER_ID = '$userId';
-                window.NATIVE_AUTH_EMAIL = '$userEmail';
                 if ('$userId' !== '') {
                     localStorage.setItem('userId', '$userId');
-                    sessionStorage.setItem('userId', '$userId');
-                    if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
+                    if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId');
                 }
-
-                // 2. CSS Overrides: Hide Web Buttons and Remove Watermark
                 var style = document.createElement('style');
-                style.innerHTML = `
-                    .auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"],
-                    .gallery-btn, .settings-btn, #nav-gallery, #nav-settings,
-                    .watermark, #watermark, [class*="watermark"], [id*="watermark"] { 
-                        display: none !important; 
-                    }
-                `;
+                style.innerHTML = '.auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"], .watermark, #watermark { display: none !important; }';
                 document.head.appendChild(style);
-                
-                // 3. JS Logic to force login status
-                if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
             })();
         """.trimIndent()
-        
-        backgroundWebView.evaluateJavascript(script, null)
+        backgroundWebView?.evaluateJavascript(script, null)
     }
 
-    private fun showImageSourceDialog() {
+    internal fun showImageSourceDialog() {
         val options = arrayOf(getString(R.string.take_photo), getString(R.string.choose_from_gallery), getString(R.string.cancel))
         AlertDialog.Builder(this)
             .setTitle(R.string.select_image_source)
@@ -208,8 +215,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (backgroundWebView.canGoBack()) {
-                    backgroundWebView.goBack()
+                if (backgroundWebView?.canGoBack() == true) {
+                    backgroundWebView?.goBack()
                 } else {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
