@@ -5,9 +5,8 @@
             <solid android:color="#E0E0E0" />
         </shape>
     </item>
-    <item>
-        <bitmap
-            android:src="@drawable/checkerboard_tile"
-            android:tileMode="repeat" />
-    </item>
+    <!-- Removed <bitmap> because it does not support Vector Drawables and causes Preview failure.
+         To have a repeating pattern, use a PNG tile or a custom Drawable. -->
+    <item
+        android:drawable="@drawable/checkerboard_tile" />
 </layer-list>
