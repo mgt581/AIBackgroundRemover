@@ -154,7 +154,7 @@
     <string name="guava_security_reason" translatable="false">Earlier versions have a security vulnerability</string>
 
     <!-- Technical -->
-    <string name="default_web_client_id" translatable="false">495715411996-slru6g459h2s8lut08c8575n06b7on18.apps.intercontinental.com</string>
+    <string name="default_web_client_id" translatable="false">411346648650-614s08k3rp9f9er43unjo4djefmht63t.apps.googleusercontent.com</string>
     <string name="manage_subscription">manage subscription</string>
 
 </resources>
