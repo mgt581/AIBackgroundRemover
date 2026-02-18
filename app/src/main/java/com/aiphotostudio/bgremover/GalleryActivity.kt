@@ -13,7 +13,6 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,6 +42,7 @@ class GalleryActivity : AppCompatActivity() {
         tvEmpty = findViewById(R.id.tv_empty)
 
         recyclerView.layoutManager = GridLayoutManager(this, 2)
+
         loadImages()
         setupFooter()
     }
@@ -81,65 +81,55 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun loadImages() {
-        val imageList = mutableListOf<Uri>()
-        
+        val imageFiles = mutableListOf<File>()
+
         val userId = auth.currentUser?.uid ?: "guest"
         val userDir = File(filesDir, "saved_images/$userId")
-        
+
         if (userDir.exists()) {
             val files = userDir.listFiles()
             files?.sortByDescending { it.lastModified() }
             files?.forEach { file ->
-                val uri = FileProvider.getUriForFile(
-                    this,
-                    "${packageName}.fileprovider",
-                    file
-                )
-                imageList.add(uri)
+                if (file.isFile) imageFiles.add(file)
             }
         }
 
-        if (imageList.isEmpty()) {
+        if (imageFiles.isEmpty()) {
             tvEmpty.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
         } else {
             tvEmpty.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
+
             adapter = GalleryAdapter(
-                imageList,
-                onDeleteClick = { uri -> deleteImage(uri) },
-                onDownloadClick = { uri -> downloadImage(uri) }
+                imageFiles = imageFiles,
+                onDeleteClick = { file -> deleteImage(file) },
+                onDownloadClick = { file -> downloadImage(file) }
             )
             recyclerView.adapter = adapter
         }
     }
 
-    private fun deleteImage(uri: Uri) {
+    private fun deleteImage(file: File) {
         try {
-            // Since it's a FileProvider URI, we need to find the actual file
-            val userId = auth.currentUser?.uid ?: "guest"
-            val userDir = File(filesDir, "saved_images/$userId")
-            
-            // Extract filename from URI
-            val fileName = uri.lastPathSegment ?: return
-            val file = File(userDir, fileName)
-            
             if (file.exists() && file.delete()) {
                 loadImages()
                 Toast.makeText(this, "Image deleted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Could not delete image", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Log.e("GalleryActivity", "Error deleting image", e)
+            Toast.makeText(this, "Delete failed", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun downloadImage(uri: Uri) {
+    private fun downloadImage(file: File) {
         try {
-            val userId = auth.currentUser?.uid ?: "guest"
-            val userDir = File(filesDir, "saved_images/$userId")
-            val fileNameFromUri = uri.lastPathSegment ?: return
-            val file = File(userDir, fileNameFromUri)
-            if (!file.exists()) return
+            if (!file.exists()) {
+                Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show()
+                return
+            }
 
             val fileName = "AI_Studio_${System.currentTimeMillis()}.png"
 
@@ -147,10 +137,16 @@ class GalleryActivity : AppCompatActivity() {
                 val values = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AI Photo Studio")
+                    put(
+                        MediaStore.Images.Media.RELATIVE_PATH,
+                        Environment.DIRECTORY_PICTURES + "/AI Photo Studio"
+                    )
                 }
 
-                val itemUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                val itemUri = contentResolver.insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    values
+                )
 
                 itemUri?.let {
                     contentResolver.openOutputStream(it).use { outputStream ->
@@ -159,7 +155,10 @@ class GalleryActivity : AppCompatActivity() {
                         }
                     }
                     Toast.makeText(this, "Saved to device storage", Toast.LENGTH_SHORT).show()
+                } ?: run {
+                    Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
                 }
+
             } else {
                 @Suppress("DEPRECATION")
                 val publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
@@ -177,6 +176,7 @@ class GalleryActivity : AppCompatActivity() {
                 val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
                 mediaScanIntent.data = Uri.fromFile(destFile)
                 sendBroadcast(mediaScanIntent)
+
                 Toast.makeText(this, "Saved to device storage", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
