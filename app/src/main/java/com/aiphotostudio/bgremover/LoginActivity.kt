@@ -21,8 +21,8 @@ import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
 /**
- * Activity for user authentication.
- * Handles Email, Google, and Anonymous Sign-In.
+ * Activity for user authentication, including email/password, Google Sign-In,
+ * and Anonymous authentication.
  */
 class LoginActivity : AppCompatActivity() {
 
@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
         toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 isSignIn = checkedId == R.id.btn_tab_signin
-                btnEmailLogin.text = if (isSignIn) getString(R.string.sign_in) else getString(R.string.sign_up)
+                updateUiForAuthMode()
             }
         }
 
@@ -88,8 +88,8 @@ class LoginActivity : AppCompatActivity() {
                             showToast(getString(R.string.signin_successful))
                             finish()
                         } else {
-                            val msg = task.exception?.message ?: getString(R.string.auth_failed)
-                            showToast(getString(R.string.signin_failed_with_message, msg))
+                            val errorMessage = task.exception?.message ?: getString(R.string.auth_failed)
+                            showToast(getString(R.string.signin_failed_with_message, errorMessage))
                         }
                     }
             } else {
@@ -100,10 +100,11 @@ class LoginActivity : AppCompatActivity() {
                             showToast(getString(R.string.signup_successful))
                             finish()
                         } else {
-                            val message = if (task.exception is FirebaseAuthUserCollisionException) {
+                            val exception = task.exception
+                            val message = if (exception is FirebaseAuthUserCollisionException) {
                                 getString(R.string.err_email_in_use)
                             } else {
-                                task.exception?.message ?: getString(R.string.auth_failed)
+                                exception?.message ?: getString(R.string.auth_failed)
                             }
                             showToast(getString(R.string.signup_failed_with_message, message))
                         }
@@ -113,10 +114,10 @@ class LoginActivity : AppCompatActivity() {
 
         btnGoogleSignIn.setOnClickListener { signInWithGoogle() }
         
-        // FIXING ANON BUTTON
+        // RE-WIRING AND FIXING THE ANONYMOUS BUTTON
         btnAnonymousSignIn.setOnClickListener {
-            Log.d(TAG, "Anonymous Button Clicked")
-            Toast.makeText(this, "Signing in as Guest...", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "Anonymous Sign-In Button CLICKED.")
+            Toast.makeText(this, "Attempting to sign in as Guest...", Toast.LENGTH_SHORT).show()
             signInAnonymously()
         }
 
@@ -148,28 +149,43 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 setLoading(true)
-                val result = credentialManager.getCredential(this@LoginActivity, request)
+                val result = credentialManager.getCredential(
+                    context = this@LoginActivity,
+                    request = request
+                )
                 val credential = result.credential
                 if (credential is GoogleIdTokenCredential) {
-                    val firebaseCredential = GoogleAuthProvider.getCredential(credential.idToken, null)
-                    auth.signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
-                        setLoading(false)
-                        if (task.isSuccessful) {
-                            showToast(getString(R.string.google_signin_successful))
-                            finish()
-                        } else {
-                            showToast(task.exception?.message ?: "Google Auth Failed")
-                        }
-                    }
+                    firebaseAuthWithGoogle(credential.idToken)
                 } else {
                     setLoading(false)
+                    showToast(getString(R.string.google_sign_in_failed))
                 }
             } catch (e: GetCredentialException) {
                 setLoading(false)
                 Log.e(TAG, "Credential Manager Error", e)
-                showToast("Google error: ${e.message}")
+                val msg = if (e.message?.contains("No credentials available") == true) {
+                    "No Google accounts found on device."
+                } else {
+                    e.message ?: "Unknown error"
+                }
+                showToast(getString(R.string.google_signin_failed_with_message, msg))
             }
         }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                setLoading(false)
+                if (task.isSuccessful) {
+                    showToast(getString(R.string.google_signin_successful))
+                    finish()
+                } else {
+                    val errorMessage = task.exception?.message ?: getString(R.string.auth_failed)
+                    showToast(getString(R.string.google_signin_failed, errorMessage))
+                }
+            }
     }
 
     private fun signInAnonymously() {
@@ -178,15 +194,19 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 setLoading(false)
                 if (task.isSuccessful) {
-                    Log.d(TAG, "Anon Success")
+                    Log.d(TAG, "Anonymous sign-in was SUCCESSFUL")
                     showToast(getString(R.string.logged_in_as_guest))
                     finish()
                 } else {
-                    val msg = task.exception?.message ?: "Guest login failed"
-                    Log.e(TAG, "Anon Error: $msg")
-                    showToast(msg)
+                    val msg = task.exception?.message ?: getString(R.string.auth_failed)
+                    Log.e(TAG, "Anonymous sign-in FAILED: $msg")
+                    showToast("Guest login failed: $msg")
                 }
             }
+    }
+
+    private fun updateUiForAuthMode() {
+        btnEmailLogin.text = if (isSignIn) getString(R.string.sign_in) else getString(R.string.sign_up)
     }
 
     private fun setLoading(isLoading: Boolean) {

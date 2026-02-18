@@ -33,7 +33,6 @@ import java.util.Locale
 
 /**
  * Main Activity for the AI Background Remover application.
- * Manages the primary WebView and native authentication flows.
  */
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
@@ -43,62 +42,37 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
-    // UI Elements
     private lateinit var tvAuthStatus: TextView
     private lateinit var btnHeaderLogin: Button
 
-    // Social Links
-    private lateinit var btnWhatsApp: TextView
-    private lateinit var btnTikTok: TextView
-    private lateinit var btnFacebook: TextView
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
+        filePathCallback = null
+    }
 
-    private val galleryLauncher =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            val results = if (uri != null) arrayOf(uri) else null
-            filePathCallback?.onReceiveValue(results)
-            filePathCallback = null
-        }
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && cameraImageUri != null) filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+        else filePathCallback?.onReceiveValue(null)
+        filePathCallback = null
+    }
 
-    private val cameraLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-            if (success && cameraImageUri != null) {
-                filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
-            } else {
-                filePathCallback?.onReceiveValue(null)
-            }
-            filePathCallback = null
-        }
-
-    private val googleSignInLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data ?: return@registerForActivityResult
-                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    account?.idToken?.let { firebaseAuthWithGoogle(it) }
-                } catch (e: ApiException) {
-                    Log.e(TAG, "Google sign in failed", e)
-                    Toast.makeText(
-                        this,
-                        getString(R.string.login_failed, e.message),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data ?: return@registerForActivityResult
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                account?.idToken?.let { firebaseAuthWithGoogle(it) }
+            } catch (e: ApiException) {
+                Toast.makeText(this, "Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
-    /**
-     * Called when the activity is first created.
-     * @param savedInstanceState If the activity is being re-initialized after
-     *     previously being shut down then this Bundle contains the data it most
-     *     recently supplied in onSaveInstanceState(Bundle).
-     */
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         auth = FirebaseAuth.getInstance()
         initViews()
         setupClickListeners()
@@ -107,34 +81,18 @@ class MainActivity : AppCompatActivity() {
         setupBackNavigation()
     }
 
-    /**
-     * Called after onCreate(Bundle) or onRestart() when the activity is being displayed to the user.
-     */
     override fun onResume() {
         super.onResume()
         updateHeaderUi()
         injectNativeConfig()
     }
 
-    /**
-     * Initializes UI components by finding them in the layout.
-     */
     private fun initViews() {
         tvAuthStatus = findViewById(R.id.tv_auth_status)
         btnHeaderLogin = findViewById(R.id.btn_header_login)
-
-        // Social Links
-        btnWhatsApp = findViewById(R.id.btn_whatsapp)
-        btnTikTok = findViewById(R.id.btn_tiktok)
-        btnFacebook = findViewById(R.id.btn_facebook)
-
-        // Main Content WebView
         backgroundWebView = findViewById(R.id.backgroundWebView)
     }
 
-    /**
-     * Sets up click listeners for various UI elements.
-     */
     private fun setupClickListeners() {
         btnHeaderLogin.setOnClickListener {
             if (auth.currentUser != null) {
@@ -146,86 +104,37 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Social Links
-        btnWhatsApp.setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
-        btnTikTok.setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
-        btnFacebook.setOnClickListener { openUrl(getString(R.string.facebook_url)) }
-
-        // Footer Navigation Buttons redirecting to WebView URLs
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
             backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/settings.html")
         }
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
             backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/gallery.html")
         }
-        findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/privacy")
-        }
-        findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
-            backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/terms")
-        }
     }
 
-    /**
-     * Configures the WebView with necessary settings and a JavaScript interface.
-     */
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         backgroundWebView.apply {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
-                loadWithOverviewMode = true
-                useWideViewPort = true
-                cacheMode = WebSettings.LOAD_DEFAULT
-                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
                 allowContentAccess = true
                 databaseEnabled = true
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             }
 
             val webInterface = WebAppInterface(
                 context = this@MainActivity,
-                onBackgroundPickerRequested = {
-                    runOnUiThread {
-                        showImageSourceDialog()
-                    }
-                },
-                onGoogleSignInRequested = {
-                    runOnUiThread {
-                        startNativeGoogleSignIn()
-                    }
-                },
-                onLoginRequested = {
-                    runOnUiThread {
-                        startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-                    }
-                },
-                onLoginSuccess = {
-                    runOnUiThread {
-                        backgroundWebView.reload()
-                    }
-                },
+                onBackgroundPickerRequested = { runOnUiThread { showImageSourceDialog() } },
+                onGoogleSignInRequested = { runOnUiThread { startNativeGoogleSignIn() } },
+                onLoginRequested = { runOnUiThread { startActivity(Intent(this@MainActivity, LoginActivity::class.java)) } },
+                onLoginSuccess = { runOnUiThread { backgroundWebView.reload() } },
                 callback = { success, uriOrMessage ->
-                    this@MainActivity.runOnUiThread {
-                        if (success) {
-                            Toast.makeText(
-                                this@MainActivity,
-                                getString(R.string.saved_to_device_gallery),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            backgroundWebView.evaluateJavascript(
-                                "if(window.onNativeSaveSuccess) window.onNativeSaveSuccess('$uriOrMessage');",
-                                null
-                            )
-                        } else {
-                            val message = uriOrMessage ?: getString(R.string.save_failed_msg)
-                            Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                            backgroundWebView.evaluateJavascript(
-                                "if(window.onNativeSaveFailed) window.onNativeSaveFailed('$message');",
-                                null
-                            )
-                        }
+                    runOnUiThread {
+                        val msg = if (success) "Saved to Gallery" else uriOrMessage ?: "Save Failed"
+                        Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
+                        backgroundWebView.evaluateJavascript("if(window.onNativeSaveSuccess) window.onNativeSaveSuccess('$uriOrMessage');", null)
                     }
                 }
             )
@@ -239,242 +148,107 @@ class MainActivity : AppCompatActivity() {
                     injectNativeConfig()
                 }
 
-                override fun shouldOverrideUrlLoading(
-                    view: WebView,
-                    request: WebResourceRequest
-                ): Boolean {
+                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
-                    
-                    // BLOCK WEB LOGIN REDIRECTS: Detect if the website is trying to send the user to signin.html
-                    if (url.contains("signin.html") || url.contains("/login") || url.contains("/auth")) {
-                        if (auth.currentUser == null) {
-                            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-                        }
-                        return true // Abort the web load
+                    if (url.contains("signin.html") || url.contains("/login")) {
+                        if (auth.currentUser == null) startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                        return true
                     }
-
-                    return if (url.startsWith("http://") || url.startsWith("https://")) {
-                        false
-                    } else {
-                        try {
-                            startActivity(Intent(Intent.ACTION_VIEW, request.url))
-                            true
-                        } catch (_: Exception) {
-                            true
-                        }
-                    }
-                }
-
-                override fun shouldInterceptRequest(
-                    view: WebView?,
-                    request: WebResourceRequest?
-                ): WebResourceResponse? {
-                    val url = request?.url ?: return null
-                    if (url.scheme == "content") {
-                        return try {
-                            val mime = contentResolver.getType(url) ?: "image/*"
-                            val input = contentResolver.openInputStream(url) ?: return null
-                            WebResourceResponse(mime, "UTF-8", input)
-                        } catch (e: Exception) {
-                            null
-                        }
-                    }
-                    return super.shouldInterceptRequest(view, request)
+                    return false
                 }
             }
 
             webChromeClient = object : WebChromeClient() {
-                override fun onShowFileChooser(
-                    webView: WebView?,
-                    filePathCallback: ValueCallback<Array<Uri>>?,
-                    fileChooserParams: FileChooserParams?
-                ): Boolean {
+                override fun onShowFileChooser(webView: WebView?, callback: ValueCallback<Array<Uri>>?, params: FileChooserParams?): Boolean {
                     this@MainActivity.filePathCallback?.onReceiveValue(null)
-                    this@MainActivity.filePathCallback = filePathCallback
+                    this@MainActivity.filePathCallback = callback
                     showImageSourceDialog()
                     return true
                 }
             }
-
             loadUrl("https://mgt581.github.io/photo-static-main-3/")
         }
     }
 
-    /**
-     * Injects a native configuration script into the WebView.
-     */
     private fun injectNativeConfig() {
         val user = auth.currentUser
         val userId = user?.uid ?: ""
-        val userEmail = user?.email ?: getString(R.string.guest)
+        val userEmail = user?.email ?: "Guest"
 
         val script = """
             (function() {
-                // Set Global Native Config
                 window.MVP_FREE_PRO = true;
                 window.NATIVE_AUTH_USER_ID = '$userId';
                 window.NATIVE_AUTH_EMAIL = '$userEmail';
                 
-                // CRITICAL: Force skip login if native auth exists
                 if ('$userId' !== '') {
-                    sessionStorage.setItem('userId', '$userId');
                     localStorage.setItem('userId', '$userId');
-                    if (window.onNativeAuthResolved) {
-                        window.onNativeAuthResolved('$userId', '$userEmail');
-                    }
+                    sessionStorage.setItem('userId', '$userId');
+                    if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
                 }
 
-                // Hide Web Authentication and Payment UI
                 var style = document.createElement('style');
-                style.innerHTML = `
-                    .auth-container, .login-btn, .signup-btn, #auth-section,
-                    .payment-button, .checkout-btn, #payment-section, 
-                    .buy-now, [class*="payment"], [id*="payment"],
-                    .stripe-button, .paypal-button, .nav-auth-links,
-                    .web-login-overlay {
-                        display: none !important; 
-                    }
-                `;
+                style.innerHTML = '.auth-container, .login-btn, .signup-btn, .web-login-overlay { display: none !important; }';
                 document.head.appendChild(style);
                 
-                // Override internal gallery logic to use Native ID
-                if (window.setNativeUser) {
-                    window.setNativeUser('$userId', '$userEmail');
-                }
-                
-                console.log('Native config injected. User: ' + '$userId');
+                console.log('Native Sync: ' + '$userId');
             })()
         """.trimIndent()
-
         backgroundWebView.evaluateJavascript(script, null)
     }
 
-    /**
-     * Initiates the native Google Sign-In flow.
-     */
     private fun startNativeGoogleSignIn() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
-        val googleSignInClient = GoogleSignIn.getClient(this, gso)
-        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+        googleSignInLauncher.launch(GoogleSignIn.getClient(this, gso).signInIntent)
     }
 
-    /**
-     * Authenticates with Firebase using a Google ID token.
-     * @param idToken The Google ID token provided by Google Sign-In.
-     */
     private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
+        auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null))
+            .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     updateHeaderUi()
                     injectNativeConfig()
                     backgroundWebView.reload()
-                    Toast.makeText(this, getString(R.string.signin_successful), Toast.LENGTH_SHORT)
-                        .show()
-                } else {
-                    Toast.makeText(this, getString(R.string.firebase_auth_failed), Toast.LENGTH_SHORT)
-                        .show()
                 }
             }
     }
 
-    /**
-     * Displays a dialog to choose the source for an image (camera or gallery).
-     */
     private fun showImageSourceDialog() {
-        val options = arrayOf(
-            getString(R.string.take_photo),
-            getString(R.string.choose_from_gallery),
-            getString(R.string.cancel)
-        )
-        AlertDialog.Builder(this)
-            .setTitle(R.string.select_image_source)
-            .setItems(options) { dialog, which ->
-                when (which) {
-                    0 -> {
-                        val photoFile = File(
-                            getExternalFilesDir(null),
-                            "IMG_${
-                                SimpleDateFormat(
-                                    "yyyyMMdd_HHmmss",
-                                    Locale.getDefault()
-                                ).format(Date())
-                            }.jpg"
-                        )
-                        cameraImageUri = FileProvider.getUriForFile(
-                            this,
-                            "${packageName}.fileprovider",
-                            photoFile
-                        )
-                        cameraImageUri?.let { cameraLauncher.launch(it) } ?: run {
-                            filePathCallback?.onReceiveValue(null)
-                            filePathCallback = null
-                        }
-                    }
-
-                    1 -> galleryLauncher.launch("image/*")
-                    2 -> {
-                        filePathCallback?.onReceiveValue(null)
-                        filePathCallback = null
-                        dialog.dismiss()
-                    }
+        val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
+        AlertDialog.Builder(this).setTitle("Select Image").setItems(options) { dialog, which ->
+            when (which) {
+                0 -> {
+                    val file = File(getExternalFilesDir(null), "IMG_${System.currentTimeMillis()}.jpg")
+                    cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
+                    cameraImageUri?.let { cameraLauncher.launch(it) }
                 }
+                1 -> galleryLauncher.launch("image/*")
+                else -> { filePathCallback?.onReceiveValue(null); filePathCallback = null; dialog.dismiss() }
             }
-            .setOnCancelListener {
-                filePathCallback?.onReceiveValue(null)
-                filePathCallback = null
-            }
-            .show()
+        }.show()
     }
 
-    /**
-     * Configures a callback to handle the back button press.
-     */
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (backgroundWebView.canGoBack()) backgroundWebView.goBack()
-                else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                }
+                else { isEnabled = false; onBackPressedDispatcher.onBackPressed() }
             }
         })
     }
 
-    /**
-     * Updates the header UI based on the user's authentication status.
-     */
-    @SuppressLint("SetTextI18n")
     private fun updateHeaderUi() {
         val user = auth.currentUser
-        if (user != null) {
-            tvAuthStatus.visibility = View.VISIBLE
-            tvAuthStatus.text = user.email ?: getString(R.string.signed_in)
-            btnHeaderLogin.text = getString(R.string.sign_out)
-        } else {
-            tvAuthStatus.visibility = View.GONE
-            btnHeaderLogin.text = getString(R.string.sign_in)
-        }
+        tvAuthStatus.visibility = if (user != null) View.VISIBLE else View.GONE
+        tvAuthStatus.text = user?.email ?: ""
+        btnHeaderLogin.text = if (user != null) "Logout" else "Sign In"
     }
 
-    /**
-     * Opens a URL in an external browser.
-     * @param url The URL to open.
-     */
     private fun openUrl(url: String) {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-        } catch (_: Exception) {
-            Toast.makeText(this, getString(R.string.could_not_open_link), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    companion object {
-        private const val TAG = "MainActivity"
+        try { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+        catch (_: Exception) { Toast.makeText(this, "Link Error", Toast.LENGTH_SHORT).show() }
     }
 }
