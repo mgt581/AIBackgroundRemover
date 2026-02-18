@@ -37,6 +37,12 @@ class LoginActivity : AppCompatActivity() {
 
     private var isSignIn = true
 
+    /**
+     * Initializes the activity, setting up Firebase and Credential Manager.
+     * @param savedInstanceState If the activity is being re-initialized after
+     * previously being shut down then this Bundle contains the data it most
+     * recently supplied.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -48,6 +54,9 @@ class LoginActivity : AppCompatActivity() {
         setupClickListeners()
     }
 
+    /**
+     * Initializes UI components by finding them in the layout.
+     */
     private fun initViews() {
         etEmail = findViewById(R.id.et_email)
         etPassword = findViewById(R.id.et_password)
@@ -59,6 +68,9 @@ class LoginActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_close_login).setOnClickListener { finish() }
     }
 
+    /**
+     * Sets up click listeners for the buttons and toggle group.
+     */
     private fun setupClickListeners() {
         toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
@@ -85,7 +97,12 @@ class LoginActivity : AppCompatActivity() {
                             showToast(getString(R.string.signin_successful))
                             finish()
                         } else {
-                            showToast(getString(R.string.signin_failed_with_message, task.exception?.message))
+                            showToast(
+                                getString(
+                                    R.string.signin_failed_with_message,
+                                    task.exception?.message
+                                )
+                            )
                         }
                     }
             } else {
@@ -96,7 +113,12 @@ class LoginActivity : AppCompatActivity() {
                             showToast(getString(R.string.signup_successful))
                             finish()
                         } else {
-                            showToast(getString(R.string.signup_failed_with_message, task.exception?.message))
+                            showToast(
+                                getString(
+                                    R.string.signup_failed_with_message,
+                                    task.exception?.message
+                                )
+                            )
                         }
                     }
             }
@@ -118,6 +140,9 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Initiates Google sign-in using Credential Manager.
+     */
     private fun signInWithGoogle() {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
@@ -140,12 +165,16 @@ class LoginActivity : AppCompatActivity() {
                     firebaseAuthWithGoogle(credential.idToken)
                 }
             } catch (e: GetCredentialException) {
-                Log.e(TAG, "Credential Manager Error", e)
+                Log.e(TAG, CREDENTIAL_MANAGER_ERROR, e)
                 showToast(getString(R.string.google_signin_failed_with_message, e.message))
             }
         }
     }
 
+    /**
+     * Authenticates with Firebase using the Google ID token.
+     * @param idToken The Google ID token.
+     */
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         setLoading(true)
@@ -161,21 +190,37 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Updates the text of the login button based on the current mode (Sign In or Sign Up).
+     */
     private fun updateUiForAuthMode() {
-        btnEmailLogin.text = if (isSignIn) getString(R.string.sign_in) else getString(R.string.sign_up)
+        btnEmailLogin.text = if (isSignIn) {
+            getString(R.string.sign_in)
+        } else {
+            getString(R.string.sign_up)
+        }
     }
 
+    /**
+     * Shows or hides the progress bar and enables/disables the login buttons.
+     * @param isLoading Whether the authentication process is ongoing.
+     */
     private fun setLoading(isLoading: Boolean) {
         progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         btnEmailLogin.isEnabled = !isLoading
         btnGoogleSignIn.isEnabled = !isLoading
     }
 
+    /**
+     * Displays a toast message.
+     * @param message The message to be displayed.
+     */
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     companion object {
         private const val TAG = "LoginActivity"
+        private const val CREDENTIAL_MANAGER_ERROR = "Credential Manager Error"
     }
 }
