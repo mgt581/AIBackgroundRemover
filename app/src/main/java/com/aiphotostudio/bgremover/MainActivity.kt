@@ -244,6 +244,15 @@ class MainActivity : AppCompatActivity() {
                     request: WebResourceRequest
                 ): Boolean {
                     val url = request.url.toString()
+                    
+                    // BLOCK WEB LOGIN REDIRECTS: Detect if the website is trying to send the user to signin.html
+                    if (url.contains("signin.html") || url.contains("/login") || url.contains("/auth")) {
+                        if (auth.currentUser == null) {
+                            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                        }
+                        return true // Abort the web load
+                    }
+
                     return if (url.startsWith("http://") || url.startsWith("https://")) {
                         false
                     } else {
@@ -306,13 +315,23 @@ class MainActivity : AppCompatActivity() {
                 window.NATIVE_AUTH_USER_ID = '$userId';
                 window.NATIVE_AUTH_EMAIL = '$userEmail';
                 
+                // CRITICAL: Force skip login if native auth exists
+                if ('$userId' !== '') {
+                    sessionStorage.setItem('userId', '$userId');
+                    localStorage.setItem('userId', '$userId');
+                    if (window.onNativeAuthResolved) {
+                        window.onNativeAuthResolved('$userId', '$userEmail');
+                    }
+                }
+
                 // Hide Web Authentication and Payment UI
                 var style = document.createElement('style');
                 style.innerHTML = `
                     .auth-container, .login-btn, .signup-btn, #auth-section,
                     .payment-button, .checkout-btn, #payment-section, 
                     .buy-now, [class*="payment"], [id*="payment"],
-                    .stripe-button, .paypal-button, .nav-auth-links { 
+                    .stripe-button, .paypal-button, .nav-auth-links,
+                    .web-login-overlay {
                         display: none !important; 
                     }
                 `;
