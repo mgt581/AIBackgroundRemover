@@ -113,7 +113,12 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnGoogleSignIn.setOnClickListener { signInWithGoogle() }
-        btnAnonymousSignIn.setOnClickListener { signInAnonymously() }
+        
+        // RE-LINKING ANON BUTTON
+        btnAnonymousSignIn.setOnClickListener {
+            Log.d(TAG, "Anonymous Sign-In clicked")
+            signInAnonymously()
+        }
 
         findViewById<Button>(R.id.btn_forgot_password).setOnClickListener {
             val email = etEmail.text.toString().trim()
@@ -183,15 +188,18 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun signInAnonymously() {
+        Log.d(TAG, "Starting signInAnonymously flow")
         setLoading(true)
         auth.signInAnonymously()
             .addOnCompleteListener(this) { task ->
                 setLoading(false)
                 if (task.isSuccessful) {
+                    Log.d(TAG, "Anonymous sign-in SUCCESS")
                     showToast(getString(R.string.logged_in_as_guest))
                     finish()
                 } else {
                     val msg = task.exception?.message ?: getString(R.string.auth_failed)
+                    Log.e(TAG, "Anonymous sign-in FAILED: $msg")
                     showToast("Guest login failed: $msg")
                 }
             }
