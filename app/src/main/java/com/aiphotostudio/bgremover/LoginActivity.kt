@@ -97,12 +97,9 @@ class LoginActivity : AppCompatActivity() {
                             showToast(getString(R.string.signin_successful))
                             finish()
                         } else {
-                            showToast(
-                                getString(
-                                    R.string.signin_failed_with_message,
-                                    task.exception?.message
-                                )
-                            )
+                            val errorMessage = task.exception?.message
+                                ?: getString(R.string.auth_failed)
+                            showToast(getString(R.string.signin_failed_with_message, errorMessage))
                         }
                     }
             } else {
@@ -113,12 +110,9 @@ class LoginActivity : AppCompatActivity() {
                             showToast(getString(R.string.signup_successful))
                             finish()
                         } else {
-                            showToast(
-                                getString(
-                                    R.string.signup_failed_with_message,
-                                    task.exception?.message
-                                )
-                            )
+                            val errorMessage = task.exception?.message
+                                ?: getString(R.string.auth_failed)
+                            showToast(getString(R.string.signup_failed_with_message, errorMessage))
                         }
                     }
             }
@@ -185,7 +179,9 @@ class LoginActivity : AppCompatActivity() {
                     showToast(getString(R.string.google_signin_successful))
                     finish()
                 } else {
-                    showToast(getString(R.string.google_signin_failed, task.exception?.message))
+                    val errorMessage = task.exception?.message
+                        ?: getString(R.string.auth_failed)
+                    showToast(getString(R.string.google_signin_failed, errorMessage))
                 }
             }
     }
