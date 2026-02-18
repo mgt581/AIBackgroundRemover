@@ -158,7 +158,7 @@ class LoginActivity : AppCompatActivity() {
                 credential?.idToken?.let { firebaseAuthWithGoogle(it) } ?: setLoading(false)
             } catch (e: GetCredentialException) {
                 setLoading(false)
-                Log.e(TAG, "Credential Manager Error", e)
+                Log.e(TAG, CREDENTIAL_MANAGER_ERROR, e)
                 val msg = e.message ?: getString(R.string.auth_failed)
                 showToast(getString(R.string.google_signin_failed_with_message, msg))
             }
@@ -190,11 +190,11 @@ class LoginActivity : AppCompatActivity() {
         auth.signInAnonymously().addOnCompleteListener(this) { task ->
             setLoading(false)
             if (task.isSuccessful) {
-                Log.d(TAG, "Anonymous sign-in successful.")
+                Log.d(TAG, SIGNIN_SUCCESS_MSG)
                 showToast(getString(R.string.logged_in_as_guest))
                 finish()
             } else {
-                Log.e(TAG, "Anonymous sign-in failed.", task.exception)
+                Log.e(TAG, SIGNIN_FAILED_MSG, task.exception)
                 showToast(getString(R.string.guest_login_failed, task.exception?.message))
             }
         }
@@ -228,5 +228,8 @@ class LoginActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "LoginActivity"
+        private const val CREDENTIAL_MANAGER_ERROR = "Credential Manager Error"
+        private const val SIGNIN_SUCCESS_MSG = "Anonymous sign-in successful."
+        private const val SIGNIN_FAILED_MSG = "Anonymous sign-in failed."
     }
 }
