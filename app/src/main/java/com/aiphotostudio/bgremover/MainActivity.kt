@@ -105,7 +105,6 @@ class MainActivity : AppCompatActivity() {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
-                databaseEnabled = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
             }
@@ -159,7 +158,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Injects JavaScript into the WebView to synchronize authentication state.
      */
-    private fun injectNativeConfig() {
+    internal fun injectNativeConfig() {
         val user = auth.currentUser
         val userId = user?.uid ?: ""
         val userEmail = user?.email ?: ""
@@ -194,7 +193,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Displays a dialog to choose between taking a photo or selecting from the gallery.
      */
-    private fun showImageSourceDialog() {
+    internal fun showImageSourceDialog() {
         val options = arrayOf(getString(R.string.take_photo), getString(R.string.choose_from_gallery), getString(R.string.cancel))
         AlertDialog.Builder(this)
             .setTitle(R.string.select_image_source)
@@ -213,7 +212,7 @@ class MainActivity : AppCompatActivity() {
     private fun openCamera() {
         val photoFile = File(getExternalFilesDir(null), "IMG_${System.currentTimeMillis()}.jpg")
         cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
-        cameraLauncher.launch(cameraImageUri)
+        cameraImageUri?.let { cameraLauncher.launch(it) }
     }
 
     /**
