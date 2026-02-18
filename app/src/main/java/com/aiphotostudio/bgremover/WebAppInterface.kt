@@ -17,6 +17,13 @@ import java.util.UUID
 
 /**
  * Interface for JavaScript to interact with the native app.
+ *
+ * @property context The application context.
+ * @property onBackgroundPickerRequested Callback to trigger the native background picker.
+ * @property onGoogleSignInRequested Callback to trigger native Google Sign-In.
+ * @property onLoginRequested Callback to trigger the native login screen.
+ * @property onLoginSuccess Callback executed after a successful login.
+ * @property callback General purpose callback for results.
  */
 @Suppress("unused", "HardcodedStringLiteral", "SpellCheckingInspection")
 class WebAppInterface(
@@ -71,13 +78,8 @@ class WebAppInterface(
             }
             val bytes = Base64.decode(cleanBase64, Base64.DEFAULT)
 
-            // 1. Save to MediaStore (Gallery)
             saveToMediaStore(bytes, name)
-
-            // 2. Save to Internal Storage
             saveToInternalStorage(bytes, name)
-
-            // 3. Upload to Firebase (for Web Gallery)
             uploadToFirebase(bytes, name)
 
         } catch (e: Exception) {
@@ -114,12 +116,7 @@ class WebAppInterface(
     }
 
     private fun uploadToFirebase(bytes: ByteArray, fileName: String) {
-        val user = auth.currentUser
-        if (user == null) {
-            Log.w(TAG, "User not signed in. Skipping Firebase upload.")
-            return
-        }
-
+        val user = auth.currentUser ?: return
         val userId = user.uid
         val storageRef = storage.reference.child("users/$userId/gallery/${UUID.randomUUID()}.png")
 
@@ -184,6 +181,7 @@ class WebAppInterface(
             val userDir = File(context.filesDir, "saved_images/$userId")
             if (!userDir.exists() && !userDir.mkdirs()) {
                 Log.e(TAG, "Failed to create directory")
+                return
             }
             val file = File(userDir, fileName)
             FileOutputStream(file).use { outputStream ->
