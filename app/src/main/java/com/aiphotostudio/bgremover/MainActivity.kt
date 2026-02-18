@@ -31,6 +31,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Main Activity for the AI Background Remover application.
+ * Manages the primary WebView and native authentication flows.
+ */
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
@@ -70,7 +74,7 @@ class MainActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                Log.e("MainActivity", "Google sign in failed", e)
+                Log.e(TAG, "Google sign in failed", e)
                 Toast.makeText(this, "Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
@@ -350,5 +354,9 @@ class MainActivity : AppCompatActivity() {
     private fun openUrl(url: String) {
         try { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
         catch (_: Exception) { Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show() }
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }
