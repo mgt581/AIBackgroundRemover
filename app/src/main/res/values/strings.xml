@@ -143,4 +143,8 @@
     <string name="signin_failed_with_message">Sign in failed: %1$s</string>
     <string name="guest_login_failed">Guest login failed: %1$s</string>
     <string name="google_account_not_found">No Google accounts found on device.</string>
+
+    <string name="credential_manager_error">Credential Manager Error</string>
+    <string name="signin_success_msg">Anonymous sign-in successful.</string>
+    <string name="signin_failed_msg">Anonymous sign-in failed.</string>
 </resources>
