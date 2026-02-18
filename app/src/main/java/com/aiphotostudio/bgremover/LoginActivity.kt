@@ -120,12 +120,7 @@ class LoginActivity : AppCompatActivity() {
                     is FirebaseAuthUserCollisionException -> getString(R.string.err_email_in_use)
                     else -> task.exception?.message ?: getString(R.string.auth_failed)
                 }
-                showToast(
-                    getString(
-                        if (isSignIn) R.string.signin_failed_with_message else R.string.signup_failed_with_message,
-                        error
-                    )
-                )
+                showToast(getString(if (isSignIn) R.string.signin_failed_with_message else R.string.signup_failed_with_message, error))
             }
         }
     }
@@ -140,12 +135,8 @@ class LoginActivity : AppCompatActivity() {
             return
         }
         auth.sendPasswordResetEmail(email)
-            .addOnSuccessListener {
-                showToast(getString(R.string.password_reset_email_sent))
-            }
-            .addOnFailureListener { e ->
-                showToast(getString(R.string.failed_to_send_reset_email, e.message))
-            }
+            .addOnSuccessListener { showToast(getString(R.string.password_reset_email_sent)) }
+            .addOnFailureListener { showToast(getString(R.string.failed_to_send_reset_email, it.message)) }
     }
 
     /**
@@ -167,7 +158,7 @@ class LoginActivity : AppCompatActivity() {
                 credential?.idToken?.let { firebaseAuthWithGoogle(it) } ?: setLoading(false)
             } catch (e: GetCredentialException) {
                 setLoading(false)
-                Log.e(TAG, getString(R.string.credential_manager_error), e)
+                Log.e(TAG, "Credential Manager Error", e)
                 val msg = e.message ?: getString(R.string.auth_failed)
                 showToast(getString(R.string.google_signin_failed_with_message, msg))
             }
@@ -199,11 +190,11 @@ class LoginActivity : AppCompatActivity() {
         auth.signInAnonymously().addOnCompleteListener(this) { task ->
             setLoading(false)
             if (task.isSuccessful) {
-                Log.d(TAG, getString(R.string.signin_success_msg))
+                Log.d(TAG, "Anonymous sign-in successful.")
                 showToast(getString(R.string.logged_in_as_guest))
                 finish()
             } else {
-                Log.e(TAG, getString(R.string.signin_failed_msg), task.exception)
+                Log.e(TAG, "Anonymous sign-in failed.", task.exception)
                 showToast(getString(R.string.guest_login_failed, task.exception?.message))
             }
         }
@@ -213,11 +204,7 @@ class LoginActivity : AppCompatActivity() {
      * Updates the UI text based on the current auth mode (Sign In/Sign Up).
      */
     private fun updateUiForAuthMode() {
-        btnEmailLogin.text = if (isSignIn) {
-            getString(R.string.sign_in)
-        } else {
-            getString(R.string.sign_up)
-        }
+        btnEmailLogin.text = if (isSignIn) getString(R.string.sign_in) else getString(R.string.sign_up)
     }
 
     /**
