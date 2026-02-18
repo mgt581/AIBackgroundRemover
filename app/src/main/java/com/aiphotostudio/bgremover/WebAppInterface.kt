@@ -9,80 +9,58 @@ import android.util.Base64
 import android.util.Log
 import android.webkit.JavascriptInterface
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.FileOutputStream
+import java.util.UUID
 
 /**
  * Interface for JavaScript to interact with the native app.
- *
- * @property context The application context.
- * @property onBackgroundPickerRequested Callback for when background picker is requested.
- * @property onGoogleSignInRequested Callback to trigger native Google Sign-In.
- * @property callback General purpose callback for results.
  */
 @Suppress("unused", "HardcodedStringLiteral", "SpellCheckingInspection")
 class WebAppInterface(
     private val context: Context,
     private val onBackgroundPickerRequested: () -> Unit,
     private val onGoogleSignInRequested: () -> Unit,
+    private val onLoginRequested: () -> Unit,
+    private val onLoginSuccess: () -> Unit,
     private val callback: (Boolean, String?) -> Unit
 ) {
 
-    /**
-     * Saves an image from base64 string.
-     * @param base64 The base64 image data.
-     */
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+
     @JavascriptInterface
     fun saveImage(base64: String) {
         saveToDevice(base64, null)
     }
 
-    /**
-     * Saves an image with a specific filename.
-     * @param base64 The base64 image data.
-     * @param fileName The target filename.
-     */
     @JavascriptInterface
     fun saveImage(base64: String, fileName: String?) {
         saveToDevice(base64, fileName)
     }
 
-    /**
-     * Saves an image to the gallery.
-     * @param base64 The base64 image data.
-     */
     @JavascriptInterface
     fun saveToGallery(base64: String) {
         val name = "img_${System.currentTimeMillis()}.png"
         saveToDevice(base64, name)
     }
 
-    /**
-     * Downloads an image from base64 string.
-     * @param base64 The base64 image data.
-     */
     @JavascriptInterface
     fun downloadImage(base64: String) {
         saveToDevice(base64, null)
     }
 
-    /**
-     * Saves to device with default naming.
-     * @param base64 The base64 image data.
-     */
     @JavascriptInterface
     fun saveToDevice(base64: String) {
         saveToDevice(base64, null)
     }
 
-    /**
-     * Core save function.
-     * @param base64 The base64 image data.
-     * @param fileName Optional filename.
-     */
     @JavascriptInterface
     fun saveToDevice(base64: String, fileName: String?) {
-        Log.d("WebAppInterface", "saveToDevice called")
+        Log.d(TAG, "saveToDevice called")
         try {
             val name = fileName ?: "AI_Studio_${System.currentTimeMillis()}.png"
             val comma = ","
@@ -93,94 +71,130 @@ class WebAppInterface(
             }
             val bytes = Base64.decode(cleanBase64, Base64.DEFAULT)
 
-            val resolver = context.contentResolver
-            val contentValues = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, name)
-                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/AIPhotoStudio")
-                    put(MediaStore.Images.Media.IS_PENDING, 1)
-                }
-            }
+            // 1. Save to MediaStore (Gallery)
+            saveToMediaStore(bytes, name)
 
-            val uri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            // 2. Save to Internal Storage
+            saveToInternalStorage(bytes, name)
 
-            uri?.let { /**
-                        *
-                        */
-                       itemUri ->
-                resolver.openOutputStream(itemUri)?.use { stream ->
-                    stream.write(bytes)
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val updateValues = ContentValues()
-                    updateValues.put(MediaStore.Images.Media.IS_PENDING, 0)
-                    resolver.update(itemUri, updateValues, null, null)
-                }
-
-                saveToInternalStorage(bytes, name)
-                callback(true, itemUri.toString())
-            } ?: callback(false, context.getString(R.string.save_failed, "MediaStore error"))
+            // 3. Upload to Firebase (for Web Gallery)
+            uploadToFirebase(bytes, name)
 
         } catch (e: Exception) {
-            Log.e("WebAppInterface", "Error saving image", e)
+            Log.e(TAG, "Error saving image", e)
             callback(false, e.message)
         }
     }
 
-    /**
-     * Triggers native background picker.
-     */
+    private fun saveToMediaStore(bytes: ByteArray, name: String) {
+        val resolver = context.contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, name)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/AIPhotoStudio")
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+        }
+
+        val uri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        uri?.let { itemUri ->
+            resolver.openOutputStream(itemUri)?.use { stream ->
+                stream.write(bytes)
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val updateValues = ContentValues()
+                updateValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+                resolver.update(itemUri, updateValues, null, null)
+            }
+            callback(true, itemUri.toString())
+        } ?: callback(false, context.getString(R.string.error_mediastore))
+    }
+
+    private fun uploadToFirebase(bytes: ByteArray, fileName: String) {
+        val user = auth.currentUser
+        if (user == null) {
+            Log.w(TAG, "User not signed in. Skipping Firebase upload.")
+            return
+        }
+
+        val userId = user.uid
+        val storageRef = storage.reference.child("users/$userId/gallery/${UUID.randomUUID()}.png")
+
+        storageRef.putBytes(bytes)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    saveMetadataToFirestore(userId, uri.toString(), fileName)
+                }
+            }
+            .addOnFailureListener { e: Exception ->
+                Log.e(TAG, "Firebase Storage upload failed", e)
+            }
+    }
+
+    private fun saveMetadataToFirestore(userId: String, downloadUrl: String, fileName: String) {
+        val photoData = hashMapOf(
+            "url" to downloadUrl,
+            "title" to fileName,
+            "createdAt" to com.google.firebase.Timestamp.now()
+        )
+
+        db.collection("users")
+            .document(userId)
+            .collection("gallery")
+            .add(photoData)
+            .addOnSuccessListener {
+                Log.d(TAG, "Firestore metadata saved")
+            }
+            .addOnFailureListener { e: Exception ->
+                Log.e(TAG, "Firestore metadata save failed", e)
+            }
+    }
+
     @JavascriptInterface
     fun showBackgroundPicker() {
         onBackgroundPickerRequested()
     }
 
-    /**
-     * Triggers native Google Sign-In.
-     */
     @JavascriptInterface
     fun googleSignIn() {
         onGoogleSignInRequested()
     }
 
-    /**
-     * Returns the current user ID or null if not signed in.
-     * @return The user ID or null.
-     */
     @JavascriptInterface
-    fun getUserId(): String? {
-        return FirebaseAuth.getInstance().currentUser?.uid
+    fun requestLogin() {
+        onLoginRequested()
     }
 
-    /**
-     * Displays a toast message.
-     * @param message The text to show.
-     */
+    @JavascriptInterface
+    fun getUserId(): String? {
+        return auth.currentUser?.uid
+    }
+
     @JavascriptInterface
     fun showToast(message: String) {
         callback(false, message)
     }
 
-    /**
-     * Private storage helper.
-     * @param bytes Image data.
-     * @param fileName Target filename.
-     */
     private fun saveToInternalStorage(bytes: ByteArray, fileName: String) {
         try {
-            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
+            val userId = auth.currentUser?.uid ?: "guest"
             val userDir = File(context.filesDir, "saved_images/$userId")
             if (!userDir.exists() && !userDir.mkdirs()) {
-                Log.e("WebAppInterface", "Failed to create directory")
+                Log.e(TAG, "Failed to create directory")
             }
             val file = File(userDir, fileName)
             FileOutputStream(file).use { outputStream ->
                 outputStream.write(bytes)
             }
         } catch (e: Exception) {
-            Log.e("WebAppInterface", "Internal save failed", e)
+            Log.e(TAG, "Internal save failed", e)
         }
+    }
+
+    companion object {
+        private const val TAG = "WebAppInterface"
     }
 }

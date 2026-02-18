@@ -16,6 +16,7 @@
     <string name="home">Home</string>
 
     <!-- Authentication -->
+    <string name="already_signed_in">Already signed in</string>
     <string name="sign_in_now">Sign in now</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
@@ -33,8 +34,25 @@
     <string name="signed_out_success">Signed out successfully</string>
     <string name="not_signed_in">Not signed in</string>
     <string name="user_placeholder">User</string>
+    <string name="guest" translatable="false">guest</string>
+    <string name="signin_successful">Sign-in successful</string>
+    <string name="firebase_auth_failed">Firebase Auth failed</string>
+    <string name="login_failed">Login failed: %1$s</string>
+    <string name="google_sign_in_failed">Google sign in failed</string>
+    <string name="saved_to_device_gallery">Saved to Device Gallery</string>
+    <string name="save_failed_msg">Save Failed</string>
+    <string name="signed_in">Signed In</string>
 
     <!-- Auth Error & Status Messages -->
+    <string name="email_and_password_required">Email and password are required</string>
+    <string name="signup_successful">Sign-up successful</string>
+    <string name="signup_failed_with_message">Sign-up failed: %1$s</string>
+    <string name="enter_email_to_reset">Please enter your email to reset password</string>
+    <string name="password_reset_email_sent">Password reset email sent</string>
+    <string name="failed_to_send_reset_email">Failed to send reset email: %1$s</string>
+    <string name="google_signin_failed_with_message">Google sign in failed: %1$s</string>
+    <string name="google_signin_successful">Google Sign-in successful</string>
+    <string name="google_signin_failed">Google Sign-in failed: %1$s</string>
     <string name="enter_email">Please enter your email</string>
     <string name="enter_valid_email">Please enter a valid email address</string>
     <string name="enter_password">Please enter your password</string>
@@ -54,8 +72,6 @@
     <string name="auth_failed">Authentication failed</string>
     <string name="google_login_successful">Google login successful</string>
     <string name="logged_in_as_guest">Logged in as guest</string>
-    <string name="google_sign_in_failed">Google sign-in failed</string>
-    <string name="google_sign_in_failed_with_message">Google sign-in failed: %1$s</string>
 
     <!-- Core Features -->
     <string name="choose_photo">Choose Photo</string>
@@ -77,6 +93,14 @@
     <string name="processing_download">Processing download…</string>
     <string name="download_started">Download started…</string>
     <string name="save_failed">Save failed: %1$s</string>
+    <string name="image_deleted">Image deleted</string>
+    <string name="delete_failed">Delete failed</string>
+    <string name="could_not_delete_image">Could not delete image</string>
+    <string name="file_not_found">File not found</string>
+    <string name="saved_to_device_storage">Saved to device storage</string>
+    <string name="download_failed">Download failed</string>
+    <string name="could_not_open_link">Could not open link</string>
+    <string name="error_mediastore">MediaStore error</string>
 
     <!-- Gallery -->
     <string name="your_gallery">Your Gallery</string>

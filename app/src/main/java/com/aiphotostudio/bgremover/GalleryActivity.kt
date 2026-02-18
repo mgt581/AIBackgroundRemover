@@ -31,6 +31,11 @@ class GalleryActivity : AppCompatActivity() {
     private lateinit var adapter: GalleryAdapter
     private lateinit var auth: FirebaseAuth
 
+    /**
+     * Initializes the activity, setting up UI components and loading images.
+     * @param savedInstanceState If the activity is being re-initialized after
+     * previously being shut down then this Bundle contains the data it most recently supplied.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gallery)
@@ -50,6 +55,9 @@ class GalleryActivity : AppCompatActivity() {
         setupFooter()
     }
 
+    /**
+     * Configures click listeners for the footer navigation buttons.
+     */
     private fun setupFooter() {
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -58,7 +66,11 @@ class GalleryActivity : AppCompatActivity() {
             if (auth.currentUser == null) {
                 startActivity(Intent(this, LoginActivity::class.java))
             } else {
-                Toast.makeText(this, "Already signed in", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.already_signed_in),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
         findViewById<View>(R.id.footer_btn_sign_up).setOnClickListener {
@@ -68,31 +80,42 @@ class GalleryActivity : AppCompatActivity() {
             // Already here
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            openUrl("https://mgt581.github.io/photo-static-main-3/privacy")
+            launchBrowser(PRIVACY_URL)
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
         }
     }
 
-    private fun openUrl(url: String) {
+    /**
+     * Launches a browser with the specified URL.
+     * @param url The URL to open in the browser.
+     */
+    private fun launchBrowser(url: String) {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
         } catch (_: Exception) {
-            Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.could_not_open_link),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
+    /**
+     * Loads saved images from internal storage for the current user.
+     */
     private fun loadImages() {
         val imageFiles = mutableListOf<File>()
 
-        val userId = auth.currentUser?.uid ?: "guest"
-        val userDir = File(filesDir, "saved_images/$userId")
+        val userId = auth.currentUser?.uid ?: getString(R.string.guest)
+        val userDir = File(filesDir, "$INTERNAL_DIR_PREFIX$userId")
 
         if (userDir.exists()) {
             val files = userDir.listFiles()
             files?.sortByDescending { it.lastModified() }
-            files?.forEach { file ->
+            files?.forEach { file: File ->
                 if (file.isFile) imageFiles.add(file)
             }
         }
@@ -106,31 +129,55 @@ class GalleryActivity : AppCompatActivity() {
 
             adapter = GalleryAdapter(
                 imageFiles = imageFiles,
-                onDeleteClick = { file -> deleteImage(file) },
-                onDownloadClick = { file -> downloadImage(file) }
+                onDeleteClick = { file: File -> deleteImage(file) },
+                onDownloadClick = { file: File -> downloadImage(file) }
             )
             recyclerView.adapter = adapter
         }
     }
 
+    /**
+     * Deletes the specified image file from internal storage.
+     * @param file The file to be deleted.
+     */
     private fun deleteImage(file: File) {
         try {
             if (file.exists() && file.delete()) {
                 loadImages()
-                Toast.makeText(this, "Image deleted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.image_deleted),
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
-                Toast.makeText(this, "Could not delete image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.could_not_delete_image),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } catch (e: Exception) {
-            Log.e("GalleryActivity", "Error deleting image", e)
-            Toast.makeText(this, "Delete failed", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Error deleting image", e)
+            Toast.makeText(
+                this,
+                getString(R.string.delete_failed),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
+    /**
+     * Downloads the specified image file to the device's public storage.
+     * @param file The file to be downloaded.
+     */
     private fun downloadImage(file: File) {
         try {
             if (!file.exists()) {
-                Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.file_not_found),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return
             }
 
@@ -142,7 +189,7 @@ class GalleryActivity : AppCompatActivity() {
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
                     put(
                         MediaStore.Images.Media.RELATIVE_PATH,
-                        Environment.DIRECTORY_PICTURES + "/AI Photo Studio"
+                        Environment.DIRECTORY_PICTURES + File.separator + ALBUM_NAME
                     )
                 }
 
@@ -151,21 +198,31 @@ class GalleryActivity : AppCompatActivity() {
                     values
                 )
 
-                itemUri?.let {
-                    contentResolver.openOutputStream(it).use { outputStream ->
+                itemUri?.let { uri: Uri ->
+                    contentResolver.openOutputStream(uri).use { outputStream ->
                         FileInputStream(file).use { inputStream ->
                             inputStream.copyTo(outputStream!!)
                         }
                     }
-                    Toast.makeText(this, "Saved to device storage", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.saved_to_device_storage),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } ?: run {
-                    Toast.makeText(this, "Save failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.save_failed, getString(R.string.error_mediastore)),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
             } else {
                 @Suppress("DEPRECATION")
-                val publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                val studioDir = File(publicDir, "AI Photo Studio")
+                val publicDir = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES
+                )
+                val studioDir = File(publicDir, ALBUM_NAME)
                 if (!studioDir.exists()) studioDir.mkdirs()
 
                 val destFile = File(studioDir, fileName)
@@ -180,11 +237,26 @@ class GalleryActivity : AppCompatActivity() {
                 mediaScanIntent.data = Uri.fromFile(destFile)
                 sendBroadcast(mediaScanIntent)
 
-                Toast.makeText(this, "Saved to device storage", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.saved_to_device_storage),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } catch (e: Exception) {
-            Log.e("GalleryActivity", "Error downloading image", e)
-            Toast.makeText(this, "Download failed", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Error downloading image", e)
+            Toast.makeText(
+                this,
+                getString(R.string.download_failed),
+                Toast.LENGTH_SHORT
+            ).show()
         }
+    }
+
+    companion object {
+        private const val TAG = "GalleryActivity"
+        private const val ALBUM_NAME = "AI Photo Studio"
+        private const val INTERNAL_DIR_PREFIX = "saved_images/"
+        private const val PRIVACY_URL = "https://mgt581.github.io/photo-static-main-3/privacy"
     }
 }
