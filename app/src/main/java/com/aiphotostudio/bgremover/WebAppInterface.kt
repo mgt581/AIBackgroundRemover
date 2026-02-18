@@ -2,6 +2,7 @@ package com.aiphotostudio.bgremover
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -151,6 +152,34 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun getUserId(): String? = auth.currentUser?.uid
+
+    /**
+     * Navigates to the native Gallery Activity.
+     */
+    @JavascriptInterface
+    fun openGallery() {
+        try {
+            val intent = Intent(context, GalleryActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            callback(false, "Failed to open Gallery: ${e.message}")
+        }
+    }
+
+    /**
+     * Navigates to the native Settings Activity.
+     */
+    @JavascriptInterface
+    fun openSettings() {
+        try {
+            val intent = Intent(context, SettingsActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            callback(false, "Failed to open Settings: ${e.message}")
+        }
+    }
 
     companion object {
         private const val COMMA = ","
