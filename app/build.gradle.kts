@@ -1,3 +1,4 @@
+import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -7,13 +8,15 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-val keystorePropertiesFile = rootProject.file("keystore.properties")
-val keystoreProperties = Properties()
+val keystorePropertiesFile: File = rootProject.file("keystore.properties")
+val keystoreProperties: Properties = Properties()
 
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    FileInputStream(keystorePropertiesFile).use { input ->
+        keystoreProperties.load(input)
+    }
 } else {
-    println("WARNING: keystore.properties not found at ${keystorePropertiesFile.absolutePath}")
+    logger.warn("keystore.properties not found at ${keystorePropertiesFile.absolutePath}")
 }
 
 android {
@@ -24,8 +27,8 @@ android {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 39
-        versionName = "6.9"
+        versionCode = 40
+        versionName = "7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -50,7 +53,7 @@ android {
                         keyAlias = keyAliasProp
                         keyPassword = keyPasswordProp
                     } else {
-                        println("WARNING: Keystore file not found at ${sFile.absolutePath}")
+                        logger.warn("Keystore file not found at ${sFile.absolutePath}")
                     }
                 }
             }
@@ -64,14 +67,18 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (signingConfigs.getByName("release").storeFile?.exists() == true) {
-                signingConfig = signingConfigs.getByName("release")
+            signingConfigs.findByName("release")?.let { releaseConfig ->
+                if (releaseConfig.storeFile?.exists() == true) {
+                    signingConfig = releaseConfig
+                }
             }
         }
 
         debug {
             isDebuggable = true
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfigs.findByName("debug")?.let { debugConfig ->
+                signingConfig = debugConfig
+            }
         }
     }
 
