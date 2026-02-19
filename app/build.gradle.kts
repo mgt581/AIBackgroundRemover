@@ -27,8 +27,8 @@ android {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 40
-        versionName = "7.0"
+        versionCode = 42
+        versionName = "7.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
