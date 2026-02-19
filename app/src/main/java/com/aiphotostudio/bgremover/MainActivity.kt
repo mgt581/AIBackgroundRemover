@@ -161,6 +161,13 @@ class MainActivity : AppCompatActivity() {
 
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
+                    
+                    // Handle "Home" link from the gallery or settings pages
+                    if (url == "https://aiphotostudio.co.uk/index.html" || url == "https://aiphotostudio.co.uk/" || url == "https://aiphotostudio.co.uk") {
+                        backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/")
+                        return true
+                    }
+
                     if (url.contains("signin.html") || url.contains("login")) {
                         if (auth.currentUser == null) {
                             startActivity(Intent(this@MainActivity, LoginActivity::class.java))
@@ -316,6 +323,15 @@ class MainActivity : AppCompatActivity() {
         } else {
             tvAuthStatus.visibility = View.GONE
             btnHeaderLogin.text = getString(R.string.sign_in)
+        }
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
         }
     }
 
