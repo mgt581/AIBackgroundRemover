@@ -22,9 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
  * Main Activity for the AI Background Remover application.
@@ -89,12 +86,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // WIRE UP NATIVE BUTTONS TO LOAD URLS IN WEBVIEW
+        // WIRE UP NATIVE BUTTONS TO LOAD URLS IN WEBVIEW AS REQUESTED
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
             backgroundWebView.loadUrl("https://aiphotostudio.co.uk/gallery.html")
         }
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings.html")
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings")
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
             backgroundWebView.loadUrl("https://aiphotostudio.co.uk/privacy.html")
@@ -103,7 +100,7 @@ class MainActivity : AppCompatActivity() {
             backgroundWebView.loadUrl("https://aiphotostudio.co.uk/terms.html")
         }
 
-        // Social Buttons - Using the extension function from UrlUtils.kt
+        // Social Buttons - uses openUrl extension from UrlUtils.kt
         findViewById<View>(R.id.btn_whatsapp).setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
         findViewById<View>(R.id.btn_tiktok).setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
         findViewById<View>(R.id.btn_facebook).setOnClickListener { openUrl(getString(R.string.facebook_url)) }
@@ -118,6 +115,8 @@ class MainActivity : AppCompatActivity() {
                 databaseEnabled = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
+                // Modern user agent to ensure web app features work correctly
+                userAgentString = "Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"
             }
 
             val webInterface = WebAppInterface(
@@ -162,8 +161,8 @@ class MainActivity : AppCompatActivity() {
                     return true
                 }
             }
-            // Using unified domain for single-origin session sync
-            loadUrl("https://aiphotostudio.co.uk/")
+            // Load the main editor from mgt581.github.io as requested
+            loadUrl("https://mgt581.github.io/photo-static-main-3/")
         }
     }
 
@@ -174,7 +173,6 @@ class MainActivity : AppCompatActivity() {
 
         val script = """
             (function() {
-                // 1. Pass Native Auth to Web
                 window.NATIVE_AUTH_USER_ID = '$userId';
                 window.NATIVE_AUTH_EMAIL = '$userEmail';
                 if ('$userId' !== '') {
@@ -183,7 +181,6 @@ class MainActivity : AppCompatActivity() {
                     if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
                 }
 
-                // 2. CSS Overrides: Hide Web Buttons and Remove Watermark
                 var style = document.createElement('style');
                 style.innerHTML = `
                     .auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"],
@@ -194,7 +191,6 @@ class MainActivity : AppCompatActivity() {
                 `;
                 document.head.appendChild(style);
                 
-                // 3. JS Logic to force login status
                 if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
             })();
         """.trimIndent()
