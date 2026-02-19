@@ -41,17 +41,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHeaderLogin: Button
 
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
-        filePathCallback = null
+        if (filePathCallback != null) {
+            filePathCallback?.onReceiveValue(if (uri != null) arrayOf(uri) else null)
+            filePathCallback = null
+        }
     }
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
-        if (success && cameraImageUri != null) {
-            filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
-        } else {
-            filePathCallback?.onReceiveValue(null)
+        if (filePathCallback != null) {
+            if (success && cameraImageUri != null) {
+                filePathCallback?.onReceiveValue(arrayOf(cameraImageUri!!))
+            } else {
+                filePathCallback?.onReceiveValue(null)
+            }
+            filePathCallback = null
         }
-        filePathCallback = null
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -116,7 +120,12 @@ class MainActivity : AppCompatActivity() {
                 databaseEnabled = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
-                userAgentString = "Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"
+                allowContentAccess = true
+                javaScriptCanOpenWindowsAutomatically = true
+                loadWithOverviewMode = true
+                useWideViewPort = true
+                // Modern User Agent
+                userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
             }
 
             val webInterface = WebAppInterface(
@@ -140,8 +149,10 @@ class MainActivity : AppCompatActivity() {
                 }
             )
 
+            // Multiple bridge names to ensure compatibility with different web implementations
             addJavascriptInterface(webInterface, "AndroidBridge")
             addJavascriptInterface(webInterface, "Studio")
+            addJavascriptInterface(webInterface, "Android")
 
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
@@ -163,6 +174,8 @@ class MainActivity : AppCompatActivity() {
 
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(webView: WebView?, callback: ValueCallback<Array<Uri>>?, params: FileChooserParams?): Boolean {
+                    // Critical: Reset any existing callback to avoid hanging the WebView
+                    filePathCallback?.onReceiveValue(null)
                     filePathCallback = callback
                     showImageSourceDialog()
                     return true
@@ -172,15 +185,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Shows a custom toast message when an image is auto-saved to the cloud gallery.
-     */
     private fun showAutoSaveToast() {
         val inflater = LayoutInflater.from(this)
         val layout = inflater.inflate(R.layout.layout_custom_toast, findViewById(R.id.backgroundWebView), false)
         
         with(Toast(applicationContext)) {
-            setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 100)
+            setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 150)
             duration = Toast.LENGTH_LONG
             view = layout
             show()
@@ -194,25 +204,28 @@ class MainActivity : AppCompatActivity() {
 
         val script = """
             (function() {
+                // Ensure bridge existence for scripts that check early
                 window.NATIVE_AUTH_USER_ID = '$userId';
                 window.NATIVE_AUTH_EMAIL = '$userEmail';
+                
                 if ('$userId' !== '') {
                     localStorage.setItem('userId', '$userId');
                     sessionStorage.setItem('userId', '$userId');
                     if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
+                    if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
                 }
 
+                // CSS overrides to hide web-only navigation and branding
                 var style = document.createElement('style');
                 style.innerHTML = `
                     .auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"],
                     .gallery-btn, .settings-btn, #nav-gallery, #nav-settings,
-                    .watermark, #watermark, [class*="watermark"], [id*="watermark"] { 
+                    .watermark, #watermark, [class*="watermark"], [id*="watermark"],
+                    .native-hide { 
                         display: none !important; 
                     }
                 `;
                 document.head.appendChild(style);
-                
-                if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
             })();
         """.trimIndent()
         
@@ -227,9 +240,18 @@ class MainActivity : AppCompatActivity() {
                 when (which) {
                     0 -> openCamera()
                     1 -> galleryLauncher.launch("image/*")
-                    else -> dialog.dismiss()
+                    else -> {
+                        filePathCallback?.onReceiveValue(null)
+                        filePathCallback = null
+                        dialog.dismiss()
+                    }
                 }
-            }.show()
+            }
+            .setOnCancelListener {
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = null
+            }
+            .show()
     }
 
     private fun openCamera() {
