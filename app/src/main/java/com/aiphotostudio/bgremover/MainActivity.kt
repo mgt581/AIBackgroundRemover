@@ -89,13 +89,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // WIRE UP NATIVE BUTTONS
-        findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
+        // WIRE UP NATIVE BUTTONS TO LOAD URLS IN WEBVIEW
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
-            startActivity(Intent(this, GalleryActivity::class.java))
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/gallery.html")
         }
+        findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings.html")
+        }
+        findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/privacy.html")
+        }
+        findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/terms.html")
+        }
+
+        // Social Buttons - Using the extension function from UrlUtils.kt
+        findViewById<View>(R.id.btn_whatsapp).setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
+        findViewById<View>(R.id.btn_tiktok).setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
+        findViewById<View>(R.id.btn_facebook).setOnClickListener { openUrl(getString(R.string.facebook_url)) }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -151,7 +162,8 @@ class MainActivity : AppCompatActivity() {
                     return true
                 }
             }
-            loadUrl("https://mgt581.github.io/photo-static-main-3/")
+            // Using unified domain for single-origin session sync
+            loadUrl("https://aiphotostudio.co.uk/")
         }
     }
 
@@ -226,8 +238,7 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user != null) {
             tvAuthStatus.visibility = View.VISIBLE
-            // Use static "signed in" text as requested
-            tvAuthStatus.text = "signed in"
+            tvAuthStatus.text = getString(R.string.signed_in)
             btnHeaderLogin.text = getString(R.string.sign_out)
         } else {
             tvAuthStatus.visibility = View.GONE
