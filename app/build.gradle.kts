@@ -146,3 +146,10 @@ dependencies {
     // Security Fix for Guava vulnerability
     implementation(libs.guava)
 }
+
+// Fix for "Unable to delete directory" errors caused by .DS_Store or other background processes
+tasks.named<Delete>("clean") {
+    doFirst {
+        delete(layout.buildDirectory.file(".DS_Store"))
+    }
+}
