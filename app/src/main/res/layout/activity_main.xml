@@ -17,44 +17,64 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:contentDescription="@string/logo"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@drawable/logo" />
 
-        <TextView
-            android:id="@+id/tv_header_title"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:orientation="vertical"
             android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:text="@string/ai_background_remover"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:paddingEnd="12dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_header_login"
-            style="@style/Widget.Material3.Button.TonalButton"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Background"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remover"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sign_in"
-            android:textSize="12sp"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/brand_primary"
-            app:cornerRadius="20dp" />
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_auth_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_header_login"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/brand_primary"
+                android:text="@string/sign_in"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:cornerRadius="20dp" />
+
+            <TextView
+                android:id="@+id/tv_auth_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="signed in"
+                android:textColor="@color/status_green"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
 
     </LinearLayout>
 

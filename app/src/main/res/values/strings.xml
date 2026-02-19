@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">AI Photo Studio</string>
     <string name="ai_background_remover" translatable="false">Background Remover</string>
+    <string name="header_title_background">Background</string>
+    <string name="header_title_remover">Remover</string>
     <string name="ai_background_remover_app" translatable="false">Background Remover</string>
     <string name="logo" translatable="false">Logo</string>
 
@@ -37,7 +39,7 @@
     <string name="google_sign_in_failed">Google sign in failed</string>
     <string name="saved_to_device_gallery">Saved to Device Gallery</string>
     <string name="save_failed_msg">Save Failed</string>
-    <string name="signed_in">Signed In</string>
+    <string name="signed_in">signed in</string>
 
     <string name="email_and_password_required">Email and password are required</string>
     <string name="signup_successful">Sign-up successful</string>

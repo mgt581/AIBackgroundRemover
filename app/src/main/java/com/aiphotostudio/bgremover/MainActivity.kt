@@ -226,7 +226,8 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user != null) {
             tvAuthStatus.visibility = View.VISIBLE
-            tvAuthStatus.text = user.email ?: getString(R.string.signed_in)
+            // Use static "signed in" text as requested
+            tvAuthStatus.text = "signed in"
             btnHeaderLogin.text = getString(R.string.sign_out)
         } else {
             tvAuthStatus.visibility = View.GONE
