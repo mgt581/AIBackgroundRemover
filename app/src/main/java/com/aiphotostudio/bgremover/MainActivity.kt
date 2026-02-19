@@ -5,6 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -13,6 +15,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -86,7 +89,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // WIRE UP NATIVE BUTTONS TO LOAD URLS IN WEBVIEW AS REQUESTED
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
             backgroundWebView.loadUrl("https://aiphotostudio.co.uk/gallery.html")
         }
@@ -100,7 +102,6 @@ class MainActivity : AppCompatActivity() {
             backgroundWebView.loadUrl("https://aiphotostudio.co.uk/terms.html")
         }
 
-        // Social Buttons - uses openUrl extension from UrlUtils.kt
         findViewById<View>(R.id.btn_whatsapp).setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
         findViewById<View>(R.id.btn_tiktok).setOnClickListener { openUrl(getString(R.string.tiktok_url)) }
         findViewById<View>(R.id.btn_facebook).setOnClickListener { openUrl(getString(R.string.facebook_url)) }
@@ -115,7 +116,6 @@ class MainActivity : AppCompatActivity() {
                 databaseEnabled = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 allowFileAccess = true
-                // Modern user agent to ensure web app features work correctly
                 userAgentString = "Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"
             }
 
@@ -127,8 +127,15 @@ class MainActivity : AppCompatActivity() {
                 onLoginSuccess = { runOnUiThread { backgroundWebView.reload() } },
                 callback = { success, message ->
                     runOnUiThread {
-                        val toastMessage = if (success) getString(R.string.saved_to_gallery) else message ?: getString(R.string.save_failed)
-                        Toast.makeText(this@MainActivity, toastMessage, Toast.LENGTH_SHORT).show()
+                        if (success) {
+                            if (auth.currentUser != null) {
+                                showAutoSaveToast()
+                            } else {
+                                Toast.makeText(this@MainActivity, getString(R.string.saved_to_gallery), Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(this@MainActivity, message ?: getString(R.string.save_failed), Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             )
@@ -161,8 +168,22 @@ class MainActivity : AppCompatActivity() {
                     return true
                 }
             }
-            // Load the main editor from mgt581.github.io as requested
             loadUrl("https://mgt581.github.io/photo-static-main-3/")
+        }
+    }
+
+    /**
+     * Shows a custom toast message when an image is auto-saved to the cloud gallery.
+     */
+    private fun showAutoSaveToast() {
+        val inflater = LayoutInflater.from(this)
+        val layout = inflater.inflate(R.layout.layout_custom_toast, findViewById(R.id.backgroundWebView), false)
+        
+        with(Toast(applicationContext)) {
+            setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 100)
+            duration = Toast.LENGTH_LONG
+            view = layout
+            show()
         }
     }
 
