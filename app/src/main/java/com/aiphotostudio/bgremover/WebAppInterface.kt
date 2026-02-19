@@ -3,7 +3,6 @@ package com.aiphotostudio.bgremover
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
@@ -56,15 +55,23 @@ class WebAppInterface(
 
     /**
      * Saves an image to the gallery.
+     * Signed-in users only.
      * @param base64 The base64 image data.
      */
     @JavascriptInterface
     fun saveToGallery(base64: String) {
+        val user = auth.currentUser
+        if (user == null) {
+            onLoginRequested()
+            return
+        }
+
         saveToDevice(base64, null)
     }
 
     /**
-     * Saves an image to the device and uploads it to Firebase.
+     * Saves an image to the device.
+     * Uploads to Firebase ONLY if signed in.
      * @param base64 The base64 image data.
      * @param fileName The target filename.
      */
@@ -72,17 +79,23 @@ class WebAppInterface(
     fun saveToDevice(base64: String, fileName: String?) {
         try {
             val name = fileName ?: "AI_Studio_${System.currentTimeMillis()}.png"
+
             val cleanBase64 = if (base64.contains(COMMA)) {
                 base64.substringAfter(COMMA)
             } else {
                 base64
             }
+
             val bytes = Base64.decode(cleanBase64, Base64.DEFAULT)
 
-            // Save locally
+            // ✅ Always save locally
             saveToMediaStore(bytes, name)
-            // Upload to cloud
-            uploadToFirebase(bytes, name)
+
+            // ✅ Upload ONLY if signed in
+            if (auth.currentUser != null) {
+                uploadToFirebase(bytes, name)
+            }
+
         } catch (e: Exception) {
             callback(false, e.message)
         }
@@ -90,22 +103,26 @@ class WebAppInterface(
 
     /**
      * Saves the image bytes to the device's MediaStore.
-     * @param bytes The image data in bytes.
-     * @param name The filename for the image.
+     *
+     * @param bytes The image bytes to be saved.
+     * @param name The name of the file to be created.
      */
     private fun saveToMediaStore(bytes: ByteArray, name: String) {
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, name)
             put(MediaStore.Images.Media.MIME_TYPE, MIME_TYPE_IMAGE_PNG)
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, PICTURES_SUB_DIRECTORY)
             }
         }
+
         val uri = context.contentResolver.insert(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             contentValues
         )
-        uri?.let { itemUri: Uri ->
+
+        uri?.let { itemUri ->
             context.contentResolver.openOutputStream(itemUri)?.use { outputStream ->
                 outputStream.write(bytes)
             }
@@ -115,36 +132,50 @@ class WebAppInterface(
 
     /**
      * Uploads the image to Firebase Storage and saves metadata to Firestore.
-     * @param bytes The image data in bytes.
-     * @param fileName The filename for the image.
+     * Only runs if user is signed in.
+     *
+     * @param bytes The image bytes to upload.
+     * @param fileName The name of the image file.
      */
     private fun uploadToFirebase(bytes: ByteArray, fileName: String) {
         val user = auth.currentUser ?: return
         val userId = user.uid
-        val storageRef = storage.reference.child("users/$userId/gallery/${UUID.randomUUID()}.png")
-        storageRef.putBytes(bytes).addOnSuccessListener {
-            storageRef.downloadUrl.addOnSuccessListener { uri: Uri ->
-                val data = hashMapOf(
-                    "url" to uri.toString(),
-                    "title" to fileName,
-                    "createdAt" to com.google.firebase.Timestamp.now()
-                )
-                db.collection("users").document(userId).collection("gallery").add(data)
+
+        val storagePath = "users/$userId/gallery/${UUID.randomUUID()}.png"
+        val storageRef = storage.reference.child(storagePath)
+
+        storageRef.putBytes(bytes)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val data = hashMapOf(
+                        KEY_URL to uri.toString(),
+                        KEY_TITLE to fileName,
+                        KEY_CREATED_AT to com.google.firebase.Timestamp.now()
+                    )
+
+                    db.collection(COLLECTION_USERS)
+                        .document(userId)
+                        .collection(COLLECTION_GALLERY)
+                        .add(data)
+                }
             }
-        }
     }
 
     /**
      * Triggers native background picker.
      */
     @JavascriptInterface
-    fun showBackgroundPicker() = onBackgroundPickerRequested()
+    fun showBackgroundPicker() {
+        onBackgroundPickerRequested()
+    }
 
     /**
      * Triggers native Google Sign-In.
      */
     @JavascriptInterface
-    fun googleSignIn() = onGoogleSignInRequested()
+    fun googleSignIn() {
+        onGoogleSignInRequested()
+    }
 
     /**
      * Returns the current user ID or null if not signed in.
@@ -163,7 +194,7 @@ class WebAppInterface(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
-            callback(false, "Failed to open Gallery: ${e.message}")
+            callback(false, context.getString(R.string.save_failed, e.message ?: "Unknown error"))
         }
     }
 
@@ -177,7 +208,7 @@ class WebAppInterface(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
-            callback(false, "Failed to open Settings: ${e.message}")
+            callback(false, context.getString(R.string.save_failed, e.message ?: "Unknown error"))
         }
     }
 
@@ -185,5 +216,11 @@ class WebAppInterface(
         private const val COMMA = ","
         private const val MIME_TYPE_IMAGE_PNG = "image/png"
         private const val PICTURES_SUB_DIRECTORY = "Pictures/AIPhotoStudio"
+
+        private const val COLLECTION_USERS = "users"
+        private const val COLLECTION_GALLERY = "gallery"
+        private const val KEY_URL = "url"
+        private const val KEY_TITLE = "title"
+        private const val KEY_CREATED_AT = "createdAt"
     }
 }
