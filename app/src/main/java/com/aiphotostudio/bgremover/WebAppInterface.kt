@@ -22,7 +22,7 @@ import java.util.UUID
  * @property onLoginSuccess Callback executed after a successful login.
  * @property callback General purpose callback for results.
  */
-@Suppress("unused")
+@Suppress("unused", "HardcodedString")
 class WebAppInterface(
     private val context: Context,
     private val onBackgroundPickerRequested: () -> Unit,
@@ -141,14 +141,14 @@ class WebAppInterface(
         val user = auth.currentUser ?: return
         val userId = user.uid
 
-        val storagePath = "users/$userId/gallery/${UUID.randomUUID()}.png"
+        val storagePath = "$COLLECTION_USERS/$userId/$COLLECTION_GALLERY/${UUID.randomUUID()}.png"
         val storageRef = storage.reference.child(storagePath)
 
         storageRef.putBytes(bytes)
             .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                     val data = hashMapOf(
-                        KEY_URL to uri.toString(),
+                        KEY_URL to downloadUri.toString(),
                         KEY_TITLE to fileName,
                         KEY_CREATED_AT to com.google.firebase.Timestamp.now()
                     )
@@ -194,7 +194,7 @@ class WebAppInterface(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
-            callback(false, context.getString(R.string.save_failed, e.message ?: "Unknown error"))
+            callback(false, context.getString(R.string.save_failed, e.message ?: context.getString(R.string.save_failed_msg)))
         }
     }
 
@@ -208,7 +208,7 @@ class WebAppInterface(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
-            callback(false, context.getString(R.string.save_failed, e.message ?: "Unknown error"))
+            callback(false, context.getString(R.string.save_failed, e.message ?: context.getString(R.string.save_failed_msg)))
         }
     }
 
