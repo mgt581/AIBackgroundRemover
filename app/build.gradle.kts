@@ -150,6 +150,9 @@ dependencies {
 // Fix for "Unable to delete directory" errors caused by .DS_Store or other background processes
 tasks.named<Delete>("clean") {
     doFirst {
-        delete(layout.buildDirectory.file(".DS_Store"))
+        val buildDir = layout.buildDirectory.get().asFile
+        if (buildDir.exists()) {
+            buildDir.deleteRecursively()
+        }
     }
 }
