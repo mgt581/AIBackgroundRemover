@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.webkit.JsResult
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -124,7 +125,6 @@ class MainActivity : AppCompatActivity() {
                 javaScriptCanOpenWindowsAutomatically = true
                 loadWithOverviewMode = true
                 useWideViewPort = true
-                // Modern User Agent
                 userAgentString = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
             }
 
@@ -149,7 +149,6 @@ class MainActivity : AppCompatActivity() {
                 }
             )
 
-            // Multiple bridge names to ensure compatibility with different web implementations
             addJavascriptInterface(webInterface, "AndroidBridge")
             addJavascriptInterface(webInterface, "Studio")
             addJavascriptInterface(webInterface, "Android")
@@ -174,13 +173,33 @@ class MainActivity : AppCompatActivity() {
 
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(webView: WebView?, callback: ValueCallback<Array<Uri>>?, params: FileChooserParams?): Boolean {
-                    // Critical: Reset any existing callback to avoid hanging the WebView
                     filePathCallback?.onReceiveValue(null)
                     filePathCallback = callback
                     showImageSourceDialog()
                     return true
                 }
+
+                override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                    // Suppress web alerts that prompt for login, as we handle this natively or via the bridge
+                    if (message?.contains("sign in", ignoreCase = true) == true || message?.contains("login", ignoreCase = true) == true) {
+                        result?.confirm()
+                        return true
+                    }
+                    return super.onJsAlert(view, url, message, result)
+                }
             }
+
+            // Handle standard downloads via bridge if they occur as direct links
+            setDownloadListener { url, _, _, _, _ ->
+                if (url.startsWith("data:image")) {
+                    // Extract base64 and use bridge logic
+                    val base64Data = url.substringAfter(",")
+                    webInterface.saveToDevice(base64Data, "AI_Photo_${System.currentTimeMillis()}.png")
+                } else {
+                    openUrl(url)
+                }
+            }
+
             loadUrl("https://mgt581.github.io/photo-static-main-3/")
         }
     }
@@ -190,7 +209,7 @@ class MainActivity : AppCompatActivity() {
         val layout = inflater.inflate(R.layout.layout_custom_toast, findViewById(R.id.backgroundWebView), false)
         
         with(Toast(applicationContext)) {
-            setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 150)
+            setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 200)
             duration = Toast.LENGTH_LONG
             view = layout
             show()
@@ -204,28 +223,43 @@ class MainActivity : AppCompatActivity() {
 
         val script = """
             (function() {
-                // Ensure bridge existence for scripts that check early
                 window.NATIVE_AUTH_USER_ID = '$userId';
                 window.NATIVE_AUTH_EMAIL = '$userEmail';
                 
                 if ('$userId' !== '') {
                     localStorage.setItem('userId', '$userId');
                     sessionStorage.setItem('userId', '$userId');
-                    if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
-                    if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
                 }
 
-                // CSS overrides to hide web-only navigation and branding
+                if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
+                if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
+
+                // Aggressively hide the "sign in to save" warning and other web-only elements
                 var style = document.createElement('style');
                 style.innerHTML = `
                     .auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"],
                     .gallery-btn, .settings-btn, #nav-gallery, #nav-settings,
                     .watermark, #watermark, [class*="watermark"], [id*="watermark"],
-                    .native-hide { 
+                    .native-hide, 
+                    /* Selectors for the specific warning text seen in screenshots */
+                    .save-info, .login-warning, p:contains("signed in"), div:contains("signed in") { 
                         display: none !important; 
                     }
                 `;
                 document.head.appendChild(style);
+
+                // Specific JS to find and hide the text "When signed in, your downloaded images are auto-saved to your Gallery"
+                var allElems = document.querySelectorAll('p, div, span');
+                for (var i = 0; i < allElems.length; i++) {
+                    var text = allElems[i].textContent || allElems[i].innerText;
+                    if (text.indexOf('When signed in') !== -1 && text.indexOf('auto-saved') !== -1) {
+                        allElems[i].style.display = 'none';
+                        if (allElems[i].parentElement && allElems[i].parentElement.tagName === 'DIV') {
+                             // Sometimes it's wrapped in a box we want to hide entirely
+                             allElems[i].parentElement.style.display = 'none';
+                        }
+                    }
+                }
             })();
         """.trimIndent()
         
