@@ -104,8 +104,8 @@ class WebAppInterface(
     /**
      * Saves the image bytes to the device's MediaStore.
      *
-     * @param bytes The image bytes to be saved.
-     * @param name The name of the file to be created.
+     * @param bytes The image data in bytes.
+     * @param name The filename for the image.
      */
     private fun saveToMediaStore(bytes: ByteArray, name: String) {
         val contentValues = ContentValues().apply {
@@ -134,8 +134,8 @@ class WebAppInterface(
      * Uploads the image to Firebase Storage and saves metadata to Firestore.
      * Only runs if user is signed in.
      *
-     * @param bytes The image bytes to upload.
-     * @param fileName The name of the image file.
+     * @param bytes The image data in bytes.
+     * @param fileName The original filename.
      */
     private fun uploadToFirebase(bytes: ByteArray, fileName: String) {
         val user = auth.currentUser ?: return
