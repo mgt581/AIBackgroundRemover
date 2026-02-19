@@ -12,8 +12,6 @@ val keystoreProperties = Properties()
 
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-} else {
-    println("WARNING: keystore.properties not found at ${keystorePropertiesFile.absolutePath}")
 }
 
 android {
@@ -36,23 +34,16 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
-                val storeFileProp = keystoreProperties["storeFile"] as? String
-                val storePasswordProp = keystoreProperties["storePassword"] as? String
-                val keyAliasProp = keystoreProperties["keyAlias"] as? String
-                val keyPasswordProp = keystoreProperties["keyPassword"] as? String
+            val storeFileProp = keystoreProperties["storeFile"] as? String
+            val storePasswordProp = keystoreProperties["storePassword"] as? String
+            val keyAliasProp = keystoreProperties["keyAlias"] as? String
+            val keyPasswordProp = keystoreProperties["keyPassword"] as? String
 
-                if (storeFileProp != null && storePasswordProp != null && keyAliasProp != null && keyPasswordProp != null) {
-                    val sFile = rootProject.file(storeFileProp)
-                    if (sFile.exists()) {
-                        storeFile = sFile
-                        storePassword = storePasswordProp
-                        keyAlias = keyAliasProp
-                        keyPassword = keyPasswordProp
-                    } else {
-                        println("WARNING: Keystore file not found at ${sFile.absolutePath}")
-                    }
-                }
+            if (storeFileProp != null && storePasswordProp != null && keyAliasProp != null && keyPasswordProp != null) {
+                storeFile = rootProject.file(storeFileProp)
+                storePassword = storePasswordProp
+                keyAlias = keyAliasProp
+                keyPassword = keyPasswordProp
             }
         }
     }
@@ -64,14 +55,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (signingConfigs.getByName("release").storeFile?.exists() == true) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
             isDebuggable = true
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -100,7 +88,6 @@ kotlin {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
@@ -147,7 +134,6 @@ dependencies {
     implementation(libs.guava)
 }
 
-// Fix for "Unable to delete directory" errors caused by .DS_Store or other background processes
 tasks.named<Delete>("clean") {
     doFirst {
         val buildDir = layout.buildDirectory.get().asFile
