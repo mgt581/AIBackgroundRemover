@@ -27,8 +27,10 @@ android {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 26
         targetSdk = 36
-        versionCode = 44
-        versionName = "7.4"
+
+        // ✅ Updated as requested
+        versionCode = 45
+        versionName = "7.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -45,7 +47,12 @@ android {
                 val keyAliasProp = keystoreProperties["keyAlias"] as? String
                 val keyPasswordProp = keystoreProperties["keyPassword"] as? String
 
-                if (storeFileProp != null && storePasswordProp != null && keyAliasProp != null && keyPasswordProp != null) {
+                if (
+                    storeFileProp != null &&
+                    storePasswordProp != null &&
+                    keyAliasProp != null &&
+                    keyPasswordProp != null
+                ) {
                     val sFile = rootProject.file(storeFileProp)
                     if (sFile.exists()) {
                         storeFile = sFile
@@ -55,6 +62,8 @@ android {
                     } else {
                         logger.warn("Keystore file not found at ${sFile.absolutePath}")
                     }
+                } else {
+                    logger.warn("keystore.properties missing one or more required fields: storeFile/storePassword/keyAlias/keyPassword")
                 }
             }
         }
@@ -62,11 +71,16 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            // ✅ TEMP FIX: Disable R8/minify so bundleRelease can build (your R8 step was failing)
+            isMinifyEnabled = false
+            isShrinkResources = false
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // Keep signing logic
             signingConfig = signingConfigs.getByName("release")
             signingConfigs.findByName("release")?.let { releaseConfig ->
                 if (releaseConfig.storeFile?.exists() == true) {
@@ -108,7 +122,6 @@ kotlin {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
@@ -134,7 +147,7 @@ dependencies {
     // ML Kit
     implementation(libs.mlkit.segmentation.selfie)
 
-    // Firebase
+    // Firebase + Play Services Auth
     implementation(libs.play.services.auth)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
