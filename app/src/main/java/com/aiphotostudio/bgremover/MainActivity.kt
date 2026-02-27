@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
+import androidx.core.net.toUri
 
 /**
  * Main Activity for the AI Background Remover application.
@@ -328,7 +329,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUrl(url: String) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(this, "Could not open link", Toast.LENGTH_SHORT).show()
