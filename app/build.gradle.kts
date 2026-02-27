@@ -29,8 +29,8 @@ android {
         targetSdk = 36
 
         // ✅ Updated as requested
-        versionCode = 48
-        versionName = "7.8"
+        versionCode = 85
+        versionName = "8.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
