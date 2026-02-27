@@ -17,6 +17,11 @@
 -keep public class * extends com.bumptech.glide.module.LibraryGlideModule
 -dontwarn com.bumptech.glide.**
 
+# ML Kit (Fixes R8 issues with segmentation-selfie)
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.internal.mlkit_vision_segmentation_common.** { *; }
+-keep class com.google.android.gms.internal.mlkit_vision_common.** { *; }
+
 # General
 -keepattributes SourceFile,LineNumberTable,Signature,InnerClasses,EnclosingMethod
 -dontwarn com.google.android.gms.**

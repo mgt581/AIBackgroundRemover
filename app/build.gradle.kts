@@ -15,22 +15,20 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { input ->
         keystoreProperties.load(input)
     }
-} else {
-    logger.warn("keystore.properties not found at ${keystorePropertiesFile.absolutePath}")
 }
 
 android {
     namespace = "com.aiphotostudio.bgremover"
-    compileSdk = 36
+    // Using API 35 (Android 15) for stability and maximum device compatibility
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
-        minSdk = 26
-        targetSdk = 36
+        minSdk = 23
+        targetSdk = 35
 
-        // ✅ Updated as requested
-        versionCode = 85
-        versionName = "8.5"
+        versionCode = 89
+        versionName = "8.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -47,23 +45,11 @@ android {
                 val keyAliasProp = keystoreProperties["keyAlias"] as? String
                 val keyPasswordProp = keystoreProperties["keyPassword"] as? String
 
-                if (
-                    storeFileProp != null &&
-                    storePasswordProp != null &&
-                    keyAliasProp != null &&
-                    keyPasswordProp != null
-                ) {
-                    val sFile = rootProject.file(storeFileProp)
-                    if (sFile.exists()) {
-                        storeFile = sFile
-                        storePassword = storePasswordProp
-                        keyAlias = keyAliasProp
-                        keyPassword = keyPasswordProp
-                    } else {
-                        logger.warn("Keystore file not found at ${sFile.absolutePath}")
-                    }
-                } else {
-                    logger.warn("keystore.properties missing one or more required fields: storeFile/storePassword/keyAlias/keyPassword")
+                if (storeFileProp != null) {
+                    storeFile = rootProject.file(storeFileProp)
+                    storePassword = storePasswordProp
+                    keyAlias = keyAliasProp
+                    keyPassword = keyPasswordProp
                 }
             }
         }
@@ -71,22 +57,21 @@ android {
 
     buildTypes {
         release {
-            // ✅ TEMP FIX: Disable R8/minify so bundleRelease can build (your R8 step was failing)
-            isMinifyEnabled = false
-            isShrinkResources = false
-
+            // Fixes "Large APK size" and "Missing deobfuscation file"
+            isMinifyEnabled = true
+            isShrinkResources = true
+            
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
 
-            // Keep signing logic
-            signingConfig = signingConfigs.getByName("release")
-            signingConfigs.findByName("release")?.let { releaseConfig ->
-                if (releaseConfig.storeFile?.exists() == true) {
-                    signingConfig = releaseConfig
-                }
+            // Fixes "Missing native debug symbols"
+            ndk {
+                debugSymbolLevel = "full"
             }
+
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
@@ -134,20 +119,16 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.activity.compose)
 
-    // Credentials & Google Auth
+    // Auth & Utilities
     implementation(libs.credentials.core)
     implementation(libs.credentials.play)
     implementation(libs.googleid.auth)
     implementation(libs.webkit.android)
-
-    // Glide
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
-
-    // ML Kit
     implementation(libs.mlkit.segmentation.selfie)
 
-    // Firebase + Play Services Auth
+    // Firebase
     implementation(libs.play.services.auth)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
@@ -159,16 +140,13 @@ dependencies {
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.google.firebase.analytics)
 
-    // Testing
+    // Testing & Guava
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    // Security Fix for Guava vulnerability
     implementation(libs.guava)
 }
 
-// Fix for "Unable to delete directory" errors caused by .DS_Store or other background processes
 tasks.named<Delete>("clean") {
     doFirst {
         val buildDir = layout.buildDirectory.get().asFile
