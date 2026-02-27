@@ -2,24 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Core permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- Storage permissions for compatibility -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"
-        tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
+    <!-- Camera hardware is optional -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
-    <!-- Media permissions for Android 13+ -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
-
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-
+    <!-- Queries for Google Sign-In and opening Chrome -->
     <queries>
         <intent>
             <action android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN" />
@@ -48,21 +40,35 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:configChanges="orientation|screenSize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Deep links (Firebase Auth / web auth callbacks) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https" android:host="aiphotostudio.co.uk" android:pathPrefix="/__/auth" />
-                <data android:scheme="https" android:host="aiphotostudio.co.uk" android:pathPrefix="/auth" />
+                <data
+                    android:scheme="https"
+                    android:host="aiphotostudio.co.uk"
+                    android:pathPrefix="/__/auth" />
+                <data
+                    android:scheme="https"
+                    android:host="aiphotostudio.co.uk"
+                    android:pathPrefix="/auth" />
 
-                <data android:scheme="https" android:host="aiphotostudio.co" android:pathPrefix="/__/auth" />
-                <data android:scheme="https" android:host="aiphotostudio.co" android:pathPrefix="/auth" />
+                <data
+                    android:scheme="https"
+                    android:host="aiphotostudio.co"
+                    android:pathPrefix="/__/auth" />
+                <data
+                    android:scheme="https"
+                    android:host="aiphotostudio.co"
+                    android:pathPrefix="/auth" />
             </intent-filter>
         </activity>
 
@@ -71,12 +77,31 @@
             android:exported="true"
             android:theme="@style/Theme.AIBackgroundRemover.NoActionBar" />
 
-        <activity android:name=".GalleryActivity" android:exported="false" android:label="@string/gallery" />
-        <activity android:name=".SettingsActivity" android:exported="false" android:label="@string/settings" />
-        <activity android:name=".TermsActivity" android:exported="false" android:label="@string/terms_of_service" />
-        <activity android:name=".PrivacyActivity" android:exported="false" android:label="@string/privacy_policy" />
-        <activity android:name=".WebPageActivity" android:exported="false" />
+        <activity
+            android:name=".GalleryActivity"
+            android:exported="false"
+            android:label="@string/gallery" />
 
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings" />
+
+        <activity
+            android:name=".TermsActivity"
+            android:exported="false"
+            android:label="@string/terms_of_service" />
+
+        <activity
+            android:name=".PrivacyActivity"
+            android:exported="false"
+            android:label="@string/privacy_policy" />
+
+        <activity
+            android:name=".WebPageActivity"
+            android:exported="false" />
+
+        <!-- FileProvider for camera photo capture + sharing local files -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
