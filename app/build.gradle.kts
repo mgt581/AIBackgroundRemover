@@ -20,12 +20,12 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.aiphotostudio.bgremover"
     // Using API 35 (Android 15) for stability and maximum device compatibility
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 23
-        targetSdk = 35
+        targetSdk = 36
 
         versionCode = 89
         versionName = "8.9"
