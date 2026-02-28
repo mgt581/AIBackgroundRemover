@@ -20,15 +20,15 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.aiphotostudio.bgremover"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = 23
         targetSdk = 35
 
-        versionCode = 94
-        versionName = "9.4"
+        versionCode = 95
+        versionName = "9.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

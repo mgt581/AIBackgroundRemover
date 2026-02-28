@@ -1,6 +1,7 @@
 package com.aiphotostudio.bgremover
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -11,6 +12,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.HttpsCallableResult
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -98,11 +100,11 @@ class SettingsActivity : AppCompatActivity() {
     private fun openBillingPortal() {
         functions.getHttpsCallable("createBillingPortalLink")
             .call()
-            .addOnSuccessListener { result ->
+            .addOnSuccessListener { result: HttpsCallableResult ->
                 val data = result.getData() as? Map<*, *>
                 val url = data?.get("url") as? String
                 if (url != null) {
-                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                     startActivity(intent)
                 }
             }
