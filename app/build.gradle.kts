@@ -24,11 +24,11 @@ android {
 
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
-        minSdk = 26
+        minSdk = 21
         targetSdk = 35
 
-        versionCode = 91
-        versionName = "9.1"
+        versionCode = 92
+        versionName = "9.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
