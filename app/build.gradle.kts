@@ -1,6 +1,7 @@
 import java.io.File
 import java.io.FileInputStream
-import java.util.Properties 
+import java.util.Properties
+import com.android.build.api.dsl.ApplicationExtension
 
 plugins {
     alias(libs.plugins.android.application)
@@ -18,7 +19,7 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
-android {
+configure<ApplicationExtension> {
     namespace = "com.aiphotostudio.bgremover"
     compileSdk = 35
 
@@ -99,8 +100,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 }
 
