@@ -15,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "495715411996-mtuffr8b46u5ghkeua8gqk5vj6mgnh4o.apps.googleusercontent.com"
+          "client_id": "495715411996-mtuffr8b46u5ghkeua8gqk5vj6mgnh4o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.aiphotostudio.bgremover",
