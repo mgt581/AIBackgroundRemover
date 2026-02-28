@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Required for apps targeting Android 13 (API 33) or higher that use Advertising ID -->
-    <!-- This satisfies the Google Play Console "Advertising ID" requirement -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <!-- Camera hardware is optional -->
@@ -15,12 +14,21 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- Queries for Google Sign-In and opening Chrome -->
+    <!-- Queries for Google Play Services and other apps -->
     <queries>
+        <!-- For Google Sign-In / Auth -->
         <intent>
             <action android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN" />
         </intent>
+        <!-- For Chrome custom tabs or opening browser -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <!-- Specific package for GMS -->
         <package android:name="com.google.android.gms" />
+        <package android:name="com.android.vending" />
         <package android:name="com.android.chrome" />
     </queries>
 

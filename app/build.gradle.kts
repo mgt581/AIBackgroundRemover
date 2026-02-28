@@ -4,6 +4,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
 }
@@ -19,13 +20,12 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.aiphotostudio.bgremover"
-    // Using API 35 (Android 15) for stability and maximum device compatibility
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.aiphotostudio.bgremover"
-        minSdk = 23
-        targetSdk = 36
+        minSdk = 26
+        targetSdk = 35
 
         versionCode = 90
         versionName = "9.0"
@@ -57,7 +57,6 @@ android {
 
     buildTypes {
         release {
-            // Fixes "Large APK size" and "Missing deobfuscation file"
             isMinifyEnabled = true
             isShrinkResources = true
             
@@ -66,7 +65,6 @@ android {
                 "proguard-rules.pro"
             )
 
-            // Fixes "Missing native debug symbols"
             ndk {
                 debugSymbolLevel = "full"
             }
@@ -90,9 +88,9 @@ android {
 
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            excludes += "META-INF/DEPENDENCIES"
-            pickFirsts += "META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version"
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+            excludes.add("META-INF/DEPENDENCIES")
+            pickFirsts.add("META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version")
         }
     }
 
@@ -100,10 +98,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-}
-
-kotlin {
-    jvmToolchain(17)
 }
 
 dependencies {
@@ -130,6 +124,7 @@ dependencies {
 
     // Firebase
     implementation(libs.play.services.auth)
+    implementation(libs.play.services.base)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
