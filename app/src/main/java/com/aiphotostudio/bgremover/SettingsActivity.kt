@@ -100,7 +100,7 @@ class SettingsActivity : AppCompatActivity() {
         functions.getHttpsCallable("createBillingPortalLink")
             .call()
             .addOnSuccessListener { result ->
-                val data = result.data as? Map<*, *>
+                val data = result.getData() as? Map<*, *>
                 val url = data?.get("url") as? String
                 if (url != null) {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
