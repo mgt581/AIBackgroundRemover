@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
 import android.webkit.JavascriptInterface
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -41,6 +42,7 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun requestLogin() {
+        Log.d(TAG, "requestLogin called")
         onLoginRequested()
     }
 
@@ -50,6 +52,7 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun saveImage(base64: String) {
+        Log.d(TAG, "saveImage called")
         saveToDevice(base64, null)
     }
 
@@ -60,8 +63,10 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun saveToGallery(base64: String) {
+        Log.d(TAG, "saveToGallery called")
         val user = auth.currentUser
         if (user == null) {
+            Log.d(TAG, "User not signed in, requesting login")
             onLoginRequested()
             return
         }
@@ -77,6 +82,7 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun saveToDevice(base64: String, fileName: String?) {
+        Log.d(TAG, "saveToDevice called with fileName: $fileName")
         try {
             val name = fileName ?: "AI_Studio_${System.currentTimeMillis()}.png"
 
@@ -87,16 +93,21 @@ class WebAppInterface(
             }
 
             val bytes = Base64.decode(cleanBase64, Base64.DEFAULT)
+            Log.d(TAG, "Decoded base64, size: ${bytes.size} bytes")
 
             // ✅ Always save locally
             saveToMediaStore(bytes, name)
 
             // ✅ Upload ONLY if signed in
             if (auth.currentUser != null) {
+                Log.d(TAG, "User is signed in, starting Firebase upload")
                 uploadToFirebase(bytes, name)
+            } else {
+                Log.d(TAG, "User not signed in, skipping Firebase upload")
             }
 
         } catch (e: Exception) {
+            Log.e(TAG, "Error in saveToDevice: ${e.message}", e)
             callback(false, e.message)
         }
     }
@@ -108,6 +119,7 @@ class WebAppInterface(
      * @param name The filename for the image.
      */
     private fun saveToMediaStore(bytes: ByteArray, name: String) {
+        Log.d(TAG, "Saving to MediaStore: $name")
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, name)
             put(MediaStore.Images.Media.MIME_TYPE, MIME_TYPE_IMAGE_PNG)
@@ -126,8 +138,12 @@ class WebAppInterface(
             context.contentResolver.openOutputStream(itemUri)?.use { outputStream ->
                 outputStream.write(bytes)
             }
+            Log.d(TAG, "Successfully saved to MediaStore: $itemUri")
             callback(true, itemUri.toString())
-        } ?: callback(false, context.getString(R.string.error_mediastore))
+        } ?: run {
+            Log.e(TAG, "Failed to insert into MediaStore")
+            callback(false, context.getString(R.string.error_mediastore))
+        }
     }
 
     /**
@@ -144,9 +160,12 @@ class WebAppInterface(
         val storagePath = "$COLLECTION_USERS/$userId/$COLLECTION_GALLERY/${UUID.randomUUID()}.png"
         val storageRef = storage.reference.child(storagePath)
 
+        Log.d(TAG, "Uploading to Firebase Storage: $storagePath")
         storageRef.putBytes(bytes)
             .addOnSuccessListener {
+                Log.d(TAG, "Firebase Storage upload success")
                 storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    Log.d(TAG, "Got download URL: $downloadUri")
                     val data = hashMapOf(
                         KEY_URL to downloadUri.toString(),
                         KEY_TITLE to fileName,
@@ -157,7 +176,16 @@ class WebAppInterface(
                         .document(userId)
                         .collection(COLLECTION_GALLERY)
                         .add(data)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Firestore metadata save success")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Firestore metadata save failed", e)
+                        }
                 }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Firebase Storage upload failed", e)
             }
     }
 
@@ -166,6 +194,7 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun showBackgroundPicker() {
+        Log.d(TAG, "showBackgroundPicker called")
         onBackgroundPickerRequested()
     }
 
@@ -174,6 +203,7 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun googleSignIn() {
+        Log.d(TAG, "googleSignIn called")
         onGoogleSignInRequested()
     }
 
@@ -189,11 +219,13 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun openGallery() {
+        Log.d(TAG, "openGallery called")
         try {
             val intent = Intent(context, GalleryActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
+            Log.e(TAG, "Error opening gallery", e)
             callback(false, context.getString(R.string.save_failed, e.message ?: context.getString(R.string.save_failed_msg)))
         }
     }
@@ -203,16 +235,19 @@ class WebAppInterface(
      */
     @JavascriptInterface
     fun openSettings() {
+        Log.d(TAG, "openSettings called")
         try {
             val intent = Intent(context, SettingsActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
+            Log.e(TAG, "Error opening settings", e)
             callback(false, context.getString(R.string.save_failed, e.message ?: context.getString(R.string.save_failed_msg)))
         }
     }
 
     companion object {
+        private const val TAG = "WebAppInterface"
         private const val COMMA = ","
         private const val MIME_TYPE_IMAGE_PNG = "image/png"
         private const val PICTURES_SUB_DIRECTORY = "Pictures/AIPhotoStudio"
