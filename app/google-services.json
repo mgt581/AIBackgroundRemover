@@ -8,14 +8,14 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:411346648650:android:3762e8d057b4c3b5fab0b3",
+        "mobilesdk_app_id": "1411346648650:android:3762e8d057b4c3b5fab0b3",
         "android_client_info": {
           "package_name": "com.aiphotostudio.bgremover"
         }
       },
       "oauth_client": [
         {
-          "client_id": "411346648650-ggktvc8l6qldmoh8sdgeb6r1o7rn0d77.apps.googleusercontent.com",
+          "client_id": "495715411996-mtuffr8b46u5ghkeua8gqk5vj6mgnh4o.apps.googleusercontent.com"
           "client_type": 1,
           "android_info": {
             "package_name": "com.aiphotostudio.bgremover",
