@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             backgroundWebView.loadUrl("https://aiphotostudio.co.uk/gallery.html")
         }
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings")
+            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings.html")
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
             backgroundWebView.loadUrl("https://aiphotostudio.co.uk/privacy.html")
@@ -168,18 +168,21 @@ class MainActivity : AppCompatActivity() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
                     
-                    if (url == "https://aiphotostudio.co.uk/index.html" || url == "https://aiphotostudio.co.uk/" || url == "https://aiphotostudio.co.uk") {
-                        backgroundWebView.loadUrl("https://aiphotostudio.co.uk")
-                        return true
-                    }
-
-                    if (url.contains("signin.html") || url.contains("login")) {
-                        if (auth.currentUser == null) {
-                            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                    // Allow navigation within the specified domains
+                    if (url.contains("aiphotostudio.co") || url.contains("aiphotostudio.co.uk")) {
+                        // Check for sign-in specifically to trigger native login if desired
+                        if (url.contains("signin.html") || url.contains("login")) {
+                            if (auth.currentUser == null) {
+                                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                                return true
+                            }
                         }
-                        return true
+                        return false
                     }
-                    return false
+                    
+                    // For other URLs, open in browser
+                    openUrl(url)
+                    return true
                 }
             }
 
@@ -209,8 +212,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Updated to the production URL
-            loadUrl("https://aiphotostudio.co.uk")
+            // Load index.html from .co domain as requested
+            loadUrl("https://aiphotostudio.co/index.html")
         }
     }
 
