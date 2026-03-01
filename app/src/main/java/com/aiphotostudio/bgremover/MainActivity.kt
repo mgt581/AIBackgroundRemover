@@ -11,21 +11,21 @@ import android.view.View
 import android.webkit.JsResult
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 
 /**
@@ -160,12 +160,16 @@ class MainActivity : AppCompatActivity() {
                     injectNativeConfig()
                 }
 
+                override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                    super.onReceivedError(view, request, error)
+                    Log.e(TAG, "WebView Error: ${error?.description}")
+                }
+
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
                     
-                    // Handle "Home" link from the gallery or settings pages
                     if (url == "https://aiphotostudio.co.uk/index.html" || url == "https://aiphotostudio.co.uk/" || url == "https://aiphotostudio.co.uk") {
-                        backgroundWebView.loadUrl("https://mgt581.github.io/photo-static-main-3/")
+                        backgroundWebView.loadUrl("https://aiphotostudio.co.uk")
                         return true
                     }
 
@@ -188,7 +192,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
-                    // Suppress web alerts that prompt for login, as we handle this natively or via the bridge
                     if (message?.contains("sign in", ignoreCase = true) == true || message?.contains("login", ignoreCase = true) == true) {
                         result?.confirm()
                         return true
@@ -197,10 +200,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Handle standard downloads via bridge if they occur as direct links
             setDownloadListener { url, _, _, _, _ ->
                 if (url.startsWith("data:image")) {
-                    // Extract base64 and use bridge logic
                     val base64Data = url.substringAfter(",")
                     webInterface.saveToDevice(base64Data, "AI_Photo_${System.currentTimeMillis()}.png")
                 } else {
@@ -208,7 +209,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            loadUrl("https://mgt581.github.io/photo-static-main-3/")
+            // Updated to the production URL
+            loadUrl("https://aiphotostudio.co.uk")
         }
     }
 
@@ -242,28 +244,24 @@ class MainActivity : AppCompatActivity() {
                 if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
                 if (window.setNativeUser) window.setNativeUser('$userId', '$userEmail');
 
-                // Aggressively hide the "sign in to save" warning and other web-only elements
                 var style = document.createElement('style');
                 style.innerHTML = `
                     .auth-container, .login-btn, .signup-btn, #auth-section, [href*="signin.html"],
                     .gallery-btn, .settings-btn, #nav-gallery, #nav-settings,
                     .watermark, #watermark, [class*="watermark"], [id*="watermark"],
                     .native-hide, 
-                    /* Selectors for the specific warning text seen in screenshots */
                     .save-info, .login-warning, p:contains("signed in"), div:contains("signed in") { 
                         display: none !important; 
                     }
                 `;
                 document.head.appendChild(style);
 
-                // Specific JS to find and hide the text "When signed in, your downloaded images are auto-saved to your Gallery"
                 var allElems = document.querySelectorAll('p, div, span');
                 for (var i = 0; i < allElems.length; i++) {
                     var text = allElems[i].textContent || allElems[i].innerText;
                     if (text.indexOf('When signed in') !== -1 && text.indexOf('auto-saved') !== -1) {
                         allElems[i].style.display = 'none';
                         if (allElems[i].parentElement && allElems[i].parentElement.tagName === 'DIV') {
-                             // Sometimes it's wrapped in a box we want to hide entirely
                              allElems[i].parentElement.style.display = 'none';
                         }
                     }
