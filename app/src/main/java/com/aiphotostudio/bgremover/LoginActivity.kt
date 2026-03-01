@@ -53,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
         setLoading(true)
 
         // Web OAuth Client ID from google-services.json (Corrected ID)
-        val serverClientId = "411346648650-614s08k3rp9f9er43unjo4djefmht63t.apps.googleusercontent.com"
+        val serverClientId = "411346648650-614s08k3rp9f9er43unto4djefmht63t.apps.googleusercontent.com"
 
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
