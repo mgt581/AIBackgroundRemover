@@ -96,16 +96,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/gallery.html")
+            startActivity(Intent(this, GalleryActivity::class.java))
         }
         findViewById<View>(R.id.footer_btn_settings).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/settings.html")
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/privacy.html")
+            openUrl("https://aiphotostudio.co.uk/privacy.html")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
-            backgroundWebView.loadUrl("https://aiphotostudio.co.uk/terms.html")
+            startActivity(Intent(this, TermsActivity::class.java))
         }
 
         findViewById<View>(R.id.btn_whatsapp).setOnClickListener { openUrl(getString(R.string.whatsapp_url)) }
@@ -242,6 +242,8 @@ class MainActivity : AppCompatActivity() {
                 if ('$userId' !== '') {
                     localStorage.setItem('userId', '$userId');
                     sessionStorage.setItem('userId', '$userId');
+                } else {
+                    localStorage.removeItem('userId');
                 }
 
                 if (window.onNativeAuthResolved) window.onNativeAuthResolved('$userId', '$userEmail');
