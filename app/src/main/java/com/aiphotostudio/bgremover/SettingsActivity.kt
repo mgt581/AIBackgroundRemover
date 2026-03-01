@@ -54,7 +54,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_about_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy")
+            openUrl("https://aiphotostudio.co/privacy.html")
         }
 
         findViewById<Button>(R.id.btn_back_home).setOnClickListener {
@@ -80,9 +80,10 @@ class SettingsActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.footer_btn_gallery).setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
+            finish()
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            openUrl("https://ai-photo-studio-24354.web.app/privacy")
+            openUrl("https://aiphotostudio.co/privacy.html")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))

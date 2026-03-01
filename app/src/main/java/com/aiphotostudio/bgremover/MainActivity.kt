@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co.uk/privacy.html")
+            openUrl("https://aiphotostudio.co/privacy.html")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
@@ -168,8 +168,8 @@ class MainActivity : AppCompatActivity() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
                     
-                    // Allow navigation within the specified domains
-                    if (url.contains("aiphotostudio.co") || url.contains("aiphotostudio.co.uk")) {
+                    // Allow navigation within the specified domain
+                    if (url.contains("aiphotostudio.co")) {
                         // Check for sign-in specifically to trigger native login if desired
                         if (url.contains("signin.html") || url.contains("login")) {
                             if (auth.currentUser == null) {

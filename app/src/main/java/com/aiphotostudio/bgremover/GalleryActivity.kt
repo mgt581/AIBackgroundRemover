@@ -82,7 +82,7 @@ class GalleryActivity : AppCompatActivity() {
             // Already here
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            launchBrowser("https://aiphotostudio.co.uk/privacy.html")
+            launchBrowser("https://aiphotostudio.co/privacy.html")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
@@ -101,7 +101,7 @@ class GalleryActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user == null) {
             tvEmpty.visibility = View.VISIBLE
-            tvEmpty.text = getString(R.string.please_sign_in_gallery) // Use resource if available, otherwise fallback
+            tvEmpty.text = getString(R.string.please_sign_in_gallery)
             progressBar.visibility = View.GONE
             return
         }
