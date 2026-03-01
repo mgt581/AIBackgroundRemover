@@ -28,8 +28,8 @@ configure<ApplicationExtension> {
         minSdk = 23
         targetSdk = 35
 
-        versionCode = 95
-        versionName = "9.5"
+        versionCode = 96
+        versionName = "9.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -107,6 +107,7 @@ configure<ApplicationExtension> {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    //noinspection WrongGradleMethod
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
