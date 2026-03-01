@@ -43,7 +43,8 @@ class GalleryActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         findViewById<Button>(R.id.btn_back_to_studio).setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
+            // Explicitly navigate to the .co homepage to ensure no payment buttons are shown
+            launchBrowser("https://aiphotostudio.co/index.html")
         }
 
         recyclerView = findViewById(R.id.rv_gallery)
@@ -257,6 +258,6 @@ class GalleryActivity : AppCompatActivity() {
         private const val TAG = "GalleryActivity"
         private const val ALBUM_NAME = "AI Photo Studio"
         private const val INTERNAL_DIR_PREFIX = "saved_images/"
-        private const val PRIVACY_URL = "https://mgt581.github.io/photo-static-main-3/privacy"
+        private const val PRIVACY_URL = "https://aiphotostudio.co.uk/privacy.html"
     }
 }
