@@ -47,10 +47,13 @@ configure<ApplicationExtension> {
                 val keyPasswordProp = keystoreProperties["keyPassword"] as? String
 
                 if (storeFileProp != null) {
-                    storeFile = rootProject.file(storeFileProp)
-                    storePassword = storePasswordProp
-                    keyAlias = keyAliasProp
-                    keyPassword = keyPasswordProp
+                    val kFile = rootProject.file(storeFileProp)
+                    if (kFile.exists()) {
+                        storeFile = kFile
+                        storePassword = storePasswordProp
+                        keyAlias = keyAliasProp
+                        keyPassword = keyPasswordProp
+                    }
                 }
             }
         }
@@ -70,7 +73,11 @@ configure<ApplicationExtension> {
                 debugSymbolLevel = "full"
             }
 
-            signingConfig = signingConfigs.getByName("release")
+            // Only use release signing if it was properly configured with an existing file
+            val releaseSigningConfig = signingConfigs.getByName("release")
+            if (releaseSigningConfig.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
+                signingConfig = releaseSigningConfig
+            }
         }
 
         debug {
