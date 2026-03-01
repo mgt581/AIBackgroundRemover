@@ -149,4 +149,5 @@
     <string name="credential_manager_error">Credential Manager Error</string>
     <string name="signin_success_msg">Anonymous sign-in successful.</string>
     <string name="signin_failed_msg">Anonymous sign-in failed.</string>
+    <string name="please_sign_in_gallery">Please sign in to view your gallery</string>
 </resources>

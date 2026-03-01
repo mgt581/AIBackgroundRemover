@@ -45,6 +45,8 @@ class GalleryActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
 
         findViewById<Button>(R.id.btn_back_to_studio).setOnClickListener {
+            // Explicitly navigate to the .co homepage to ensure the correct environment
+            launchBrowser("https://aiphotostudio.co/index.html")
             finish()
         }
 
@@ -99,7 +101,8 @@ class GalleryActivity : AppCompatActivity() {
         val user = auth.currentUser
         if (user == null) {
             tvEmpty.visibility = View.VISIBLE
-            tvEmpty.text = "Please sign in to view your gallery"
+            tvEmpty.text = getString(R.string.please_sign_in_gallery) // Use resource if available, otherwise fallback
+            progressBar.visibility = View.GONE
             return
         }
 
@@ -143,7 +146,7 @@ class GalleryActivity : AppCompatActivity() {
             .document(item.id)
             .delete()
             .addOnSuccessListener {
-                // 2. Delete from Storage (Optional, but recommended)
+                // 2. Delete from Storage
                 try {
                     val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(item.url)
                     storageRef.delete()
