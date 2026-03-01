@@ -4,8 +4,6 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">aiphotostudio.co</domain>
         <domain includeSubdomains="true">www.aiphotostudio.co</domain>
-        <domain includeSubdomains="true">aiphotostudio.co.uk</domain>
-        <domain includeSubdomains="true">www.aiphotostudio.co.uk</domain>
         <domain includeSubdomains="true">googleapis.com</domain>
         <domain includeSubdomains="true">www.googleapis.com</domain>
         <domain includeSubdomains="true">apis.google.com</domain>
