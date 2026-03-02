@@ -72,7 +72,7 @@ android {
                 debugSymbolLevel = "full"
             }
 
-            // Consolidate signing configuration
+            // Fallback to debug if release not configured
             val releaseSigningConfig = signingConfigs.findByName("release")
             if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
                 signingConfig = releaseSigningConfig
@@ -104,53 +104,48 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    // Manually adding known missing references from the previous error or toml
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
 
     // Compose
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation("androidx.vectordrawable:vectordrawable-animated:1.2.0")
+    implementation(libs.animated.vector.drawable)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.activity.compose)
 
     // Auth & Utilities
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services-auth)
-    implementation(libs.googleid)
-    implementation(libs.androidx.webkit)
+    implementation(libs.credentials.core)
+    implementation(libs.credentials.play)
+    implementation(libs.googleid.auth)
+    implementation(libs.webkit.android)
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
-    implementation("com.google.mlkit:segmentation-selfie:16.0.0-beta6")
+    implementation(libs.mlkit.segmentation.selfie)
 
     // Firebase
     implementation(libs.play.services.auth)
-    implementation("com.google.android.gms:play-services-base:18.5.0")
+    implementation(libs.play.services.base)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-functions")
-    implementation("com.google.firebase:firebase-appcheck")
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.functions)
+    implementation(libs.firebase.appcheck)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.google.firebase.analytics)
 
     // Testing & Guava
     testImplementation(libs.junit)
-    testImplementation("androidx.test.ext:junit:1.2.1")
-    testImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    implementation("com.google.guava:guava:33.2.1-android")
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.guava)
 }
 
 tasks.named<Delete>("clean") {
