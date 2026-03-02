@@ -72,7 +72,7 @@ android {
                 debugSymbolLevel = "full"
             }
 
-            // Fallback to debug if release not configured
+            // Consolidate signing configuration
             val releaseSigningConfig = signingConfigs.findByName("release")
             if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
                 signingConfig = releaseSigningConfig
@@ -83,6 +83,7 @@ android {
 
         debug {
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -103,6 +104,12 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 }
 
