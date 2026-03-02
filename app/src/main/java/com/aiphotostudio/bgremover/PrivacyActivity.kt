@@ -1,18 +1,24 @@
 package com.aiphotostudio.bgremover
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class PrivacyActivity : AppCompatActivity() {
 
+    private fun openPage(title: String, url: String) {
+        startActivity(
+            Intent(this, WebPageActivity::class.java).apply {
+                putExtra(WebPageActivity.EXTRA_TITLE, title)
+                putExtra(WebPageActivity.EXTRA_URL, url)
+            }
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_privacy)
 
-        findViewById<Button>(R.id.btn_back).setOnClickListener {
-            finish()
-        }
+        openPage("Privacy Policy", "https://aiphotostudio.co.uk/privacy.html")
+        finish()
     }
 }
