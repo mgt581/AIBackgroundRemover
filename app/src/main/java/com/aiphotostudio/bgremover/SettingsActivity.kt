@@ -54,7 +54,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_about_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy.html")
+            openUrl("https://aiphotostudio.co.uk/privacy.html")
         }
 
         findViewById<Button>(R.id.btn_back_home).setOnClickListener {
@@ -83,7 +83,7 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy.html")
+            openUrl("https://aiphotostudio.co.uk/privacy.html")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))

@@ -44,8 +44,8 @@ class GalleryActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
 
         findViewById<Button>(R.id.btn_back_to_studio).setOnClickListener {
-            // Explicitly navigate to the .co homepage to ensure the correct environment
-            launchBrowser("https://aiphotostudio.co/index.html")
+            // Explicitly navigate to the .co.uk homepage to ensure the correct environment
+            launchBrowser("https://aiphotostudio.co.uk/index.html")
             finish()
         }
 
@@ -81,7 +81,7 @@ class GalleryActivity : AppCompatActivity() {
             // Already here
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            launchBrowser("https://aiphotostudio.co/privacy.html")
+            launchBrowser("https://aiphotostudio.co.uk/privacy.html")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))

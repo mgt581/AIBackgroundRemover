@@ -21,7 +21,7 @@ class WebPageActivity : AppCompatActivity() {
         setContentView(R.layout.activity_web_page)
 
         val title = intent.getStringExtra(EXTRA_TITLE) ?: "Page"
-        val url = intent.getStringExtra(EXTRA_URL) ?: "https://aiphotostudio.co"
+        val url = intent.getStringExtra(EXTRA_URL) ?: "https://aiphotostudio.co.uk"
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)

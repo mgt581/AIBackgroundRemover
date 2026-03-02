@@ -66,11 +66,11 @@
 
                 <data
                     android:scheme="https"
-                    android:host="aiphotostudio.co"
+                    android:host="aiphotostudio.co.uk"
                     android:pathPrefix="/__/auth" />
                 <data
                     android:scheme="https"
-                    android:host="aiphotostudio.co"
+                    android:host="aiphotostudio.co.uk"
                     android:pathPrefix="/auth" />
             </intent-filter>
         </activity>

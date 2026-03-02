@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
         findViewById<View>(R.id.footer_btn_privacy).setOnClickListener {
-            openUrl("https://aiphotostudio.co/privacy.html")
+            openUrl("https://aiphotostudio.co.uk/privacy.html")
         }
         findViewById<View>(R.id.footer_btn_terms).setOnClickListener {
             startActivity(Intent(this, TermsActivity::class.java))
@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                     val url = request.url.toString()
                     
                     // Allow navigation within the specified domain
-                    if (url.contains("aiphotostudio.co")) {
+                    if (url.contains("aiphotostudio.co.uk")) {
                         // Check for sign-in specifically to trigger native login if desired
                         if (url.contains("signin.html") || url.contains("login")) {
                             if (auth.currentUser == null) {
@@ -212,8 +212,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Load index.html from .co domain as requested
-            loadUrl("https://aiphotostudio.co/index.html")
+            // Load index.html from .co.uk domain
+            loadUrl("https://aiphotostudio.co.uk/index.html")
         }
     }
 
