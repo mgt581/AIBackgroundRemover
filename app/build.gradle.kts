@@ -28,8 +28,8 @@ configure<ApplicationExtension> {
         minSdk = 23
         targetSdk = 35
 
-        versionCode = 96
-        versionName = "9.6"
+        versionCode = 97
+        versionName = "9.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -162,6 +162,13 @@ tasks.named<Delete>("clean") {
         val buildDir = layout.buildDirectory.get().asFile
         if (buildDir.exists()) {
             buildDir.deleteRecursively()
+        }
+    }
+}
+android {
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
