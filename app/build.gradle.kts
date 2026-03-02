@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.ApplicationExtension
 import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
@@ -18,7 +19,9 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
-android {
+// Use configure<ApplicationExtension> to explicitly apply the new DSL
+// and prevent plugin interference.
+configure<ApplicationExtension> {
     namespace = "com.aiphotostudio.bgremover"
     compileSdk = 35
 
@@ -72,7 +75,6 @@ android {
                 debugSymbolLevel = "full"
             }
 
-            // Using findByName to be safe with the new DSL
             val releaseSigningConfig = signingConfigs.findByName("release")
             if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
                 signingConfig = releaseSigningConfig
@@ -107,7 +109,7 @@ android {
     }
 }
 
-// Move Kotlin configuration outside of the android block to avoid ClassCastException
+// This must be a top-level block, not nested inside android{}
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
