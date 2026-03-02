@@ -2,6 +2,7 @@ package com.aiphotostudio.bgremover
 
 import android.app.Application
 import android.util.Log
+import com.aiphotostudiobgremover.BuildConfig
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.FirebaseApp
