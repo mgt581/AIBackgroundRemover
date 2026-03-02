@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
@@ -20,11 +22,12 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.aiphotostudio.bgremover"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.aiphotostudiobgremover"
         minSdk = 23
+        //noinspection OldTargetApi
         targetSdk = 35
 
         versionCode = 97
@@ -74,10 +77,10 @@ android {
 
             // Consolidate signing config
             val releaseSigningConfig = signingConfigs.findByName("release")
-            if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
-                signingConfig = releaseSigningConfig
+            signingConfig = if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
+                releaseSigningConfig
             } else {
-                signingConfig = signingConfigs.getByName("debug")
+                signingConfigs.getByName("debug")
             }
         }
 
