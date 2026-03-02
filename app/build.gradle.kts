@@ -72,9 +72,9 @@ android {
                 debugSymbolLevel = "full"
             }
 
-            // Fallback to debug if release not configured, matching previous logic
-            val releaseSigningConfig = signingConfigs.getByName("release")
-            if (releaseSigningConfig.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
+            // Consolidate signing configuration
+            val releaseSigningConfig = signingConfigs.findByName("release")
+            if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
                 signingConfig = releaseSigningConfig
             } else {
                 signingConfig = signingConfigs.getByName("debug")
@@ -112,10 +112,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    // Some libraries might be missing from toml if I didn't check carefully, 
-    // but I will stick to what was there or what I can infer.
-    // Re-adding the implementations from the previous version of the file.
-    implementation("androidx.appcompat:appcompat:1.7.0") // Fallback if libs.androidx.appcompat is missing
+    // Manually adding known missing references from the previous error or toml
+    implementation("androidx.appcompat:appcompat:1.7.0")
     implementation(libs.google.material)
 
     // Compose
@@ -127,10 +125,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
 
     // Auth & Utilities
-    implementation("androidx.credentials:credentials:1.5.0-rc01")
-    implementation("androidx.credentials:credentials-play-services-auth:1.5.0-rc01")
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services-auth)
     implementation(libs.googleid)
-    implementation(libs.webkit)
+    implementation(libs.androidx.webkit)
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
     implementation("com.google.mlkit:segmentation-selfie:16.0.0-beta6")
