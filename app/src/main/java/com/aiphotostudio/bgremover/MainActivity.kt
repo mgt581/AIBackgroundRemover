@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        binding.backgroundWebView.apply {
+        binding.backgroundWebView?.apply {
             webViewClient = WebViewClient()
             settings.apply {
                 javaScriptEnabled = true
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TermsActivity::class.java))
         }
         
-        binding.btnHeaderLogin.setOnClickListener {
+        binding.btnHeaderLogin?.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }
@@ -62,8 +62,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupOnBackPressed() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (binding.backgroundWebView.canGoBack()) {
-                    binding.backgroundWebView.goBack()
+                val webView = binding.backgroundWebView
+                if (webView != null && webView.canGoBack()) {
+                    webView.goBack()
                 } else {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
