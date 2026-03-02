@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.ApplicationExtension
 import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
@@ -19,9 +18,7 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
-// Use configure<ApplicationExtension> to explicitly apply the new DSL
-// and prevent plugin interference.
-configure<ApplicationExtension> {
+android {
     namespace = "com.aiphotostudio.bgremover"
     compileSdk = 35
 
@@ -75,17 +72,18 @@ configure<ApplicationExtension> {
                 debugSymbolLevel = "full"
             }
 
+            // Consolidate signing configuration
             val releaseSigningConfig = signingConfigs.findByName("release")
             if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
                 signingConfig = releaseSigningConfig
             } else {
-                signingConfig = signingConfigs.findByName("debug")
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
 
         debug {
             isDebuggable = true
-            signingConfig = signingConfigs.findByName("debug")
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -107,12 +105,9 @@ configure<ApplicationExtension> {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-}
 
-// This must be a top-level block, not nested inside android{}
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
