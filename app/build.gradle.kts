@@ -1,6 +1,7 @@
 import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
+import com.android.build.api.dsl.ApplicationExtension
 
 plugins {
     alias(libs.plugins.android.application)
@@ -8,7 +9,7 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-// Extract function: load properties only when file exists
+// Extract function: load properties only when a file exists
 fun loadPropertiesIfExists(file: File): Properties = Properties().apply {
     if (file.exists()) {
         FileInputStream(file).use { input -> load(input) }
@@ -25,19 +26,19 @@ val releaseKeystoreFile: File? =
         ?.takeIf(File::exists)
 
 // Introduce constants: keep config values readable and consistent
-val compileSdkVersion = 35
-val minSdkVersion = 23
-val targetSdkVersion = 35
+val appCompileSdk = 35
+val appMinSdk = 23
+val appTargetSdk = 35
 val javaCompat = JavaVersion.VERSION_17
 
-android {
+configure<ApplicationExtension> {
     namespace = "com.aiphotostudio.bgremover"
-    compileSdk = compileSdkVersion
+    compileSdk = appCompileSdk
 
     defaultConfig {
         applicationId = "com.aiphotostudiobgremover"
-        minSdk = minSdkVersion
-        targetSdk = targetSdkVersion
+        minSdk = appMinSdk
+        targetSdk = appTargetSdk
         versionCode = 97
         versionName = "9.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -57,7 +58,7 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
 
@@ -68,13 +69,13 @@ android {
 
             ndk { debugSymbolLevel = "full" }
 
-            // Move/simplify: single source of truth for choosing signing config
+            // Move/simplify: a single source of truth for choosing signing config
             signingConfig =
                 if (releaseKeystoreFile != null) signingConfigs.getByName("release")
                 else signingConfigs.getByName("debug")
         }
 
-        debug {
+        getByName("debug") {
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
         }
