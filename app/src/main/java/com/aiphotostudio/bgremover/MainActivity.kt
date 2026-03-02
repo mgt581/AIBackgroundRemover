@@ -3,8 +3,10 @@ package com.aiphotostudio.bgremover
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.webkit.WebSettings
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.aiphotostudio.bgremover.databinding.ActivityMainBinding
@@ -26,15 +28,54 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        binding.backgroundWebView?.apply {
-            webViewClient = WebViewClient()
+        val webView = binding.backgroundWebView ?: return
+        
+        webView.apply {
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    Log.d("MainActivity", "Page finished loading: $url")
+                }
+
+                override fun onReceivedError(
+                    view: android.webkit.WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
+                ) {
+                    Log.e("MainActivity", "Error loading page: $description")
+                }
+            }
+
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                databaseEnabled = true
             }
+
+            addJavascriptInterface(
+                WebAppInterface(
+                    context = this@MainActivity,
+                    onBackgroundPickerRequested = { /* Handle background picker */ },
+                    onGoogleSignInRequested = { /* Handle Google Sign-In */ },
+                    onLoginRequested = {
+                        startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                    },
+                    onLoginSuccess = { /* Handle login success */ },
+                    callback = { success, message ->
+                        runOnUiThread {
+                            if (!success && message != null) {
+                                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                ),
+                "AndroidInterface"
+            )
+
             loadUrl("https://aiphotostudio.co.uk")
         }
     }

@@ -14,13 +14,25 @@ class AIApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         
+        // Initialize Firebase on main thread (required)
         try {
-            // Initialize Firebase
             FirebaseApp.initializeApp(this)
+            Log.d("AIApplication", "Firebase initialized successfully")
             
+            // Move App Check to background to avoid blocking main thread
+            Thread {
+                setupAppCheck()
+            }.start()
+            
+        } catch (e: Exception) {
+            Log.e("AIApplication", "Firebase initialization failed", e)
+        }
+    }
+
+    private fun setupAppCheck() {
+        try {
             val appCheck = FirebaseAppCheck.getInstance()
 
-            // Generated BuildConfig will be available after a successful build
             if (BuildConfig.DEBUG) {
                 Log.d("AIApplication", "App Check: Installing DebugAppCheckProviderFactory")
                 appCheck.installAppCheckProviderFactory(
@@ -29,29 +41,19 @@ class AIApplication : Application() {
             } else {
                 val playServicesStatus = GoogleApiAvailability.getInstance()
                     .isGooglePlayServicesAvailable(this)
-                if (shouldEnablePlayIntegrity(playServicesStatus)) {
+                if (playServicesStatus == ConnectionResult.SUCCESS) {
                     Log.d("AIApplication", "App Check: Installing PlayIntegrityAppCheckProviderFactory")
                     appCheck.installAppCheckProviderFactory(
                         PlayIntegrityAppCheckProviderFactory.getInstance()
                     )
                 } else {
-                    Log.w(
-                        "AIApplication",
-                        "App Check disabled: Play Services unavailable"
-                    )
+                    Log.w("AIApplication", "App Check disabled: Play Services unavailable ($playServicesStatus)")
                 }
             }
             appCheck.setTokenAutoRefreshEnabled(true)
-
-            Log.d("AIApplication", "Firebase and App Check initialized successfully")
+            Log.d("AIApplication", "App Check configured successfully")
         } catch (e: Exception) {
-            Log.e("AIApplication", "Firebase initialization failed", e)
-        }
-    }
-
-    companion object {
-        fun shouldEnablePlayIntegrity(playServicesStatus: Int): Boolean {
-            return playServicesStatus == ConnectionResult.SUCCESS
+            Log.e("AIApplication", "App Check configuration failed", e)
         }
     }
 }
