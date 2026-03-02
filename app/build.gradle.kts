@@ -22,12 +22,11 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.aiphotostudio.bgremover"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.aiphotostudiobgremover"
         minSdk = 23
-        //noinspection OldTargetApi
         targetSdk = 35
 
         versionCode = 97
