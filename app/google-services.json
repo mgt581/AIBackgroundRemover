@@ -8,18 +8,50 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1411346648650:android:3762e8d057b4c3b5fab0b3",
+        "mobilesdk_app_id": "1:411346648650:android:3762e8d057b4c3b5fab0b3",
         "android_client_info": {
-          "package_name": "com.aiphotostudio.bgremover"
+          "package_name": "com.aiphotostudiobgremover"
         }
       },
       "oauth_client": [
         {
-          "client_id": "495715411996-mtuffr8b46u5ghkeua8gqk5vj6mgnh4o.apps.googleusercontent.com",
+          "client_id": "411346648650-26cit1s9lv3nraa12rpbqcoc7iuksjbu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.aiphotostudio.bgremover",
+            "package_name": "com.aiphotostudiobgremover",
+            "certificate_hash": "80481d884a0eb6fb11f2424ae4cb82a659698d9b"
+          }
+        },
+        {
+          "client_id": "411346648650-5j9ra4m35sspji1vkt524q211hgak2vq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudiobgremover",
+            "certificate_hash": "98206a1b73b0bea3b2816ce092c59e0a16345d74"
+          }
+        },
+        {
+          "client_id": "411346648650-jnckc94vo64un2tf5scs81qck2jn095l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudiobgremover",
             "certificate_hash": "ed1769cc68887992668fe15a93b9a65cd1aaa7d1"
+          }
+        },
+        {
+          "client_id": "411346648650-n1rdohmje4po67menbemok1nmf4f6fdh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudiobgremover",
+            "certificate_hash": "8e73eb90ddd4e015ff99b54e4483ab264d6c81fd"
+          }
+        },
+        {
+          "client_id": "411346648650-n8kmgr0qchum2tr6hpvqlh78g86dk4qu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aiphotostudiobgremover",
+            "certificate_hash": "b07c47d06f719d6812194a82b8f61955fd996fb1"
           }
         },
         {

@@ -165,10 +165,3 @@ tasks.named<Delete>("clean") {
         }
     }
 }
-android {
-    buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("debug")
-        }
-    }
-}
