@@ -24,7 +24,8 @@ configure<ApplicationExtension> {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.aiphotostudio.bgremover"
+        // Updated to match google-services.json
+        applicationId = "com.aiphotostudiobgremover"
         minSdk = 23
         targetSdk = 35
 
