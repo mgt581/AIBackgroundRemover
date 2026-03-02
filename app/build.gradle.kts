@@ -32,7 +32,7 @@ val appTargetSdk = 35
 val javaCompat = JavaVersion.VERSION_17
 
 configure<ApplicationExtension> {
-    namespace = "com.aiphotostudiobgremover"
+    namespace = "com.aiphotostudio.bgremover"
     compileSdk = appCompileSdk
 
     defaultConfig {
