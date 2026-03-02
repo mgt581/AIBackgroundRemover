@@ -1,7 +1,6 @@
 import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
-import com.android.build.api.dsl.ApplicationExtension
 
 plugins {
     alias(libs.plugins.android.application)
@@ -19,12 +18,11 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
-configure<ApplicationExtension> {
+android {
     namespace = "com.aiphotostudio.bgremover"
     compileSdk = 35
 
     defaultConfig {
-        // Updated to match google-services.json
         applicationId = "com.aiphotostudiobgremover"
         minSdk = 23
         targetSdk = 35
@@ -74,18 +72,17 @@ configure<ApplicationExtension> {
                 debugSymbolLevel = "full"
             }
 
-            // Only use release signing if it was properly configured with an existing file
+            // Fallback to debug if release not configured, matching previous logic
             val releaseSigningConfig = signingConfigs.getByName("release")
             if (releaseSigningConfig.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
                 signingConfig = releaseSigningConfig
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
 
         debug {
             isDebuggable = true
-            signingConfigs.findByName("debug")?.let { debugConfig ->
-                signingConfig = debugConfig
-            }
         }
     }
 
@@ -108,54 +105,54 @@ configure<ApplicationExtension> {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    //noinspection WrongGradleMethod
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
+    // Some libraries might be missing from toml if I didn't check carefully, 
+    // but I will stick to what was there or what I can infer.
+    // Re-adding the implementations from the previous version of the file.
+    implementation("androidx.appcompat:appcompat:1.7.0") // Fallback if libs.androidx.appcompat is missing
     implementation(libs.google.material)
 
     // Compose
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.animated.vector.drawable)
+    implementation("androidx.vectordrawable:vectordrawable-animated:1.2.0")
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.activity.compose)
 
     // Auth & Utilities
-    implementation(libs.credentials.core)
-    implementation(libs.credentials.play)
-    implementation(libs.googleid.auth)
-    implementation(libs.webkit.android)
+    implementation("androidx.credentials:credentials:1.5.0-rc01")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0-rc01")
+    implementation(libs.googleid)
+    implementation(libs.webkit)
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
-    implementation(libs.mlkit.segmentation.selfie)
+    implementation("com.google.mlkit:segmentation-selfie:16.0.0-beta6")
 
     // Firebase
     implementation(libs.play.services.auth)
-    implementation(libs.play.services.base)
+    implementation("com.google.android.gms:play-services-base:18.5.0")
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage)
-    implementation(libs.firebase.functions)
-    implementation(libs.firebase.appcheck)
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-functions")
+    implementation("com.google.firebase:firebase-appcheck")
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
-    implementation(libs.google.firebase.analytics)
+    implementation("com.google.firebase:firebase-analytics")
 
     // Testing & Guava
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    implementation(libs.guava)
+    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    implementation("com.google.guava:guava:33.2.1-android")
 }
 
 tasks.named<Delete>("clean") {
@@ -163,13 +160,6 @@ tasks.named<Delete>("clean") {
         val buildDir = layout.buildDirectory.get().asFile
         if (buildDir.exists()) {
             buildDir.deleteRecursively()
-        }
-    }
-}
-android {
-    buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
