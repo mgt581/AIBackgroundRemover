@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
@@ -74,18 +72,18 @@ android {
                 debugSymbolLevel = "full"
             }
 
-            // Consolidate signing config
+            // Using findByName to be safe with the new DSL
             val releaseSigningConfig = signingConfigs.findByName("release")
-            signingConfig = if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
-                releaseSigningConfig
+            if (releaseSigningConfig?.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
+                signingConfig = releaseSigningConfig
             } else {
-                signingConfigs.getByName("debug")
+                signingConfig = signingConfigs.findByName("debug")
             }
         }
 
         debug {
             isDebuggable = true
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("debug")
         }
     }
 
@@ -107,9 +105,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
 
-    kotlinOptions {
-        jvmTarget = "17"
+// Move Kotlin configuration outside of the android block to avoid ClassCastException
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
