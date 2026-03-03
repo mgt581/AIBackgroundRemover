@@ -6,12 +6,15 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.aiphotostudiobgremover.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
@@ -22,6 +25,23 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val BASE_URL = "https://aiphotostudio.co.uk"
+    
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data: Intent? = result.data
+        val results = if (result.resultCode == RESULT_OK && data != null) {
+            val targetData = data.dataString
+            val targetClipData = data.clipData
+            if (targetClipData != null) {
+                val count = targetClipData.itemCount
+                Array(count) { i -> targetClipData.getItemAt(i).uri }
+            } else if (targetData != null) {
+                arrayOf(Uri.parse(targetData))
+            } else null
+        } else null
+        filePathCallback?.onReceiveValue(results)
+        filePathCallback = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,21 +57,47 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupWebView(webView: WebView) {
         webView.apply {
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            settings.allowFileAccess = true
-            settings.allowContentAccess = true
-            settings.javaScriptCanOpenWindowsAutomatically = true
-            settings.setSupportMultipleWindows(true)
+            settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                databaseEnabled = true
+                allowFileAccess = true
+                allowContentAccess = true
+                javaScriptCanOpenWindowsAutomatically = true
+                setSupportMultipleWindows(false) // Changed to false for better stability on single-page apps
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                
+                // Set a modern mobile user agent to ensure site features are enabled
+                userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            }
             
             addJavascriptInterface(WebAppInterface(), "AndroidBridge")
 
-            webChromeClient = WebChromeClient()
+            webChromeClient = object : WebChromeClient() {
+                // This is REQUIRED for "Choose Photo" buttons on websites to work
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    this@MainActivity.filePathCallback?.onReceiveValue(null)
+                    this@MainActivity.filePathCallback = filePathCallback
+                    
+                    val intent = fileChooserParams?.createIntent()
+                    try {
+                        fileChooserLauncher.launch(intent)
+                    } catch (e: Exception) {
+                        this@MainActivity.filePathCallback = null
+                        return false
+                    }
+                    return true
+                }
+            }
+
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     val url = request?.url?.toString() ?: return false
 
-                    // Handle Auth and Social redirects by opening in browser
                     if (url.contains("google.com/accounts") || 
                         url.contains("facebook.com") || 
                         url.contains("appleid.apple.com") ||
@@ -78,43 +124,37 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+            
+            // Handle Download buttons on the website
+            setDownloadListener { url, _, _, _, _ ->
+                downloadAndSaveImage(url)
+            }
 
             loadUrl(BASE_URL)
         }
     }
 
     private fun setupButtons() {
-        // Shared Footer Buttons
-        binding.footerBtnGallery?.setOnClickListener {
+        binding.footerBtnGallery.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
         }
-        binding.footerBtnSettings?.setOnClickListener {
+        binding.footerBtnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        
-        // Header Buttons
         binding.btnHeaderLogin?.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
         }
         binding.btnSignUp?.setOnClickListener { 
             startActivity(Intent(this, LoginActivity::class.java))
         }
-
-        // Social Buttons - Using direct links
-        binding.btnWhatsapp?.setOnClickListener { openUrl("https://wa.me/447459142721") } // Updated with example
-        binding.btnTiktok?.setOnClickListener { openUrl("https://tiktok.com/@aiphotostudio") }
-        binding.btnFacebook?.setOnClickListener { openUrl("https://facebook.com/aiphotostudio") }
-
-        // Landscape specific main buttons
-        binding.btnChoosePhoto?.setOnClickListener {
-            // Logic for choosing photo
-        }
+        binding.btnWhatsapp.setOnClickListener { openUrl("https://wa.me/447459142721") }
+        binding.btnTiktok.setOnClickListener { openUrl("https://tiktok.com/@aiphotostudio") }
+        binding.btnFacebook.setOnClickListener { openUrl("https://facebook.com/aiphotostudio") }
     }
 
     private fun openUrl(url: String) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
             Toast.makeText(this, "No application found to open this link", Toast.LENGTH_SHORT).show()
         }
