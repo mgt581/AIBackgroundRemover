@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 allowFileAccess = true
                 allowContentAccess = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile AIPhotoStudioApp Safari/537.36"
             }
 
             addJavascriptInterface(WebAppInterface(), "AndroidBridge")
@@ -118,20 +118,26 @@ class MainActivity : AppCompatActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    // CSS and JS Injection to hide payment buttons and watermarks
+                    
+                    // Inject JS to mark the HTML as being in the Android app 
+                    // This allows the website's CSS (e.g., html.android-app .pricing-row) to hide elements
+                    val jsMarkApp = "document.documentElement.classList.add('android-app');"
+                    view?.evaluateJavascript(jsMarkApp, null)
+
+                    // Fallback CSS injection to hide common payment/pricing/watermark patterns
                     val css = """
-                        .payment-button, .buy-now, .pricing-section, .subscription-btn, 
+                        .payment-button, .buy-now, .pricing-section, .subscription-btn, .pricing-row, #upgradeMsg,
                         [class*='payment'], [id*='payment'], [class*='pricing'], [id*='pricing'],
                         .watermark, [class*='watermark'], [id*='watermark'] { 
                             display: none !important; 
                         }
                     """.trimIndent()
                     
-                    val js = "var style = document.createElement('style');" +
+                    val jsStyle = "var style = document.createElement('style');" +
                             "style.innerHTML = '$css';" +
                             "document.head.appendChild(style);"
                     
-                    view?.evaluateJavascript(js, null)
+                    view?.evaluateJavascript(jsStyle, null)
                 }
 
                 override fun shouldOverrideUrlLoading(v: WebView?, r: WebResourceRequest?): Boolean {
