@@ -28,11 +28,11 @@ val releaseKeystoreFile: File? =
 // Introduce constants: keep config values readable and consistent
 val appCompileSdk = 35
 val appMinSdk = 23
-val appTargetSdk = 35
+val appTargetSdk = 36
 val javaCompat = JavaVersion.VERSION_17
 
 configure<ApplicationExtension> {
-    namespace = "com.aiphotostudio.bgremover"
+    namespace = "com.aiphotostudiobgremover"
     compileSdk = appCompileSdk
 
     defaultConfig {
