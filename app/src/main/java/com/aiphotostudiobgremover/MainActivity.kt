@@ -1,10 +1,12 @@
 package com.aiphotostudiobgremover
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -21,6 +23,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -113,6 +116,24 @@ class MainActivity : AppCompatActivity() {
             }
 
             webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    // CSS and JS Injection to hide payment buttons and watermarks
+                    val css = """
+                        .payment-button, .buy-now, .pricing-section, .subscription-btn, 
+                        [class*='payment'], [id*='payment'], [class*='pricing'], [id*='pricing'],
+                        .watermark, [class*='watermark'], [id*='watermark'] { 
+                            display: none !important; 
+                        }
+                    """.trimIndent()
+                    
+                    val js = "var style = document.createElement('style');" +
+                            "style.innerHTML = '$css';" +
+                            "document.head.appendChild(style);"
+                    
+                    view?.evaluateJavascript(js, null)
+                }
+
                 override fun shouldOverrideUrlLoading(v: WebView?, r: WebResourceRequest?): Boolean {
                     val url = r?.url.toString()
                     return when {
@@ -160,14 +181,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveBitmapToGallery(bitmap: Bitmap) {
-        val saved = MediaStore.Images.Media.insertImage(
-            contentResolver,
-            bitmap,
-            "AI_${System.currentTimeMillis()}",
-            "Downloaded from AI Photo Studio"
-        )
-        val message = if (saved != null) "Saved to Gallery!" else "Failed to save image"
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        val filename = "AI_${System.currentTimeMillis()}.png"
+        var fos: OutputStream? = null
+        var imageUri: Uri? = null
+
+        val contentResolver = contentResolver
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AIPhotoStudio")
+            }
+            imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            fos = imageUri?.let { contentResolver.openOutputStream(it) }
+        } else {
+            val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
+            val image = File(imagesDir, filename)
+            fos = java.io.FileOutputStream(image)
+        }
+
+        fos?.use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            runOnUiThread {
+                Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            runOnUiThread {
+                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupOnBackPressed(webView: WebView) {
