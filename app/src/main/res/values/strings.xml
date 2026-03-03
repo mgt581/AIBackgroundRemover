@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AI Photo Studio</string>
+    <string name="app_name">AI Background Remover</string>
     <string name="ai_background_remover" translatable="false">Background Remover</string>
     <string name="header_title_background">Background</string>
     <string name="header_title_remover">Remover</string>
