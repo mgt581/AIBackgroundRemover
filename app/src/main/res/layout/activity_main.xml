@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/brand_primary"
                 android:text="@string/sign_in"
-                android:textColor="@color/white"
+                android:textColor="#4A148C"
                 android:textSize="12sp"
                 app:cornerRadius="20dp" />
 
