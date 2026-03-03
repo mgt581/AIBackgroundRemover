@@ -51,7 +51,8 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            tools:ignore="IntentFilterUniqueDataAttributes">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -90,19 +91,6 @@
             android:exported="false"
             android:label="@string/settings" />
 
-        <activity
-            android:name=".TermsActivity"
-            android:exported="false"
-            android:label="@string/terms_of_service" />
-
-        <activity
-            android:name=".PrivacyActivity"
-            android:exported="false"
-            android:label="@string/privacy_policy" />
-
-        <activity
-            android:name=".WebPageActivity"
-            android:exported="false" />
 
         <!-- FileProvider for camera photo capture + sharing local files -->
         <provider

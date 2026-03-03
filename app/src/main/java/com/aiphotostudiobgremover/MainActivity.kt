@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupWebView(webView: WebView) {
         webView.apply {
+            @android.annotation.SuppressLint("SetJavaScriptEnabled")
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
@@ -69,13 +70,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        binding.footerBtnGallery.setOnClickListener {
+        binding.footerBtnGallery?.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
         }
-        binding.footerBtnSettings.setOnClickListener {
+        binding.footerBtnSettings?.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        binding.btnHeaderLogin!!.setOnClickListener {
+        binding.btnHeaderLogin?.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }
