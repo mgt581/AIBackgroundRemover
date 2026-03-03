@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
@@ -19,10 +20,16 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.aiphotostudiobgremover.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,30 +37,34 @@ class MainActivity : AppCompatActivity() {
     private val BASE_URL = "https://aiphotostudio.co.uk"
 
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private var cameraImageUri: Uri? = null
 
     // Permission launcher for Camera
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            Toast.makeText(this, "Permission granted! Try uploading again.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Permission granted! Tap the upload button again.", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Camera permission is required to take photos.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Fixed File Chooser Launcher
+    // Handles the result from either the Gallery or the Camera
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data: Intent? = result.data
-        val results = if (result.resultCode == RESULT_OK) {
-            // Using the built-in parseResult is much safer for all Android versions
-            WebChromeClient.FileChooserParams.parseResult(result.resultCode, data)
+        val results: Array<Uri>? = if (result.resultCode == RESULT_OK) {
+            if (data?.data != null || data?.clipData != null) {
+                // User picked a file from the gallery
+                WebChromeClient.FileChooserParams.parseResult(result.resultCode, data)
+            } else {
+                // User took a photo with the camera
+                cameraImageUri?.let { arrayOf(it) }
+            }
         } else {
             null
         }
 
-        // CRITICAL: We MUST call onReceiveValue even if results are null
-        // otherwise the WebView hangs and won't let you click the button again.
         filePathCallback?.onReceiveValue(results)
         filePathCallback = null
     }
@@ -81,7 +92,6 @@ class MainActivity : AppCompatActivity() {
                 javaScriptCanOpenWindowsAutomatically = true
                 setSupportMultipleWindows(false)
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-
                 userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
             }
 
@@ -93,25 +103,41 @@ class MainActivity : AppCompatActivity() {
                     filePathCallback: ValueCallback<Array<Uri>>?,
                     fileChooserParams: FileChooserParams?
                 ): Boolean {
-                    // Check Camera Permission
+                    // 1. Check Camera Permission first
                     if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        return false // Cancel this attempt so they can try again after granting
+                        return false
                     }
 
+                    // 2. Reset any previous callback
                     this@MainActivity.filePathCallback?.onReceiveValue(null)
                     this@MainActivity.filePathCallback = filePathCallback
 
+                    // 3. Create Intent to take a photo
+                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    if (takePictureIntent.resolveActivity(packageManager) != null) {
+                        val photoFile: File? = try { createCapturedImageFile() } catch (ex: IOException) { null }
+                        photoFile?.let {
+                            cameraImageUri = FileProvider.getUriForFile(
+                                this@MainActivity,
+                                "${applicationContext.packageName}.fileprovider",
+                                it
+                            )
+                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
+                        }
+                    }
+
+                    // 4. Create Intent to pick files/gallery
                     val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "image/*"
                     }
 
-                    // This creates the 'Chooser' popup (Camera vs Files)
+                    // 5. Combine them into a Chooser
                     val chooserIntent = Intent(Intent.ACTION_CHOOSER).apply {
                         putExtra(Intent.EXTRA_INTENT, contentSelectionIntent)
-                        putExtra(Intent.EXTRA_TITLE, "Select Photo")
-                        // Optionally add camera intent here if site doesn't trigger it
+                        putExtra(Intent.EXTRA_TITLE, "Select Action")
+                        putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takePictureIntent))
                     }
 
                     try {
@@ -127,55 +153,43 @@ class MainActivity : AppCompatActivity() {
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     val url = request?.url?.toString() ?: return false
-
-                    if (url.contains("google.com/accounts") ||
-                        url.contains("facebook.com") ||
-                        url.contains("appleid.apple.com") ||
-                        url.contains("whatsapp.com") ||
-                        url.contains("tiktok.com")) {
+                    if (url.contains("google.com/accounts") || url.contains("facebook.com") ||
+                        url.contains("whatsapp.com") || url.contains("tiktok.com")) {
                         openUrl(url)
                         return true
                     }
-
                     return when {
                         url.contains("gallery.html") -> {
-                            startActivity(Intent(this@MainActivity, GalleryActivity::class.java))
-                            true
+                            startActivity(Intent(this@MainActivity, GalleryActivity::class.java)); true
                         }
                         url.contains("signin.html") || url.contains("login") -> {
-                            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-                            true
+                            startActivity(Intent(this@MainActivity, LoginActivity::class.java)); true
                         }
                         url.contains("settings") -> {
-                            startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
-                            true
+                            startActivity(Intent(this@MainActivity, SettingsActivity::class.java)); true
                         }
                         else -> false
                     }
                 }
             }
 
-            setDownloadListener { url, _, _, _, _ ->
-                downloadAndSaveImage(url)
-            }
-
+            setDownloadListener { url, _, _, _, _ -> downloadAndSaveImage(url) }
             loadUrl(BASE_URL)
         }
     }
 
+    @Throws(IOException::class)
+    private fun createCapturedImageFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+    }
+
     private fun setupButtons() {
-        binding.footerBtnGallery.setOnClickListener {
-            startActivity(Intent(this, GalleryActivity::class.java))
-        }
-        binding.footerBtnSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-        binding.btnHeaderLogin?.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
-        }
-        binding.btnSignUp?.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
-        }
+        binding.footerBtnGallery.setOnClickListener { startActivity(Intent(this, GalleryActivity::class.java)) }
+        binding.footerBtnSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
+        binding.btnHeaderLogin?.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
+        binding.btnSignUp?.setOnClickListener { startActivity(Intent(this, LoginActivity::class.java)) }
         binding.btnWhatsapp.setOnClickListener { openUrl("https://wa.me/447459142721") }
         binding.btnTiktok.setOnClickListener { openUrl("https://tiktok.com/@aiphotostudio") }
         binding.btnFacebook.setOnClickListener { openUrl("https://facebook.com/aiphotostudio") }
@@ -185,19 +199,15 @@ class MainActivity : AppCompatActivity() {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
-            Toast.makeText(this, "No application found to open this link", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No application found", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupOnBackPressed(webView: WebView) {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.goBack()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                }
+                if (webView.canGoBack()) webView.goBack()
+                else { isEnabled = false; onBackPressedDispatcher.onBackPressed() }
             }
         })
     }
@@ -205,43 +215,25 @@ class MainActivity : AppCompatActivity() {
     inner class WebAppInterface {
         @JavascriptInterface
         fun saveImageToDevice(imageUrl: String) {
-            runOnUiThread {
-                Toast.makeText(this@MainActivity, "Downloading image...", Toast.LENGTH_SHORT).show()
-                downloadAndSaveImage(imageUrl)
-            }
-        }
-
-        @JavascriptInterface
-        fun autoSaveToGallery(imageUrl: String) {
-            saveImageToDevice(imageUrl)
+            runOnUiThread { downloadAndSaveImage(imageUrl) }
         }
     }
 
     private fun downloadAndSaveImage(url: String) {
-        Glide.with(this)
-            .asBitmap()
-            .load(url)
-            .into(object : CustomTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    saveBitmapToGallery(resource)
-                }
-                override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
-            })
+        Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
+            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                saveBitmapToGallery(resource)
+            }
+            override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+        })
     }
 
     private fun saveBitmapToGallery(bitmap: Bitmap) {
-        @Suppress("DEPRECATION")
         val savedImageURL = MediaStore.Images.Media.insertImage(
-            contentResolver,
-            bitmap,
-            "AI_Photo_${System.currentTimeMillis()}",
-            "Downloaded from AI Photo Studio"
+            contentResolver, bitmap, "AI_Photo_${System.currentTimeMillis()}", "Downloaded from AI Photo Studio"
         )
-
-        if (savedImageURL != null) {
-            Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
-        }
+        val message = if (savedImageURL != null) "Saved to Gallery!" else "Failed to save image"
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
+
