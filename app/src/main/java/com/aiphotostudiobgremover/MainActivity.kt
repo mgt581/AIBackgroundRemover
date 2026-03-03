@@ -2,9 +2,11 @@ package com.aiphotostudiobgremover
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.webkit.JavascriptInterface
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -35,17 +37,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupWebView(webView: WebView) {
         webView.apply {
-            @android.annotation.SuppressLint("SetJavaScriptEnabled")
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
             settings.allowContentAccess = true
+            settings.javaScriptCanOpenWindowsAutomatically = true
+            settings.setSupportMultipleWindows(true)
             
             addJavascriptInterface(WebAppInterface(), "AndroidBridge")
 
+            webChromeClient = WebChromeClient()
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     val url = request?.url?.toString() ?: return false
+
+                    // Handle Auth and Social redirects by opening in browser
+                    if (url.contains("google.com/accounts") || 
+                        url.contains("facebook.com") || 
+                        url.contains("appleid.apple.com") ||
+                        url.contains("whatsapp.com") ||
+                        url.contains("tiktok.com")) {
+                        openUrl(url)
+                        return true
+                    }
 
                     return when {
                         url.contains("gallery.html") -> {
@@ -70,14 +84,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
+        // Shared Footer Buttons
         binding.footerBtnGallery?.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
         }
         binding.footerBtnSettings?.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        
+        // Header Buttons
         binding.btnHeaderLogin?.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
+        }
+        binding.btnSignUp?.setOnClickListener { 
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
+
+        // Social Buttons - Using direct links
+        binding.btnWhatsapp?.setOnClickListener { openUrl("https://wa.me/447459142721") } // Updated with example
+        binding.btnTiktok?.setOnClickListener { openUrl("https://tiktok.com/@aiphotostudio") }
+        binding.btnFacebook?.setOnClickListener { openUrl("https://facebook.com/aiphotostudio") }
+
+        // Landscape specific main buttons
+        binding.btnChoosePhoto?.setOnClickListener {
+            // Logic for choosing photo
+        }
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "No application found to open this link", Toast.LENGTH_SHORT).show()
         }
     }
 
