@@ -26,7 +26,7 @@ val releaseKeystoreFile: File? =
         ?.takeIf(File::exists)
 
 // Introduce constants: keep config values readable and consistent
-val appCompileSdk = 35
+val appCompileSdk = 36
 val appMinSdk = 23
 val appTargetSdk = 36
 val javaCompat = JavaVersion.VERSION_17
