@@ -151,7 +151,9 @@ class MainActivity : AppCompatActivity() {
                     val css = """
                         .payment-button, .buy-now, .pricing-section, .subscription-btn, .pricing-row, #upgradeMsg,
                         [class*='payment'], [id*='payment'], [class*='pricing'], [id*='pricing'],
-                        .watermark, [class*='watermark'], [id*='watermark'] { 
+                        .watermark, [class*='watermark'], [id*='watermark'], .branded-watermark,
+                        .logo-overlay, .upgrade-overlay, .premium-badge, .remove-watermark-btn,
+                        [class*='upgrade'], [id*='upgrade'], [class*='premium'], [id*='premium'] { 
                             display: none !important; 
                         }
                     """.trimIndent()
@@ -195,6 +197,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchCamera() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        
+        // Ensure there is a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(packageManager) == null) {
+            Toast.makeText(this, "No camera app found to take photos.", Toast.LENGTH_SHORT).show()
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
+            return
+        }
+
         val photoFile = try {
             createCapturedImageFile()
         } catch (e: IOException) {
@@ -219,42 +230,82 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun downloadAndSaveImage(url: String) {
+        if (url.startsWith("data:image")) {
+            // Handle Base64 Data URI
+            try {
+                val base64Data = url.substring(url.indexOf(",") + 1)
+                val imageBytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
+                val decodedBitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                if (decodedBitmap != null) {
+                    saveBitmapToGallery(decodedBitmap)
+                } else {
+                    Toast.makeText(this, "Failed to decode image", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error processing data URI: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+
         Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
             override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                 saveBitmapToGallery(resource)
             }
             override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+            override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
+                Toast.makeText(this@MainActivity, "Failed to download image", Toast.LENGTH_SHORT).show()
+            }
         })
     }
 
     private fun saveBitmapToGallery(bitmap: Bitmap) {
+        // For API <= 28, we need WRITE_EXTERNAL_STORAGE
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                // We should ideally request it here, but let's at least warn and return for now, 
+                // as this is a background process from a JS call usually.
+                // Or better, trigger a standard request if it's missing.
+                Toast.makeText(this, "Storage permission is required to save photos.", Toast.LENGTH_SHORT).show()
+                // You might want to register a launcher for this too if it's frequent.
+                return
+            }
+        }
+
         val filename = "AI_${System.currentTimeMillis()}.png"
         var fos: OutputStream? = null
         var imageUri: Uri? = null
 
         val contentResolver = contentResolver
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AIPhotoStudio")
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AIPhotoStudio")
+                }
+                imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                fos = imageUri?.let { contentResolver.openOutputStream(it) }
+            } else {
+                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
+                val studioDir = File(imagesDir, "AIPhotoStudio")
+                if (!studioDir.exists()) studioDir.mkdirs()
+                val image = File(studioDir, filename)
+                fos = java.io.FileOutputStream(image)
             }
-            imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-            fos = imageUri?.let { contentResolver.openOutputStream(it) }
-        } else {
-            val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
-            val image = File(imagesDir, filename)
-            fos = java.io.FileOutputStream(image)
-        }
 
-        fos?.use {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            runOnUiThread {
-                Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
+            fos?.use {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                runOnUiThread {
+                    Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
+                }
+            } ?: run {
+                runOnUiThread {
+                    Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
+                }
             }
-        } ?: run {
+        } catch (e: Exception) {
             runOnUiThread {
-                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Error saving image: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
