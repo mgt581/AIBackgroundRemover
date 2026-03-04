@@ -3,10 +3,10 @@ package com.aiphotostudiobgremover
 import android.Manifest
 import android.app.DownloadManager
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.aiphotostudiobgremover.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -69,13 +70,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.backgroundWebView?.let {
-            setupWebView(it)
-            setupOnBackPressed(it)
+        binding.backgroundWebView?.let { webView ->
+            setupWebView(webView)
+            setupOnBackPressed(webView)
         }
         setupButtons()
     }
 
+    @Suppress("SetJavaScriptEnabled")
     private fun setupWebView(webView: WebView) {
         webView.apply {
             settings.apply {
@@ -287,7 +289,7 @@ class MainActivity : AppCompatActivity() {
 
         val photoFile = try {
             createCapturedImageFile()
-        } catch (ignored: IOException) {
+        } catch (_: IOException) {
             null
         }
 
@@ -399,7 +401,7 @@ class MainActivity : AppCompatActivity() {
                     url
                 }
                 val imageBytes = Base64.decode(base64Data, Base64.DEFAULT)
-                val decodedBitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                val decodedBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 if (decodedBitmap != null) {
                     saveBitmapToGallery(decodedBitmap)
                 } else {
@@ -417,7 +419,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         try {
-            val request = DownloadManager.Request(Uri.parse(url))
+            val request = DownloadManager.Request(url.toUri())
             val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
 
             request.setMimeType(mimetype)
@@ -438,10 +440,10 @@ class MainActivity : AppCompatActivity() {
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, "AIPhotoStudio/$filename")
 
-            val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
             Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
             Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     saveBitmapToGallery(resource)
@@ -505,49 +507,9 @@ class MainActivity : AppCompatActivity() {
 
     inner class WebAppInterface {
         @JavascriptInterface
+        @Suppress("unused")
         fun saveImageToDevice(url: String) {
             runOnUiThread { downloadAndSaveImage(url) }
-        }
-    }
-
-    class AndroidSaveBridge(private val context: Context) {
-        @JavascriptInterface
-        fun saveBase64Image(base64: String, filename: String, mime: String) {
-            try {
-                val bytes = Base64.decode(base64, Base64.DEFAULT)
-
-                val resolver = context.contentResolver
-                val values = ContentValues().apply {
-                    put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-                    put(MediaStore.Images.Media.MIME_TYPE, mime)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/AI Photo Studio")
-                        put(MediaStore.Images.Media.IS_PENDING, 1)
-                    }
-                }
-
-                val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-                    ?: throw Exception("MediaStore insert failed")
-
-                resolver.openOutputStream(uri)?.use { out ->
-                    out.write(bytes)
-                    out.flush()
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    values.clear()
-                    values.put(MediaStore.Images.Media.IS_PENDING, 0)
-                    resolver.update(uri, values, null, null)
-                }
-                
-                if (context is MainActivity) {
-                    context.runOnUiThread {
-                        Toast.makeText(context, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
     }
 }
