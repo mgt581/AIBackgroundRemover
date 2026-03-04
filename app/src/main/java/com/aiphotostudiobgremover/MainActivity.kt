@@ -157,11 +157,12 @@ class MainActivity : AppCompatActivity() {
                         .payment-button, .buy-now, .pricing-section, .subscription-btn, .pricing-row, #upgradeMsg,
                         [class*='payment'], [id*='payment'], [class*='pricing'], [id*='pricing'],
                         [class*='stripe'], [id*='stripe'], .stripe-payment-provider, .StripeElement,
+                        iframe[src*='stripe'], .stripe-checkout, .pay-button,
                         .watermark, [class*='watermark'], [id*='watermark'], .branded-watermark,
                         .logo-overlay, .upgrade-overlay, .premium-badge, .remove-watermark-btn,
                         [class*='upgrade'], [id*='upgrade'], [class*='premium'], [id*='premium'],
                         .checkout-container, .checkout-button, .billing-section, .pricing-plan,
-                        .floating-watermark, .img-watermark, .overlay-watermark { 
+                        .floating-watermark, .img-watermark, .overlay-watermark, [src*='watermark'] { 
                             display: none !important; 
                             visibility: hidden !important;
                             opacity: 0 !important;
@@ -205,10 +206,10 @@ class MainActivity : AppCompatActivity() {
                             
                             // 4. Manual sweep for any tricky elements
                             function hideTricky() {
-                                var selectors = ['.watermark', '[class*="watermark"]', '[id*="watermark"]', '.stripe-payment-provider'];
+                                var selectors = ['.watermark', '[class*="watermark"]', '[id*="watermark"]', '.stripe-payment-provider', '.stripe-checkout', 'iframe[src*="stripe"]'];
                                 selectors.forEach(function(s) {
                                     var elms = document.querySelectorAll(s);
-                                    elms.forEach(function(el) { el.style.display = 'none'; });
+                                    elms.forEach(function(el) { el.style.display = 'none'; el.style.visibility = 'hidden'; });
                                 });
                             }
                             setInterval(hideTricky, 1000);
@@ -250,6 +251,9 @@ class MainActivity : AppCompatActivity() {
         }
         binding.footerBtnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        binding.btnHeaderLogin?.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 
