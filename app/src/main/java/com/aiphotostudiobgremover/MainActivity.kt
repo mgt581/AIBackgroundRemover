@@ -302,24 +302,29 @@ class MainActivity : AppCompatActivity() {
         contentLength: Long = 0
     ) {
         if (url.startsWith("blob:")) {
-            // Enhanced JS to handle blob URLs with multiple fallback methods
+            // Updated JS with improved Blob-to-Base64 conversion logic
             val js = """
                 (async function() {
                   try {
-                    console.log("Fetching blob URL: $url");
                     const res = await fetch('$url');
-                    if (!res.ok) throw new Error("Fetch failed with status " + res.status);
                     const blob = await res.blob();
+                    
+                    // Use a more reliable way to read blob as base64
                     const reader = new FileReader();
                     reader.onloadend = function() {
-                      AndroidBridge.saveImageToDevice(reader.result);
+                      const base64data = reader.result;
+                      if (base64data && base64data.startsWith('data:')) {
+                        AndroidBridge.saveImageToDevice(base64data);
+                      } else {
+                        AndroidBridge.saveImageToDevice("ERROR: Invalid base64 data generated");
+                      }
                     };
                     reader.onerror = function() {
                         AndroidBridge.saveImageToDevice("ERROR: FileReader failed");
                     };
                     reader.readAsDataURL(blob);
                   } catch (e) {
-                    console.error("Fetch failed, trying XHR: ", e);
+                    // Fallback using XHR if fetch fails
                     try {
                         var xhr = new XMLHttpRequest();
                         xhr.open('GET', '$url', true);
@@ -332,15 +337,15 @@ class MainActivity : AppCompatActivity() {
                                 };
                                 reader.readAsDataURL(xhr.response);
                             } else {
-                                AndroidBridge.saveImageToDevice("ERROR: XHR status " + xhr.status);
+                                AndroidBridge.saveImageToDevice("ERROR: XHR failed with status " + xhr.status);
                             }
                         };
                         xhr.onerror = function() {
-                            AndroidBridge.saveImageToDevice("ERROR: XHR failed");
+                            AndroidBridge.saveImageToDevice("ERROR: XHR network error");
                         };
                         xhr.send();
-                    } catch (e2) {
-                        AndroidBridge.saveImageToDevice("ERROR: " + e.toString() + " | " + e2.toString());
+                    } catch (err) {
+                        AndroidBridge.saveImageToDevice("ERROR: " + e.toString());
                     }
                   }
                 })();
