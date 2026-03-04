@@ -28,7 +28,6 @@ import com.bumptech.glide.request.transition.Transition
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
-import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -70,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.backgroundWebView.let {
+        binding.backgroundWebView?.let {
             setupWebView(it)
             setupOnBackPressed(it)
         }
@@ -271,7 +270,7 @@ class MainActivity : AppCompatActivity() {
         binding.footerBtnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        binding.btnHeaderLogin.setOnClickListener {
+        binding.btnHeaderLogin?.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }
@@ -389,7 +388,7 @@ class MainActivity : AppCompatActivity() {
                   }
                 })();
             """.trimIndent()
-            binding.backgroundWebView.evaluateJavascript(js, null)
+            binding.backgroundWebView?.evaluateJavascript(js, null)
             return
         }
 
