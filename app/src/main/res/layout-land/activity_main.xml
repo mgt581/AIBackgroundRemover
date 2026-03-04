@@ -104,7 +104,7 @@
                 android:id="@+id/btn_choose_photo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/choose_photo"
+                android:text="@string/choose_photo_gallery"
                 android:layout_marginTop="24dp"
                 android:backgroundTint="@color/brand_primary"
                 android:textColor="@color/white"
