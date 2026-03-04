@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity() {
             setupWebView(webView)
             setupOnBackPressed(webView)
         }
-        setupButtons()
     }
 
     @Suppress("SetJavaScriptEnabled")
@@ -241,18 +240,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun shouldOverrideUrlLoading(v: WebView?, r: WebResourceRequest?): Boolean {
-                    val url = r?.url.toString()
-                    return when {
-                        url.contains("gallery.html") -> {
-                            startActivity(Intent(this@MainActivity, GalleryActivity::class.java))
-                            true
-                        }
-                        url.contains("login") -> {
-                            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-                            true
-                        }
-                        else -> false
-                    }
+                    return false
                 }
             }
 
@@ -262,18 +250,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             loadUrl(baseUrl)
-        }
-    }
-
-    private fun setupButtons() {
-        binding.footerBtnGallery.setOnClickListener {
-            startActivity(Intent(this, GalleryActivity::class.java))
-        }
-        binding.footerBtnSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-        binding.btnHeaderLogin?.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 
