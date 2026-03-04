@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:text="Auto-saving to Gallery..."
+        android:text="@string/auto_saving_to_gallery"
         android:textColor="@color/white"
         android:textSize="14sp"
         android:textStyle="bold" />

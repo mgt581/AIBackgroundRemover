@@ -305,7 +305,7 @@
             android:layout_height="wrap_content"
             android:text="@string/footer_ownership"
             android:textColor="@color/brand_text_secondary"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:gravity="center"
             android:paddingBottom="8dp" />
     </LinearLayout>

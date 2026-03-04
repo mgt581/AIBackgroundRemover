@@ -24,6 +24,7 @@ import com.aiphotostudiobgremover.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
@@ -143,13 +144,14 @@ class MainActivity : AppCompatActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    
-                    // Inject JS to mark the HTML as being in the Android app 
+
+                    // Inject JS to mark the HTML as being in the Android app
                     // This allows the website's CSS (e.g., html.android-app .pricing-row) to hide elements
                     val jsMarkApp = "document.documentElement.classList.add('android-app');"
                     view?.evaluateJavascript(jsMarkApp, null)
 
                     // Fallback CSS injection to hide common payment/pricing/watermark patterns
+                    // IMPORTANT: Must be safely escaped, otherwise JS breaks silently in WebView.
                     val css = """
                         .payment-button, .buy-now, .pricing-section, .subscription-btn, .pricing-row, #upgradeMsg,
                         [class*='payment'], [id*='payment'], [class*='pricing'], [id*='pricing'],
@@ -159,11 +161,17 @@ class MainActivity : AppCompatActivity() {
                             display: none !important; 
                         }
                     """.trimIndent()
-                    
-                    val jsStyle = "var style = document.createElement('style');" +
-                            "style.innerHTML = '$css';" +
-                            "document.head.appendChild(style);"
-                    
+
+                    val jsStyle = """
+                        (function() {
+                          try {
+                            var style = document.createElement('style');
+                            style.innerHTML = ${JSONObject.quote(css)};
+                            document.head.appendChild(style);
+                          } catch (e) {}
+                        })();
+                    """.trimIndent()
+
                     view?.evaluateJavascript(jsStyle, null)
                 }
 
@@ -184,8 +192,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
-                downloadAndSaveImage(url, userAgent, contentDisposition, mimetype, contentLength)
+                // Ensure user-agent isn't null (DownloadManager hates null headers; some servers do too)
+                val ua = userAgent ?: settings.userAgentString
+                downloadAndSaveImage(url, ua, contentDisposition, mimetype, contentLength)
             }
+
             loadUrl(BASE_URL)
         }
     }
@@ -201,7 +212,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchCamera() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        
+
         // Ensure there is a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(packageManager) == null) {
             Toast.makeText(this, "No camera app found to take photos.", Toast.LENGTH_SHORT).show()
@@ -233,26 +244,28 @@ class MainActivity : AppCompatActivity() {
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
-    private fun downloadAndSaveImage(url: String, userAgent: String? = null, contentDisposition: String? = null, mimetype: String? = null, contentLength: Long = 0) {
+    private fun downloadAndSaveImage(
+        url: String,
+        userAgent: String? = null,
+        contentDisposition: String? = null,
+        mimetype: String? = null,
+        contentLength: Long = 0
+    ) {
         if (url.startsWith("blob:")) {
-            // Handle Blob URL via JS injection to convert to Base64
+            // Handle Blob URL via JS injection to convert to Base64 (use fetch; XHR with blob: often fails)
             val js = """
-                (function() {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', '$url', true);
-                    xhr.responseType = 'blob';
-                    xhr.onload = function(e) {
-                        if (this.status == 200) {
-                            var blob = this.response;
-                            var reader = new FileReader();
-                            reader.readAsDataURL(blob);
-                            reader.onloadend = function() {
-                                var base64data = reader.result;
-                                AndroidBridge.saveImageToDevice(base64data);
-                            }
-                        }
+                (async function() {
+                  try {
+                    const res = await fetch('$url');
+                    const blob = await res.blob();
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                      AndroidBridge.saveImageToDevice(reader.result);
                     };
-                    xhr.send();
+                    reader.readAsDataURL(blob);
+                  } catch (e) {
+                    AndroidBridge.saveImageToDevice("ERROR:" + e.toString());
+                  }
                 })();
             """.trimIndent()
             binding.backgroundWebView?.evaluateJavascript(js, null)
@@ -280,26 +293,44 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // For regular URLs, use DownloadManager as requested
+        if (url.startsWith("ERROR:")) {
+            Toast.makeText(this, "WebView download error: ${url.removePrefix("ERROR:")}", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // For regular URLs:
+        // 1) Try DownloadManager with Cookie/Referer (needed when server requires session auth)
+        // 2) If DM fails, fallback to Glide -> save to Gallery (most reliable)
         try {
             val request = DownloadManager.Request(Uri.parse(url))
             val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
-            
+
             request.setMimeType(mimetype)
-            request.addRequestHeader("User-Agent", userAgent)
+            val ua = userAgent ?: "Mozilla/5.0"
+            request.addRequestHeader("User-Agent", ua)
+
+            // Add cookies if present (critical for authenticated URLs)
+            val cookie = CookieManager.getInstance().getCookie(url)
+            if (!cookie.isNullOrBlank()) {
+                request.addRequestHeader("Cookie", cookie)
+            }
+
+            // Some servers expect a referer
+            request.addRequestHeader("Referer", BASE_URL)
+
             request.setDescription("Downloading image...")
             request.setTitle(filename)
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, "AIPhotoStudio/$filename")
-            
+
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
             Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
-            
-            // Note: DownloadManager handles saving to public directory. 
+
+            // Note: DownloadManager handles saving to public directory.
             // On modern Android, files in public directories are automatically scanned by MediaStore.
         } catch (e: Exception) {
-            // Fallback to Glide if DownloadManager fails (e.g. invalid URL for DM)
+            // Fallback to Glide if DownloadManager fails (or URL isn't compatible with DM)
             Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     saveBitmapToGallery(resource)
@@ -316,7 +347,7 @@ class MainActivity : AppCompatActivity() {
         // For API <= 28, we need WRITE_EXTERNAL_STORAGE
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                // We should ideally request it here, but let's at least warn and return for now, 
+                // We should ideally request it here, but let's at least warn and return for now,
                 // as this is a background process from a JS call usually.
                 // Or better, trigger a standard request if it's missing.
                 Toast.makeText(this, "Storage permission is required to save photos.", Toast.LENGTH_SHORT).show()
@@ -391,8 +422,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
-
 
 
 

@@ -151,4 +151,8 @@
     <string name="signin_success_msg">Anonymous sign-in successful.</string>
     <string name="signin_failed_msg">Anonymous sign-in failed.</string>
     <string name="please_sign_in_gallery">Please sign in to view your gallery</string>
+    <string name="terms_content">1. Acceptance of Terms\nBy using AI Background Remover, you agree to these terms.\n\n2. Description of Service\nWe provide AI-powered background removal services.\n\n3. User Conduct\nYou agree not to use the service for any illegal purposes.\n\n4. Privacy Policy\nYour use of the service is also governed by our Privacy Policy.\n\n5. Termination\nWe reserve the right to terminate your access for any reason.\n\n6. Changes to Terms\nWe may update these terms at any time.</string>
+    <string name="choose_from_photos">Choose from photos</string>
+    <string name="presets">Presets</string>
+    <string name="auto_saving_to_gallery">Auto-saving to Gallery…</string>
 </resources>
