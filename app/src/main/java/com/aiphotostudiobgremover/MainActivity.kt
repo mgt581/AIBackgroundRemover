@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Base64
 import android.webkit.*
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.backgroundWebView?.let {
+        binding.backgroundWebView.let {
             setupWebView(it)
             setupOnBackPressed(it)
         }
@@ -92,6 +93,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             addJavascriptInterface(WebAppInterface(), "AndroidBridge")
+            addJavascriptInterface(AndroidSaveBridge(this@MainActivity), "AndroidSave")
 
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(w: WebView?, fpc: ValueCallback<Array<Uri>>?, fcp: FileChooserParams?): Boolean {
@@ -148,15 +150,38 @@ class MainActivity : AppCompatActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                     super.onPageStarted(view, url, favicon)
-                    // Inject markers as early as possible
-                    val jsEarly = "window.isAndroidApp = true; window.isMobileApp = true; document.documentElement.classList.add('android-app');"
+                    // Early injection to capture Blobs and set markers
+                    val jsEarly = """
+                        (function() {
+                            window.__AIPS_IS_ANDROID_APP__ = true;
+                            window.isAndroidApp = true;
+                            window.isMobileApp = true;
+                            document.documentElement.classList.add('android-app');
+                            
+                            window.blobCache = window.blobCache || {};
+                            if (!window.urlPatched) {
+                                const originalCreate = URL.createObjectURL;
+                                URL.createObjectURL = function(obj) {
+                                    const url = originalCreate.call(URL, obj);
+                                    if (obj instanceof Blob) {
+                                        const reader = new FileReader();
+                                        reader.onloadend = function() {
+                                            window.blobCache[url] = reader.result;
+                                        };
+                                        reader.readAsDataURL(obj);
+                                    }
+                                    return url;
+                                };
+                                window.urlPatched = true;
+                            }
+                        })();
+                    """.trimIndent()
                     view?.evaluateJavascript(jsEarly, null)
                 }
 
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
 
-                    // Inject JS to mark the HTML as being in the Android app and hide elements continuously
                     val css = """
                         .payment-button, .buy-now, .pricing-section, .subscription-btn, .pricing-row, #upgradeMsg,
                         [class*='payment'], [id*='payment'], [class*='pricing'], [id*='pricing'],
@@ -173,20 +198,17 @@ class MainActivity : AppCompatActivity() {
                             height: 0 !important;
                             width: 0 !important;
                             pointer-events: none !important;
-                            position: absolute !important;
-                            top: -9999px !important;
                         }
                     """.trimIndent()
 
                     val jsInjection = """
                         (function() {
                           try {
-                            // 1. Mark as app
+                            window.__AIPS_IS_ANDROID_APP__ = true;
                             document.documentElement.classList.add('android-app');
                             window.isAndroidApp = true;
                             window.isMobileApp = true;
 
-                            // 2. Inject CSS
                             var style = document.getElementById('android-app-styles');
                             if (!style) {
                                 style = document.createElement('style');
@@ -195,20 +217,13 @@ class MainActivity : AppCompatActivity() {
                             }
                             style.innerHTML = ${JSONObject.quote(css)};
 
-                            // 3. Continuous Cleanup (MutationObserver)
                             var observer = new MutationObserver(function(mutations) {
-                                mutations.forEach(function(mutation) {
-                                    if (mutation.addedNodes.length) {
-                                        // Ensure styles are still there
-                                        if (!document.getElementById('android-app-styles')) {
-                                            document.head.appendChild(style);
-                                        }
-                                    }
-                                });
+                                if (!document.getElementById('android-app-styles')) {
+                                    document.head.appendChild(style);
+                                }
                             });
                             observer.observe(document.body, { childList: true, subtree: true });
                             
-                            // 4. Manual sweep for any tricky elements
                             function hideTricky() {
                                 var selectors = ['.watermark', '[class*="watermark"]', '[id*="watermark"]', '.stripe-payment-provider', '.stripe-checkout', 'iframe[src*="stripe"]'];
                                 selectors.forEach(function(s) {
@@ -256,7 +271,7 @@ class MainActivity : AppCompatActivity() {
         binding.footerBtnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        binding.btnHeaderLogin?.setOnClickListener {
+        binding.btnHeaderLogin.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }
@@ -302,55 +317,79 @@ class MainActivity : AppCompatActivity() {
         contentLength: Long = 0
     ) {
         if (url.startsWith("blob:")) {
-            // Updated JS with improved Blob-to-Base64 conversion logic
             val js = """
                 (async function() {
                   try {
-                    const res = await fetch('$url');
-                    const blob = await res.blob();
+                    const blobUrl = '$url';
                     
-                    // Use a more reliable way to read blob as base64
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                      const base64data = reader.result;
-                      if (base64data && base64data.startsWith('data:')) {
-                        AndroidBridge.saveImageToDevice(base64data);
+                    const blobToBase64 = (blob) => {
+                      return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = () => reject("FileReader failed");
+                        reader.readAsDataURL(blob);
+                      });
+                    };
+
+                    // 1. Check Blob Cache
+                    if (window.blobCache && window.blobCache[blobUrl]) {
+                      const dataUrl = window.blobCache[blobUrl];
+                      const base64 = dataUrl.split(',')[1];
+                      const mime = dataUrl.split(';')[0].split(':')[1];
+                      const filename = 'AIPStudio_' + Date.now() + '.png';
+                      if (window.AndroidSave) {
+                        window.AndroidSave.saveBase64Image(base64, filename, mime);
                       } else {
-                        AndroidBridge.saveImageToDevice("ERROR: Invalid base64 data generated");
+                        AndroidBridge.saveImageToDevice(dataUrl);
                       }
-                    };
-                    reader.onerror = function() {
-                        AndroidBridge.saveImageToDevice("ERROR: FileReader failed");
-                    };
-                    reader.readAsDataURL(blob);
-                  } catch (e) {
-                    // Fallback using XHR if fetch fails
-                    try {
-                        var xhr = new XMLHttpRequest();
-                        xhr.open('GET', '$url', true);
-                        xhr.responseType = 'blob';
-                        xhr.onload = function() {
-                            if (xhr.status === 200 || xhr.status === 0) {
-                                var reader = new FileReader();
-                                reader.onloadend = function() {
-                                    AndroidBridge.saveImageToDevice(reader.result);
-                                };
-                                reader.readAsDataURL(xhr.response);
-                            } else {
-                                AndroidBridge.saveImageToDevice("ERROR: XHR failed with status " + xhr.status);
-                            }
-                        };
-                        xhr.onerror = function() {
-                            AndroidBridge.saveImageToDevice("ERROR: XHR network error");
-                        };
-                        xhr.send();
-                    } catch (err) {
-                        AndroidBridge.saveImageToDevice("ERROR: " + e.toString());
+                      return;
                     }
+
+                    // 2. Try DOM extraction
+                    const elements = [...document.querySelectorAll('canvas'), ...document.querySelectorAll('img')];
+                    for (const el of elements) {
+                      try {
+                        const isMatch = el.src === blobUrl || (el.tagName === 'CANVAS' && el.width > 100);
+                        if (isMatch) {
+                          const canvas = el.tagName === 'CANVAS' ? el : document.createElement('canvas');
+                          if (el.tagName !== 'CANVAS') {
+                            canvas.width = el.naturalWidth || el.width;
+                            canvas.height = el.naturalHeight || el.height;
+                            canvas.getContext('2d').drawImage(el, 0, 0);
+                          }
+                          const dataUrl = canvas.toDataURL('image/png');
+                          if (dataUrl.length > 1000) {
+                            const base64 = dataUrl.split(',')[1];
+                            const filename = 'AIPStudio_' + Date.now() + '.png';
+                            if (window.AndroidSave) {
+                              window.AndroidSave.saveBase64Image(base64, filename, 'image/png');
+                            } else {
+                              AndroidBridge.saveImageToDevice(dataUrl);
+                            }
+                            return;
+                          }
+                        }
+                      } catch (e) {}
+                    }
+
+                    // 3. Fallback: Fetch blob
+                    const res = await fetch(blobUrl);
+                    const blob = await res.blob();
+                    const dataUrl = await blobToBase64(blob);
+                    const base64 = dataUrl.split(',')[1];
+                    const mime = blob.type || 'image/png';
+                    const filename = 'AIPStudio_' + Date.now() + '.png';
+                    if (window.AndroidSave) {
+                      window.AndroidSave.saveBase64Image(base64, filename, mime);
+                    } else {
+                      AndroidBridge.saveImageToDevice(dataUrl);
+                    }
+                  } catch (e) {
+                    AndroidBridge.saveImageToDevice("ERROR: Security block or revoked URL - " + e.toString());
                   }
                 })();
             """.trimIndent()
-            binding.backgroundWebView?.evaluateJavascript(js, null)
+            binding.backgroundWebView.evaluateJavascript(js, null)
             return
         }
 
@@ -361,7 +400,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     url
                 }
-                val imageBytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
+                val imageBytes = Base64.decode(base64Data, Base64.DEFAULT)
                 val decodedBitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 if (decodedBitmap != null) {
                     saveBitmapToGallery(decodedBitmap)
@@ -418,51 +457,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveBitmapToGallery(bitmap: Bitmap) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Storage permission is required to save photos.", Toast.LENGTH_SHORT).show()
-                return
-            }
-        }
-
         val filename = "AI_${System.currentTimeMillis()}.png"
-        var fos: OutputStream? = null
-        var imageUri: Uri? = null
-
-        val contentResolver = contentResolver
+        val resolver = contentResolver
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AIPhotoStudio")
-                    put(MediaStore.MediaColumns.IS_PENDING, 1)
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/AI Photo Studio")
+                    put(MediaStore.Images.Media.IS_PENDING, 1)
                 }
-                imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                fos = imageUri?.let { contentResolver.openOutputStream(it) }
-            } else {
-                val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()
-                val studioDir = File(imagesDir, "AIPhotoStudio")
-                if (!studioDir.exists()) studioDir.mkdirs()
-                val image = File(studioDir, filename)
-                fos = java.io.FileOutputStream(image)
             }
 
-            fos?.use {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && imageUri != null) {
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.IS_PENDING, 0)
-                    }
-                    contentResolver.update(imageUri, contentValues, null, null)
-                }
-                runOnUiThread {
-                    Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
-                }
-            } ?: run {
-                runOnUiThread {
-                    Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show()
-                }
+            val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                ?: return
+
+            resolver.openOutputStream(uri)?.use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                out.flush()
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear()
+                values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                resolver.update(uri, values, null, null)
+            }
+            runOnUiThread {
+                Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             runOnUiThread {
@@ -488,6 +509,47 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun saveImageToDevice(url: String) {
             runOnUiThread { downloadAndSaveImage(url) }
+        }
+    }
+
+    class AndroidSaveBridge(private val context: Context) {
+        @JavascriptInterface
+        fun saveBase64Image(base64: String, filename: String, mime: String) {
+            try {
+                val bytes = Base64.decode(base64, Base64.DEFAULT)
+
+                val resolver = context.contentResolver
+                val values = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+                    put(MediaStore.Images.Media.MIME_TYPE, mime)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/AI Photo Studio")
+                        put(MediaStore.Images.Media.IS_PENDING, 1)
+                    }
+                }
+
+                val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                    ?: throw Exception("MediaStore insert failed")
+
+                resolver.openOutputStream(uri)?.use { out ->
+                    out.write(bytes)
+                    out.flush()
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    values.clear()
+                    values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                    resolver.update(uri, values, null, null)
+                }
+                
+                if (context is MainActivity) {
+                    context.runOnUiThread {
+                        Toast.makeText(context, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
