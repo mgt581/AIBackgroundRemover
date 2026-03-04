@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
                                     val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                                         addCategory(Intent.CATEGORY_OPENABLE)
                                         type = "*/*"
-                                        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "application/pdf", "text/plain")) // User said "choose file", but usually it's for photos in this app context. I'll allow images and some common types.
+                                        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "application/pdf", "text/plain"))
                                     }
                                     fileChooserLauncher.launch(intent)
                                 }
@@ -142,37 +142,81 @@ class MainActivity : AppCompatActivity() {
             }
 
             webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    // Inject markers as early as possible
+                    val jsEarly = "window.isAndroidApp = true; window.isMobileApp = true; document.documentElement.classList.add('android-app');"
+                    view?.evaluateJavascript(jsEarly, null)
+                }
+
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
 
-                    // Inject JS to mark the HTML as being in the Android app
-                    // This allows the website's CSS (e.g., html.android-app .pricing-row) to hide elements
-                    val jsMarkApp = "document.documentElement.classList.add('android-app');"
-                    view?.evaluateJavascript(jsMarkApp, null)
-
-                    // Fallback CSS injection to hide common payment/pricing/watermark patterns
-                    // IMPORTANT: Must be safely escaped, otherwise JS breaks silently in WebView.
+                    // Inject JS to mark the HTML as being in the Android app and hide elements continuously
                     val css = """
                         .payment-button, .buy-now, .pricing-section, .subscription-btn, .pricing-row, #upgradeMsg,
                         [class*='payment'], [id*='payment'], [class*='pricing'], [id*='pricing'],
+                        [class*='stripe'], [id*='stripe'], .stripe-payment-provider, .StripeElement,
                         .watermark, [class*='watermark'], [id*='watermark'], .branded-watermark,
                         .logo-overlay, .upgrade-overlay, .premium-badge, .remove-watermark-btn,
-                        [class*='upgrade'], [id*='upgrade'], [class*='premium'], [id*='premium'] { 
+                        [class*='upgrade'], [id*='upgrade'], [class*='premium'], [id*='premium'],
+                        .checkout-container, .checkout-button, .billing-section, .pricing-plan,
+                        .floating-watermark, .img-watermark, .overlay-watermark { 
                             display: none !important; 
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            height: 0 !important;
+                            width: 0 !important;
+                            pointer-events: none !important;
+                            position: absolute !important;
+                            top: -9999px !important;
                         }
                     """.trimIndent()
 
-                    val jsStyle = """
+                    val jsInjection = """
                         (function() {
                           try {
-                            var style = document.createElement('style');
+                            // 1. Mark as app
+                            document.documentElement.classList.add('android-app');
+                            window.isAndroidApp = true;
+                            window.isMobileApp = true;
+
+                            // 2. Inject CSS
+                            var style = document.getElementById('android-app-styles');
+                            if (!style) {
+                                style = document.createElement('style');
+                                style.id = 'android-app-styles';
+                                document.head.appendChild(style);
+                            }
                             style.innerHTML = ${JSONObject.quote(css)};
-                            document.head.appendChild(style);
+
+                            // 3. Continuous Cleanup (MutationObserver)
+                            var observer = new MutationObserver(function(mutations) {
+                                mutations.forEach(function(mutation) {
+                                    if (mutation.addedNodes.length) {
+                                        // Ensure styles are still there
+                                        if (!document.getElementById('android-app-styles')) {
+                                            document.head.appendChild(style);
+                                        }
+                                    }
+                                });
+                            });
+                            observer.observe(document.body, { childList: true, subtree: true });
+                            
+                            // 4. Manual sweep for any tricky elements
+                            function hideTricky() {
+                                var selectors = ['.watermark', '[class*="watermark"]', '[id*="watermark"]', '.stripe-payment-provider'];
+                                selectors.forEach(function(s) {
+                                    var elms = document.querySelectorAll(s);
+                                    elms.forEach(function(el) { el.style.display = 'none'; });
+                                });
+                            }
+                            setInterval(hideTricky, 1000);
                           } catch (e) {}
                         })();
                     """.trimIndent()
 
-                    view?.evaluateJavascript(jsStyle, null)
+                    view?.evaluateJavascript(jsInjection, null)
                 }
 
                 override fun shouldOverrideUrlLoading(v: WebView?, r: WebResourceRequest?): Boolean {
@@ -192,7 +236,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
-                // Ensure user-agent isn't null (DownloadManager hates null headers; some servers do too)
                 val ua = userAgent ?: settings.userAgentString
                 downloadAndSaveImage(url, ua, contentDisposition, mimetype, contentLength)
             }
@@ -213,7 +256,6 @@ class MainActivity : AppCompatActivity() {
     private fun launchCamera() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
-        // Ensure there is a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(packageManager) == null) {
             Toast.makeText(this, "No camera app found to take photos.", Toast.LENGTH_SHORT).show()
             filePathCallback?.onReceiveValue(null)
@@ -252,7 +294,6 @@ class MainActivity : AppCompatActivity() {
         contentLength: Long = 0
     ) {
         if (url.startsWith("blob:")) {
-            // Handle Blob URL via JS injection to convert to Base64 (use fetch; XHR with blob: often fails)
             val js = """
                 (async function() {
                   try {
@@ -273,7 +314,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (url.startsWith("data:image")) {
-            // Handle Base64 Data URI
             try {
                 val base64Data = if (url.contains(",")) {
                     url.substring(url.indexOf(",") + 1)
@@ -298,9 +338,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // For regular URLs:
-        // 1) Try DownloadManager with Cookie/Referer (needed when server requires session auth)
-        // 2) If DM fails, fallback to Glide -> save to Gallery (most reliable)
         try {
             val request = DownloadManager.Request(Uri.parse(url))
             val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
@@ -309,14 +346,14 @@ class MainActivity : AppCompatActivity() {
             val ua = userAgent ?: "Mozilla/5.0"
             request.addRequestHeader("User-Agent", ua)
 
-            // Add cookies if present (critical for authenticated URLs)
             val cookie = CookieManager.getInstance().getCookie(url)
             if (!cookie.isNullOrBlank()) {
                 request.addRequestHeader("Cookie", cookie)
             }
 
-            // Some servers expect a referer
             request.addRequestHeader("Referer", BASE_URL)
+            request.addRequestHeader("X-Platform", "android")
+            request.addRequestHeader("X-App-Id", packageName)
 
             request.setDescription("Downloading image...")
             request.setTitle(filename)
@@ -326,11 +363,7 @@ class MainActivity : AppCompatActivity() {
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
             Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
-
-            // Note: DownloadManager handles saving to public directory.
-            // On modern Android, files in public directories are automatically scanned by MediaStore.
         } catch (e: Exception) {
-            // Fallback to Glide if DownloadManager fails (or URL isn't compatible with DM)
             Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     saveBitmapToGallery(resource)
@@ -344,14 +377,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveBitmapToGallery(bitmap: Bitmap) {
-        // For API <= 28, we need WRITE_EXTERNAL_STORAGE
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                // We should ideally request it here, but let's at least warn and return for now,
-                // as this is a background process from a JS call usually.
-                // Or better, trigger a standard request if it's missing.
                 Toast.makeText(this, "Storage permission is required to save photos.", Toast.LENGTH_SHORT).show()
-                // You might want to register a launcher for this too if it's frequent.
                 return
             }
         }
@@ -422,10 +450,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
-
-
-
-
-
-
