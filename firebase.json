@@ -7,32 +7,6 @@
     {
       "codebase": "default",
       "source": "functions"
-    },
-    {
-      "codebase": "remove-bg",
-      "disallowLegacyRuntimeConfig": true,
-      "ignore": [
-        "venv",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "source": "remove-bg",
-      "runtime": "python313"
-    },
-    {
-      "source": "image-processing",
-      "codebase": "image-processing",
-      "disallowLegacyRuntimeConfig": true,
-      "ignore": [
-        "venv",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "runtime": "python313"
     }
   ],
   "hosting": {
