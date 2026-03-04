@@ -34,7 +34,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val BASE_URL = "https://aiphotostudio.co.uk/?platform=android"
+    private val baseUrl = "https://aiphotostudio.co.uk/?platform=android"
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
@@ -254,12 +254,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+            setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
                 val ua = userAgent ?: settings.userAgentString
-                downloadAndSaveImage(url, ua, contentDisposition, mimetype, contentLength)
+                downloadAndSaveImage(url, ua, contentDisposition, mimetype)
             }
 
-            loadUrl(BASE_URL)
+            loadUrl(baseUrl)
         }
     }
 
@@ -287,7 +287,7 @@ class MainActivity : AppCompatActivity() {
 
         val photoFile = try {
             createCapturedImageFile()
-        } catch (e: IOException) {
+        } catch (ignored: IOException) {
             null
         }
 
@@ -312,8 +312,7 @@ class MainActivity : AppCompatActivity() {
         url: String,
         userAgent: String? = null,
         contentDisposition: String? = null,
-        mimetype: String? = null,
-        contentLength: Long = 0
+        mimetype: String? = null
     ) {
         if (url.startsWith("blob:")) {
             val js = """
@@ -430,7 +429,7 @@ class MainActivity : AppCompatActivity() {
                 request.addRequestHeader("Cookie", cookie)
             }
 
-            request.addRequestHeader("Referer", BASE_URL)
+            request.addRequestHeader("Referer", baseUrl)
             request.addRequestHeader("X-Platform", "android")
             request.addRequestHeader("X-App-Id", packageName)
 
@@ -442,7 +441,7 @@ class MainActivity : AppCompatActivity() {
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
             Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
+        } catch (ignored: Exception) {
             Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     saveBitmapToGallery(resource)
