@@ -83,6 +83,10 @@ class MainActivity : AppCompatActivity() {
                 domStorageEnabled = true
                 allowFileAccess = true
                 allowContentAccess = true
+                @Suppress("DEPRECATION")
+                allowFileAccessFromFileURLs = true
+                @Suppress("DEPRECATION")
+                allowUniversalAccessFromFileURLs = true
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile AIPhotoStudioApp Safari/537.36"
             }
@@ -298,18 +302,46 @@ class MainActivity : AppCompatActivity() {
         contentLength: Long = 0
     ) {
         if (url.startsWith("blob:")) {
+            // Enhanced JS to handle blob URLs with multiple fallback methods
             val js = """
                 (async function() {
                   try {
+                    console.log("Fetching blob URL: $url");
                     const res = await fetch('$url');
+                    if (!res.ok) throw new Error("Fetch failed with status " + res.status);
                     const blob = await res.blob();
                     const reader = new FileReader();
                     reader.onloadend = function() {
                       AndroidBridge.saveImageToDevice(reader.result);
                     };
+                    reader.onerror = function() {
+                        AndroidBridge.saveImageToDevice("ERROR: FileReader failed");
+                    };
                     reader.readAsDataURL(blob);
                   } catch (e) {
-                    AndroidBridge.saveImageToDevice("ERROR:" + e.toString());
+                    console.error("Fetch failed, trying XHR: ", e);
+                    try {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', '$url', true);
+                        xhr.responseType = 'blob';
+                        xhr.onload = function() {
+                            if (xhr.status === 200 || xhr.status === 0) {
+                                var reader = new FileReader();
+                                reader.onloadend = function() {
+                                    AndroidBridge.saveImageToDevice(reader.result);
+                                };
+                                reader.readAsDataURL(xhr.response);
+                            } else {
+                                AndroidBridge.saveImageToDevice("ERROR: XHR status " + xhr.status);
+                            }
+                        };
+                        xhr.onerror = function() {
+                            AndroidBridge.saveImageToDevice("ERROR: XHR failed");
+                        };
+                        xhr.send();
+                    } catch (e2) {
+                        AndroidBridge.saveImageToDevice("ERROR: " + e.toString() + " | " + e2.toString());
+                    }
                   }
                 })();
             """.trimIndent()
