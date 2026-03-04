@@ -1,9 +1,9 @@
 [versions]
-agp = "9.0.0"
+agp = "9.0.1"
 coreKtx = "1.17.0"
 appcompat = "1.7.1"
 glide = "5.0.5"
-kotlin = "2.1.10"
+kotlin = "2.2.10"
 activityCompose = "1.12.4"
 firebaseBom = "34.10.0"
 googleServices = "4.4.4"
