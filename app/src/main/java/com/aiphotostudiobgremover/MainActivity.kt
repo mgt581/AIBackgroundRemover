@@ -1,7 +1,9 @@
 package com.aiphotostudiobgremover
 
 import android.Manifest
+import android.app.DownloadManager
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -31,7 +33,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val BASE_URL = "https://aiphotostudio.co.uk"
+    private val BASE_URL = "https://aiphotostudio.co.uk/?platform=android"
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
@@ -181,7 +183,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            setDownloadListener { url, _, _, _, _ -> downloadAndSaveImage(url) }
+            setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+                downloadAndSaveImage(url, userAgent, contentDisposition, mimetype, contentLength)
+            }
             loadUrl(BASE_URL)
         }
     }
@@ -229,11 +233,40 @@ class MainActivity : AppCompatActivity() {
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
-    private fun downloadAndSaveImage(url: String) {
+    private fun downloadAndSaveImage(url: String, userAgent: String? = null, contentDisposition: String? = null, mimetype: String? = null, contentLength: Long = 0) {
+        if (url.startsWith("blob:")) {
+            // Handle Blob URL via JS injection to convert to Base64
+            val js = """
+                (function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '$url', true);
+                    xhr.responseType = 'blob';
+                    xhr.onload = function(e) {
+                        if (this.status == 200) {
+                            var blob = this.response;
+                            var reader = new FileReader();
+                            reader.readAsDataURL(blob);
+                            reader.onloadend = function() {
+                                var base64data = reader.result;
+                                AndroidBridge.saveImageToDevice(base64data);
+                            }
+                        }
+                    };
+                    xhr.send();
+                })();
+            """.trimIndent()
+            binding.backgroundWebView?.evaluateJavascript(js, null)
+            return
+        }
+
         if (url.startsWith("data:image")) {
             // Handle Base64 Data URI
             try {
-                val base64Data = url.substring(url.indexOf(",") + 1)
+                val base64Data = if (url.contains(",")) {
+                    url.substring(url.indexOf(",") + 1)
+                } else {
+                    url
+                }
                 val imageBytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
                 val decodedBitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 if (decodedBitmap != null) {
@@ -247,15 +280,36 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
-            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                saveBitmapToGallery(resource)
-            }
-            override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
-            override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
-                Toast.makeText(this@MainActivity, "Failed to download image", Toast.LENGTH_SHORT).show()
-            }
-        })
+        // For regular URLs, use DownloadManager as requested
+        try {
+            val request = DownloadManager.Request(Uri.parse(url))
+            val filename = URLUtil.guessFileName(url, contentDisposition, mimetype)
+            
+            request.setMimeType(mimetype)
+            request.addRequestHeader("User-Agent", userAgent)
+            request.setDescription("Downloading image...")
+            request.setTitle(filename)
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, "AIPhotoStudio/$filename")
+            
+            val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            dm.enqueue(request)
+            Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
+            
+            // Note: DownloadManager handles saving to public directory. 
+            // On modern Android, files in public directories are automatically scanned by MediaStore.
+        } catch (e: Exception) {
+            // Fallback to Glide if DownloadManager fails (e.g. invalid URL for DM)
+            Glide.with(this).asBitmap().load(url).into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    saveBitmapToGallery(resource)
+                }
+                override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+                override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
+                    Toast.makeText(this@MainActivity, "failed to download image", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     private fun saveBitmapToGallery(bitmap: Bitmap) {
@@ -282,6 +336,7 @@ class MainActivity : AppCompatActivity() {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
                     put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/AIPhotoStudio")
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
                 }
                 imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
                 fos = imageUri?.let { contentResolver.openOutputStream(it) }
@@ -295,6 +350,12 @@ class MainActivity : AppCompatActivity() {
 
             fos?.use {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && imageUri != null) {
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    }
+                    contentResolver.update(imageUri, contentValues, null, null)
+                }
                 runOnUiThread {
                     Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show()
                 }
