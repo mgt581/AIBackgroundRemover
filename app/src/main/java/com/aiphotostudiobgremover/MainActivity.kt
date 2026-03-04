@@ -12,6 +12,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.webkit.*
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -36,8 +37,12 @@ class MainActivity : AppCompatActivity() {
 
     // Handles Camera Permission request
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (!isGranted) {
+        if (isGranted) {
+            launchCamera()
+        } else {
             Toast.makeText(this, "Camera permission is required to take photos.", Toast.LENGTH_SHORT).show()
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
         }
     }
 
@@ -83,34 +88,52 @@ class MainActivity : AppCompatActivity() {
 
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(w: WebView?, fpc: ValueCallback<Array<Uri>>?, fcp: FileChooserParams?): Boolean {
-                    if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        return false
-                    }
-
                     filePathCallback?.onReceiveValue(null)
                     filePathCallback = fpc
 
-                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    val photoFile = try { createCapturedImageFile() } catch (e: IOException) { null }
+                    val options = arrayOf(
+                        getString(R.string.take_photo),
+                        getString(R.string.choose_photo_gallery),
+                        getString(R.string.choose_file),
+                        getString(R.string.cancel)
+                    )
 
-                    photoFile?.let {
-                        cameraImageUri = FileProvider.getUriForFile(this@MainActivity, "${packageName}.fileprovider", it)
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
-                    }
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle(R.string.select_option)
+                        .setItems(options) { dialog, which ->
+                            when (which) {
+                                0 -> { // Take Photo
+                                    if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                    } else {
+                                        launchCamera()
+                                    }
+                                }
+                                1 -> { // Choose Photo (Gallery)
+                                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                                    fileChooserLauncher.launch(intent)
+                                }
+                                2 -> { // Choose File
+                                    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                                        addCategory(Intent.CATEGORY_OPENABLE)
+                                        type = "*/*"
+                                        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "application/pdf", "text/plain")) // User said "choose file", but usually it's for photos in this app context. I'll allow images and some common types.
+                                    }
+                                    fileChooserLauncher.launch(intent)
+                                }
+                                else -> { // Cancel
+                                    filePathCallback?.onReceiveValue(null)
+                                    filePathCallback = null
+                                    dialog.dismiss()
+                                }
+                            }
+                        }
+                        .setOnCancelListener {
+                            filePathCallback?.onReceiveValue(null)
+                            filePathCallback = null
+                        }
+                        .show()
 
-                    val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "image/*"
-                    }
-
-                    val chooserIntent = Intent(Intent.ACTION_CHOOSER).apply {
-                        putExtra(Intent.EXTRA_INTENT, contentSelectionIntent)
-                        putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takePictureIntent))
-                        putExtra(Intent.EXTRA_TITLE, "Select Photo")
-                    }
-
-                    fileChooserLauncher.launch(chooserIntent)
                     return true
                 }
             }
@@ -167,6 +190,24 @@ class MainActivity : AppCompatActivity() {
         }
         binding.footerBtnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+        }
+    }
+
+    private fun launchCamera() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val photoFile = try {
+            createCapturedImageFile()
+        } catch (e: IOException) {
+            null
+        }
+
+        photoFile?.let {
+            cameraImageUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", it)
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
+            fileChooserLauncher.launch(takePictureIntent)
+        } ?: run {
+            filePathCallback?.onReceiveValue(null)
+            filePathCallback = null
         }
     }
 
