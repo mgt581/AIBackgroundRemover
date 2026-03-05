@@ -1,4 +1,4 @@
-package com.aiphotostudiobgremover
+package com.aiphotostudio.bgremover
 
 import android.content.ContentValues
 import android.content.Context

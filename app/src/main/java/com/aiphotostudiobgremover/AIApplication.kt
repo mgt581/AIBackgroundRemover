@@ -1,4 +1,4 @@
-package com.aiphotostudiobgremover
+package com.aiphotostudio.bgremover
 
 import android.app.Application
 import com.google.android.gms.common.ConnectionResult

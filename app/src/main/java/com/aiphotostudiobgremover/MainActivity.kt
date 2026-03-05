@@ -1,4 +1,4 @@
-package com.aiphotostudiobgremover
+package com.aiphotostudio.bgremover
 
 import android.Manifest
 import android.app.DownloadManager
@@ -22,7 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import com.aiphotostudiobgremover.databinding.ActivityMainBinding
+import com.aiphotostudio.bgremover.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition

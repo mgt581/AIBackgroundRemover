@@ -32,15 +32,15 @@ val appTargetSdk = 36
 val javaCompat = JavaVersion.VERSION_17
 
 configure<ApplicationExtension> {
-    namespace = "com.aiphotostudiobgremover"
+    namespace = "com.aiphotostudio.bgremover"
     compileSdk = appCompileSdk
 
     defaultConfig {
-        applicationId = "com.aiphotostudiobgremover"
+        applicationId = "com.aiphotostudio.bgremover"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 97
-        versionName = "9.7"
+        versionCode = 99
+        versionName = "9.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
