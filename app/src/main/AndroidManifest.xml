@@ -16,9 +16,6 @@
 
     <queries>
         <intent>
-            <action android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN" />
-        </intent>
-        <intent>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
@@ -48,6 +45,10 @@
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="33">
+
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="true" />
 
         <activity
             android:name=".MainActivity"
