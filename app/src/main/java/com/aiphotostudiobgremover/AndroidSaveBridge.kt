@@ -29,15 +29,10 @@ class AndroidSaveBridge(private val context: Context) {
             val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
                 ?: throw Exception("MediaStore insert failed")
 
-            var out: OutputStream? = null
-            try {
-                out = resolver.openOutputStream(uri)
-                    ?: throw Exception("OpenOutputStream failed")
+            resolver.openOutputStream(uri)?.use { out ->
                 out.write(bytes)
                 out.flush()
-            } finally {
-                out?.close()
-            }
+            } ?: throw Exception("OpenOutputStream failed")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 values.clear()
