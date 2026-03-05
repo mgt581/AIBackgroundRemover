@@ -1,8 +1,8 @@
-package com.aiphotostudiobgremover
+package com.aiphotostudio.bgremover
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.aiphotostudiobgremover.databinding.ActivityLoginBinding
+import com.aiphotostudio.bgremover.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding

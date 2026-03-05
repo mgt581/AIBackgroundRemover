@@ -1,8 +1,8 @@
-package com.aiphotostudiobgremover
+package com.aiphotostudio.bgremover
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.aiphotostudiobgremover.databinding.ActivityGalleryBinding
+import com.aiphotostudio.bgremover.databinding.ActivityGalleryBinding
 
 class GalleryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGalleryBinding
