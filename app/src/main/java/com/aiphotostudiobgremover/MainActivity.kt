@@ -74,6 +74,47 @@ class MainActivity : AppCompatActivity() {
             setupWebView(webView)
             setupOnBackPressed(webView)
         }
+
+        setupFooterButtons()
+    }
+
+    private fun setupFooterButtons() {
+        binding.footerBtnPrivacy.setOnClickListener {
+            val intent = Intent(this, WebPageActivity::class.java).apply {
+                putExtra("url", "https://aiphotostudio.co.uk/privacy")
+                putExtra("title", getString(R.string.privacy_policy))
+            }
+            startActivity(intent)
+        }
+
+        binding.footerBtnTerms.setOnClickListener {
+            val intent = Intent(this, WebPageActivity::class.java).apply {
+                putExtra("url", "https://aiphotostudio.co.uk/terms")
+                putExtra("title", getString(R.string.terms_of_service))
+            }
+            startActivity(intent)
+        }
+
+        binding.btnWhatsapp.setOnClickListener {
+            openUrl(getString(R.string.whatsapp_url))
+        }
+
+        binding.btnTiktok.setOnClickListener {
+            openUrl(getString(R.string.tiktok_url))
+        }
+
+        binding.btnFacebook.setOnClickListener {
+            openUrl(getString(R.string.facebook_url))
+        }
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.could_not_open_link, Toast.LENGTH_SHORT).show()
+        }
     }
 
     @Suppress("SetJavaScriptEnabled")

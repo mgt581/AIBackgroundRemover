@@ -74,6 +74,7 @@
         <activity android:name=".LoginActivity" android:exported="true" android:theme="@style/Theme.AIBackgroundRemover.NoActionBar" />
         <activity android:name=".GalleryActivity" android:exported="false" android:label="@string/gallery" />
         <activity android:name=".SettingsActivity" android:exported="false" android:label="@string/settings" />
+        <activity android:name=".WebPageActivity" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
