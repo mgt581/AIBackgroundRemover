@@ -132,6 +132,17 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
+        .btn-facebook {
+            background: #1877f2;
+            color: white;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+        }
+
         .forgot-link {
             display: block;
             margin-top: 16px;
@@ -188,6 +199,11 @@
             Continue with Google
         </button>
 
+        <button class="btn btn-facebook" onclick="handleFacebookSignIn()" aria-label="Sign in with Facebook">
+            <i class="fab fa-facebook-f"></i>
+            Continue with Facebook
+        </button>
+
         <a href="#" class="forgot-link" onclick="handlePasswordReset()">Forgot your password?</a>
     </div>
 </div>
@@ -199,7 +215,9 @@
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
         GoogleAuthProvider,
+        FacebookAuthProvider,
         signInWithRedirect,
+        signInWithPopup,
         getRedirectResult,
         onAuthStateChanged,
         sendPasswordResetEmail
@@ -215,7 +233,8 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
 
     let currentMode = "login";
 
@@ -262,7 +281,31 @@
     };
 
     window.handleGoogleSignIn = () => {
-        signInWithRedirect(auth, provider);
+        signInWithRedirect(auth, googleProvider);
+    };
+
+    // Use signInWithPopup for Facebook to avoid the OAuth "authorization code
+    // has been used" error (Facebook error_subcode 36009) that occurs when a
+    // redirect-based flow reloads the page and attempts to exchange the
+    // single-use authorization code a second time.
+    window.handleFacebookSignIn = async () => {
+        try {
+            const result = await signInWithPopup(auth, facebookProvider);
+            const user = result.user;
+            localStorage.setItem("currentUserKey", user.email || user.uid);
+            window.location.replace("app.html");
+        } catch (error) {
+            if (error.code === "auth/account-exists-with-different-credential") {
+                alert("An account already exists with this email address but with different sign-in credentials. Please sign in using a different method.");
+            } else if (error.code === "auth/popup-blocked") {
+                alert("The sign-in popup was blocked by your browser. Please allow popups for this site and try again.");
+            } else if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
+                // User dismissed the popup — no action needed
+            } else {
+                console.error("Facebook Auth Error:", error);
+                alert(error.message);
+            }
+        }
     };
 
     window.handlePasswordReset = async () => {
