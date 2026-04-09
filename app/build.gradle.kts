@@ -39,8 +39,8 @@ configure<ApplicationExtension> {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 101
-        versionName = "10.1"
+        versionCode = 103
+        versionName = "10.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -105,6 +105,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("androidx.window:window:1.3.0")
 
     // Compose
     implementation(libs.androidx.compose.ui)

@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.1"
+agp = "9.1.0"
 coreKtx = "1.17.0"
 appcompat = "1.7.1"
 glide = "5.0.5"
@@ -21,6 +21,8 @@ webkit = "1.15.0"
 animatedVectorDrawable = "1.2.0"
 mlkitSegmentationSelfie = "16.0.0-beta6"
 guava = "33.5.0-android"
+flexbox = "3.0.0"
+window = "1.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,6 +50,8 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+flexbox = { group = "com.google.android.flexbox", name = "flexbox", version.ref = "flexbox" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
 
 # Using flat names to avoid accessor issues
 credentials-core = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }

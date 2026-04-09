@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         try {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             startActivity(intent)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(this, R.string.could_not_open_link, Toast.LENGTH_SHORT).show()
         }
     }
