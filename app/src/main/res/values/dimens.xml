@@ -17,4 +17,7 @@
 
     <!-- Gallery Grid -->
     <integer name="gallery_columns">2</integer>
+
+    <!-- Tablet indicator -->
+    <bool name="isTablet">false</bool>
 </resources>

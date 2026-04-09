@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardBackgroundColor="@color/brand_surface"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="@dimen/card_corner_radius"
     app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -34,8 +34,8 @@
             <Button
                 android:id="@+id/btn_download"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="209dp"
-                android:layout_height="48dp"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginEnd="4dp"
                 android:layout_weight="1"
                 android:insetTop="0dp"
@@ -43,14 +43,14 @@
                 android:padding="0dp"
                 android:text="@string/save"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_size_small"
                 app:strokeColor="@color/brand_primary" />
 
             <Button
                 android:id="@+id/btn_delete"
                 style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="211dp"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginStart="4dp"
                 android:layout_weight="1"
                 android:backgroundTint="@color/brand_accent"
@@ -59,7 +59,7 @@
                 android:padding="0dp"
                 android:text="@string/delete"
                 android:textColor="#212121"
-                android:textSize="12sp" />
+                android:textSize="@dimen/text_size_small" />
 
         </LinearLayout>
 
