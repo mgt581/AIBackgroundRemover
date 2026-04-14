@@ -17,6 +17,7 @@ import android.util.Log
 import android.webkit.*
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import com.google.firebase.messaging.FirebaseMessaging
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -40,15 +41,9 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraImageUri: Uri? = null
 
-    // Handles Camera Permission request
+    // Handles Camera and Notification Permission requests
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            launchCamera()
-        } else {
-            Toast.makeText(this, "Camera permission is required to take photos.", Toast.LENGTH_SHORT).show()
-            filePathCallback?.onReceiveValue(null)
-            filePathCallback = null
-        }
+        // Handle results based on what was requested if needed
     }
 
     // Handles the result from the File Chooser (Camera or Gallery)
@@ -77,6 +72,28 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupButtons()
+        logFcmToken()
+        requestNotificationPermission()
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun logFcmToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+            val token = task.result
+            Log.d("FCM_TOKEN", "Your FCM Token is: $token")
+            // Re-copy this token to Firebase Console if it changed
+        }
     }
 
     private fun setupButtons() {
