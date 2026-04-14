@@ -39,8 +39,8 @@ configure<ApplicationExtension> {
         applicationId = "com.aiphotostudio.bgremover"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 103
-        versionName = "10.3"
+        versionCode = 104
+        versionName = "10.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
