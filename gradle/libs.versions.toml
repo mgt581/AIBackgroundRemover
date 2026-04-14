@@ -23,6 +23,7 @@ mlkitSegmentationSelfie = "16.0.0-beta6"
 guava = "33.5.0-android"
 flexbox = "3.0.0"
 window = "1.3.0"
+firebaseMessaging = "25.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +61,7 @@ googleid-auth = { group = "com.google.android.libraries.identity.googleid", name
 webkit-android = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 animated-vector-drawable = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version.ref = "animatedVectorDrawable" }
 mlkit-segmentation-selfie = { group = "com.google.mlkit", name = "segmentation-selfie", version.ref = "mlkitSegmentationSelfie" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
