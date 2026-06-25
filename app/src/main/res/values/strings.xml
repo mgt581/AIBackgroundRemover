@@ -121,8 +121,9 @@
     <string name="not_enough_credits">Not enough credits. Please buy more or wait until tomorrow.</string>
     <string name="top_up_credits">Top up credits</string>
     <string name="subscriptions">Subscriptions</string>
-    <string name="credits_10_pack">10 Credits — £1.99</string>
-    <string name="credits_50_pack">50 Credits — £7.99</string>
+    <string name="credits_10_pack">10 Credits — £1.49</string>
+    <string name="credits_25_pack">25 Credits — £2.99</string>
+    <string name="credits_50_pack">50 Credits — £4.99</string>
     <string name="subscription_monthly_desc">Unlimited edits, priority support — £4.99/mo</string>
     <string name="subscription_yearly_desc">Unlimited edits, 1 week free trial — £39.99/yr</string>
     <string name="footer_ownership">© 2026 AI Photo Studio. All rights reserved.</string>
