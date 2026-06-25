@@ -109,9 +109,9 @@
     <string name="cancel">Cancel</string>
 
     <string name="monthly_pass">Monthly Pro — £4.99</string>
-    <string name="monthly_desc">Unlimited AI edits, high-res exports, and priority processing.</string>
+    <string name="monthly_desc">Unlimited background removals + 15 bonus object removals every month!</string>
     <string name="yearly_pass">Yearly Pro — £39.99</string>
-    <string name="yearly_desc">Best value! Unlimited edits with a 7-day FREE trial.</string>
+    <string name="yearly_desc">Best value! Unlimited background removals + 50 bonus object removals + 30-day FREE trial.</string>
 
     <string name="credits_label">Credits: %1$d</string>
     <string name="zero_credits">0 Credits</string>
@@ -119,6 +119,7 @@
     <string name="premium_label">Premium</string>
     <string name="buy_credits">Get Credits</string>
     <string name="not_enough_credits">Not enough credits. Please buy more or wait until tomorrow.</string>
+    <string name="paid_credits_required">Object removal requires paid credits or a subscription.</string>
     <string name="top_up_credits">Top up credits</string>
     <string name="subscriptions">Subscriptions</string>
     <string name="credits_10_pack">10 Credits — £1.49</string>
