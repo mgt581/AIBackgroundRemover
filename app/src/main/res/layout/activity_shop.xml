@@ -76,11 +76,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/monthly_pass"
                         android:textColor="@color/white"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:textSize="16sp" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/subscription_monthly_desc"
+                        android:text="@string/monthly_desc"
                         android:textColor="@color/brand_text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -106,11 +107,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/yearly_pass"
                         android:textColor="@color/status_green"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:textSize="16sp" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/subscription_yearly_desc"
+                        android:text="@string/yearly_desc"
                         android:textColor="@color/brand_text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
