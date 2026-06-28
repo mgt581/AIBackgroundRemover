@@ -175,6 +175,16 @@
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_support"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Need help? Chat with support"
+                android:textColor="@color/brand_text_secondary"
+                app:icon="@drawable/ic_home"
+                app:iconTint="@color/brand_text_secondary" />
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
